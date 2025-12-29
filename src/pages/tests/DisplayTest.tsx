@@ -1,82 +1,536 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Expand, Minimize } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import {
+  ArrowLeft,
+  Expand,
+  Minimize,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Monitor,
+  Grid3X3,
+  Palette,
+  SlidersHorizontal,
+  Type,
+  Eye,
+  CircleDot,
+} from "lucide-react";
 
-const colors = [
-  { name: "Red", hex: "#FF0000", description: "Check for stuck red pixels" },
-  { name: "Green", hex: "#00FF00", description: "Check for stuck green pixels" },
-  { name: "Blue", hex: "#0000FF", description: "Check for stuck blue pixels" },
-  { name: "White", hex: "#FFFFFF", description: "Check for dead/black pixels" },
-  { name: "Black", hex: "#000000", description: "Check for bright/stuck pixels" },
-  { name: "Cyan", hex: "#00FFFF", description: "Additional color check" },
-  { name: "Magenta", hex: "#FF00FF", description: "Additional color check" },
-  { name: "Yellow", hex: "#FFFF00", description: "Additional color check" },
+// Test categories
+type TestCategory = "pixels" | "patterns" | "gradients" | "uniformity" | "sharpness";
+
+interface TestItem {
+  id: string;
+  name: string;
+  category: TestCategory;
+  description: string;
+  render: (params: TestParams) => React.ReactNode;
+}
+
+interface TestParams {
+  grayscale: number;
+  gradientSteps: number;
+  fontSize: number;
+  invertText: boolean;
+}
+
+// Solid colors for dead pixel test
+const pixelColors = [
+  { name: "Black", hex: "#000000" },
+  { name: "White", hex: "#FFFFFF" },
+  { name: "Red", hex: "#FF0000" },
+  { name: "Green", hex: "#00FF00" },
+  { name: "Blue", hex: "#0000FF" },
+];
+
+// All tests
+const tests: TestItem[] = [
+  // Dead Pixel Tests
+  ...pixelColors.map((color) => ({
+    id: `pixel-${color.name.toLowerCase()}`,
+    name: `${color.name}`,
+    category: "pixels" as TestCategory,
+    description: `Check for defective pixels on ${color.name.toLowerCase()} background`,
+    render: () => (
+      <div className="w-full h-full" style={{ backgroundColor: color.hex }} />
+    ),
+  })),
+  // Test Pattern
+  {
+    id: "pattern-grid",
+    name: "Test Pattern",
+    category: "patterns",
+    description: "Check circles, lines, and overall image quality",
+    render: () => <TestPattern />,
+  },
+  // Gradients
+  {
+    id: "gradient-grayscale",
+    name: "Grayscale",
+    category: "gradients",
+    description: "Check for banding in grayscale gradient",
+    render: (params) => <GradientTest steps={params.gradientSteps} color="gray" />,
+  },
+  {
+    id: "gradient-red",
+    name: "Red Gradient",
+    category: "gradients",
+    description: "Check for banding in red gradient",
+    render: (params) => <GradientTest steps={params.gradientSteps} color="red" />,
+  },
+  {
+    id: "gradient-green",
+    name: "Green Gradient",
+    category: "gradients",
+    description: "Check for banding in green gradient",
+    render: (params) => <GradientTest steps={params.gradientSteps} color="green" />,
+  },
+  {
+    id: "gradient-blue",
+    name: "Blue Gradient",
+    category: "gradients",
+    description: "Check for banding in blue gradient",
+    render: (params) => <GradientTest steps={params.gradientSteps} color="blue" />,
+  },
+  // Uniformity
+  {
+    id: "uniformity",
+    name: "Uniformity",
+    category: "uniformity",
+    description: "Check brightness uniformity across the screen",
+    render: (params) => (
+      <div
+        className="w-full h-full"
+        style={{ backgroundColor: `hsl(0, 0%, ${params.grayscale}%)` }}
+      />
+    ),
+  },
+  // Sharpness
+  {
+    id: "sharpness",
+    name: "Text Sharpness",
+    category: "sharpness",
+    description: "Check text clarity and sharpness",
+    render: (params) => <SharpnessTest fontSize={params.fontSize} invert={params.invertText} />,
+  },
+];
+
+// Test Pattern Component
+function TestPattern() {
+  return (
+    <div className="w-full h-full bg-neutral-900 flex items-center justify-center overflow-hidden">
+      <svg viewBox="0 0 1920 1080" className="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        {/* Background grid */}
+        <defs>
+          <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#333" strokeWidth="0.5" />
+          </pattern>
+          <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+            <rect width="100" height="100" fill="url(#smallGrid)" />
+            <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#444" strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+        
+        {/* Center circles */}
+        {[100, 200, 300, 400].map((r) => (
+          <circle key={r} cx="960" cy="540" r={r} fill="none" stroke="#fff" strokeWidth="2" />
+        ))}
+        
+        {/* Center crosshair */}
+        <line x1="860" y1="540" x2="1060" y2="540" stroke="#fff" strokeWidth="2" />
+        <line x1="960" y1="440" x2="960" y2="640" stroke="#fff" strokeWidth="2" />
+        
+        {/* Corner markers */}
+        {[
+          [50, 50], [1870, 50], [50, 1030], [1870, 1030],
+        ].map(([x, y], i) => (
+          <g key={i}>
+            <circle cx={x} cy={y} r="30" fill="none" stroke="#fff" strokeWidth="2" />
+            <circle cx={x} cy={y} r="5" fill="#fff" />
+          </g>
+        ))}
+        
+        {/* Color bars */}
+        {["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff", "#ff00ff", "#ffffff"].map((color, i) => (
+          <rect key={color} x={760 + i * 60} y="800" width="50" height="100" fill={color} />
+        ))}
+        
+        {/* Grayscale bars */}
+        {Array.from({ length: 11 }).map((_, i) => (
+          <rect key={i} x={460 + i * 40} y="920" width="35" height="60" fill={`rgb(${i * 25.5}, ${i * 25.5}, ${i * 25.5})`} />
+        ))}
+      </svg>
+    </div>
+  );
+}
+
+// Gradient Test Component
+function GradientTest({ steps, color }: { steps: number; color: string }) {
+  const getColor = (value: number) => {
+    switch (color) {
+      case "red": return `rgb(${value}, 0, 0)`;
+      case "green": return `rgb(0, ${value}, 0)`;
+      case "blue": return `rgb(0, 0, ${value})`;
+      default: return `rgb(${value}, ${value}, ${value})`;
+    }
+  };
+
+  if (steps >= 256) {
+    // Smooth gradient
+    const gradientColor = color === "gray" ? "white" : color;
+    return (
+      <div
+        className="w-full h-full"
+        style={{
+          background: `linear-gradient(to right, black, ${gradientColor})`,
+        }}
+      />
+    );
+  }
+
+  // Stepped gradient
+  return (
+    <div className="w-full h-full flex">
+      {Array.from({ length: steps }).map((_, i) => (
+        <div
+          key={i}
+          className="h-full flex-1"
+          style={{ backgroundColor: getColor(Math.round((i / (steps - 1)) * 255)) }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Sharpness Test Component
+function SharpnessTest({ fontSize, invert }: { fontSize: number; invert: boolean }) {
+  const bg = invert ? "#000" : "#fff";
+  const fg = invert ? "#fff" : "#000";
+  const text = "The quick brown fox jumps over the lazy dog. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz !@#$%^&*()";
+
+  return (
+    <div
+      className="w-full h-full flex flex-col items-center justify-center p-8 overflow-auto"
+      style={{ backgroundColor: bg, color: fg }}
+    >
+      <div className="max-w-4xl space-y-6 text-center">
+        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "serif" }}>{text}</p>
+        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "sans-serif" }}>{text}</p>
+        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "monospace" }}>{text}</p>
+        
+        {/* Fine lines test */}
+        <div className="mt-8 flex justify-center gap-1">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <div key={i} className="h-20" style={{ width: "1px", backgroundColor: fg }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Category config
+const categories: { id: TestCategory; name: string; icon: React.ElementType }[] = [
+  { id: "pixels", name: "Dead Pixels", icon: CircleDot },
+  { id: "patterns", name: "Test Pattern", icon: Grid3X3 },
+  { id: "gradients", name: "Gradients", icon: Palette },
+  { id: "uniformity", name: "Uniformity", icon: Monitor },
+  { id: "sharpness", name: "Sharpness", icon: Type },
 ];
 
 const DisplayTest = () => {
-  const [activeColor, setActiveColor] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [currentTestIndex, setCurrentTestIndex] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Test parameters
+  const [grayscale, setGrayscale] = useState(50);
+  const [gradientSteps, setGradientSteps] = useState(256);
+  const [fontSize, setFontSize] = useState(14);
+  const [invertText, setInvertText] = useState(false);
 
-  const enterFullscreen = (colorIndex: number) => {
-    setActiveColor(colorIndex);
+  const currentTest = tests[currentTestIndex];
+  const testParams: TestParams = { grayscale, gradientSteps, fontSize, invertText };
+
+  const enterFullscreen = (testIndex: number) => {
+    setCurrentTestIndex(testIndex);
     setIsFullscreen(true);
     document.documentElement.requestFullscreen?.();
   };
 
-  const exitFullscreen = () => {
+  const exitFullscreen = useCallback(() => {
     setIsFullscreen(false);
-    setActiveColor(null);
     if (document.fullscreenElement) {
       document.exitFullscreen?.();
     }
-  };
+  }, []);
 
-  const nextColor = () => {
-    if (activeColor !== null && activeColor < colors.length - 1) {
-      setActiveColor(activeColor + 1);
-    } else {
-      exitFullscreen();
+  const nextTest = useCallback(() => {
+    if (currentTestIndex < tests.length - 1) {
+      setCurrentTestIndex(currentTestIndex + 1);
     }
-  };
+  }, [currentTestIndex]);
+
+  const prevTest = useCallback(() => {
+    if (currentTestIndex > 0) {
+      setCurrentTestIndex(currentTestIndex - 1);
+    }
+  }, [currentTestIndex]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isFullscreen) return;
+      
+      switch (e.key) {
+        case "Escape":
+          exitFullscreen();
+          break;
+        case " ":
+          e.preventDefault();
+          setShowControls((prev) => !prev);
+          break;
+        case "ArrowRight":
+        case "ArrowDown":
+          nextTest();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          prevTest();
+          break;
+        case "Tab":
+          e.preventDefault();
+          setSidebarOpen((prev) => !prev);
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen, exitFullscreen, nextTest, prevTest]);
+
+  // Group tests by category
+  const testsByCategory = categories.map((cat) => ({
+    ...cat,
+    tests: tests.filter((t) => t.category === cat.id),
+  }));
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
-      {/* Fullscreen Color Display */}
+
+      {/* Fullscreen Test Mode */}
       <AnimatePresence>
-        {isFullscreen && activeColor !== null && (
+        {isFullscreen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] cursor-pointer flex items-center justify-center"
-            style={{ backgroundColor: colors[activeColor].hex }}
-            onClick={nextColor}
+            className="fixed inset-0 z-[100] bg-black"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-xl bg-black/50 backdrop-blur-sm text-white text-center"
-            >
-              <p className="text-sm font-medium">
-                {colors[activeColor].name} — {colors[activeColor].description}
-              </p>
-              <p className="text-xs opacity-70 mt-1">
-                Click anywhere for next color • ESC to exit
-              </p>
-            </motion.div>
-            <button
-              onClick={(e) => { e.stopPropagation(); exitFullscreen(); }}
-              className="absolute top-4 right-4 p-2 rounded-lg bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
-            >
-              <Minimize className="h-5 w-5" />
-            </button>
+            {/* Test Content */}
+            <div className="w-full h-full">
+              {currentTest.render(testParams)}
+            </div>
+
+            {/* Navigation Sidebar */}
+            <AnimatePresence>
+              {showControls && sidebarOpen && (
+                <motion.div
+                  initial={{ x: -320, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -320, opacity: 0 }}
+                  transition={{ type: "spring", damping: 25 }}
+                  className="fixed top-0 left-0 bottom-0 w-72 bg-background/95 backdrop-blur-xl border-r border-border overflow-y-auto"
+                >
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="font-semibold text-foreground">Display Tests</h2>
+                      <button
+                        onClick={() => setSidebarOpen(false)}
+                        className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {testsByCategory.map((category) => (
+                      <div key={category.id} className="mb-4">
+                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                          <category.icon className="h-3.5 w-3.5" />
+                          {category.name}
+                        </div>
+                        <div className="space-y-1">
+                          {category.tests.map((test) => {
+                            const testIndex = tests.findIndex((t) => t.id === test.id);
+                            return (
+                              <button
+                                key={test.id}
+                                onClick={() => setCurrentTestIndex(testIndex)}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                                  currentTestIndex === testIndex
+                                    ? "bg-primary text-primary-foreground"
+                                    : "hover:bg-muted text-foreground"
+                                }`}
+                              >
+                                {test.name}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Parameter Controls */}
+                    {currentTest.category === "uniformity" && (
+                      <div className="mt-6 p-4 rounded-xl bg-muted/50">
+                        <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                          Gray Level: {grayscale}%
+                        </label>
+                        <Slider
+                          value={[grayscale]}
+                          onValueChange={([v]) => setGrayscale(v)}
+                          min={0}
+                          max={100}
+                          step={1}
+                        />
+                      </div>
+                    )}
+
+                    {currentTest.category === "gradients" && (
+                      <div className="mt-6 p-4 rounded-xl bg-muted/50">
+                        <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                          Steps: {gradientSteps}
+                        </label>
+                        <Slider
+                          value={[gradientSteps]}
+                          onValueChange={([v]) => setGradientSteps(v)}
+                          min={8}
+                          max={256}
+                          step={8}
+                        />
+                      </div>
+                    )}
+
+                    {currentTest.category === "sharpness" && (
+                      <div className="mt-6 space-y-4">
+                        <div className="p-4 rounded-xl bg-muted/50">
+                          <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                            Font Size: {fontSize}px
+                          </label>
+                          <Slider
+                            value={[fontSize]}
+                            onValueChange={([v]) => setFontSize(v)}
+                            min={8}
+                            max={32}
+                            step={1}
+                          />
+                        </div>
+                        <button
+                          onClick={() => setInvertText(!invertText)}
+                          className="w-full px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 text-sm font-medium transition-colors"
+                        >
+                          {invertText ? "White on Black" : "Black on White"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Sidebar Toggle (when closed) */}
+            <AnimatePresence>
+              {showControls && !sidebarOpen && (
+                <motion.button
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  onClick={() => setSidebarOpen(true)}
+                  className="fixed top-4 left-4 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {/* Top Controls */}
+            <AnimatePresence>
+              {showControls && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="fixed top-4 right-4 flex items-center gap-2"
+                >
+                  <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border">
+                    <span className="text-sm text-foreground font-medium">
+                      {currentTestIndex + 1} / {tests.length}
+                    </span>
+                  </div>
+                  <button
+                    onClick={exitFullscreen}
+                    className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Bottom Info & Navigation */}
+            <AnimatePresence>
+              {showControls && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3"
+                >
+                  <button
+                    onClick={prevTest}
+                    disabled={currentTestIndex === 0}
+                    className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  
+                  <div className="px-6 py-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border text-center min-w-64">
+                    <p className="font-medium text-foreground">{currentTest.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{currentTest.description}</p>
+                  </div>
+                  
+                  <button
+                    onClick={nextTest}
+                    disabled={currentTestIndex === tests.length - 1}
+                    className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Keyboard Hints */}
+            <AnimatePresence>
+              {showControls && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-background/60 backdrop-blur-sm px-3 py-2 rounded-lg"
+                >
+                  <span className="opacity-70">Space: toggle UI • Tab: menu • ←→: navigate • Esc: exit</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -108,47 +562,55 @@ const DisplayTest = () => {
               Display & Screen Test
             </h1>
             <p className="text-muted-foreground max-w-2xl">
-              Test your display for dead pixels, stuck pixels, and color accuracy.
-              Click on any color below to view it fullscreen and inspect your screen.
+              Comprehensive display testing for dead pixels, color accuracy, gradients, and sharpness.
+              Click any test to enter fullscreen mode.
             </p>
           </motion.div>
 
-          {/* Color Grid */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-8"
-          >
-            <h2 className="text-lg font-semibold text-foreground mb-4">
-              Dead Pixel Test Colors
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {colors.map((color, index) => (
-                <motion.button
-                  key={index}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => enterFullscreen(index)}
-                  className="group relative aspect-video rounded-2xl overflow-hidden border border-border shadow-md hover:shadow-lg transition-shadow"
-                  style={{ backgroundColor: color.hex }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 text-white">
-                      <Expand className="h-5 w-5" />
-                      <span className="font-medium">{color.name}</span>
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
+          {/* Test Categories */}
+          {testsByCategory.map((category, categoryIndex) => (
+            <motion.div
+              key={category.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: categoryIndex * 0.1 }}
+              className="mb-8"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <category.icon className="h-5 w-5 text-primary" />
+                <h2 className="text-lg font-semibold text-foreground">{category.name}</h2>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {category.tests.map((test) => {
+                  const testIndex = tests.findIndex((t) => t.id === test.id);
+                  return (
+                    <motion.button
+                      key={test.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => enterFullscreen(testIndex)}
+                      className="group relative aspect-video rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-md transition-all bg-card"
+                    >
+                      <div className="absolute inset-0 overflow-hidden">
+                        {test.render(testParams)}
+                      </div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/60 backdrop-blur-sm">
+                        <Expand className="h-5 w-5 text-white mb-2" />
+                        <span className="text-sm font-medium text-white">{test.name}</span>
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          ))}
 
           {/* Screen Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
             className="glass-card rounded-2xl p-6"
           >
             <h2 className="text-lg font-semibold text-foreground mb-4">
@@ -186,17 +648,28 @@ const DisplayTest = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             className="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/10"
           >
-            <h3 className="font-semibold text-foreground mb-3">How to Test</h3>
-            <ol className="space-y-2 text-sm text-muted-foreground">
-              <li>1. Click on any color card above to view it fullscreen</li>
-              <li>2. Look carefully at your entire screen for any pixels that don't match the color</li>
-              <li>3. Dead pixels appear as black dots on bright colors</li>
-              <li>4. Stuck pixels appear as colored dots that don't change with the background</li>
-              <li>5. Click anywhere to cycle through all colors, or press ESC to exit</li>
-            </ol>
+            <h3 className="font-semibold text-foreground mb-3">Keyboard Shortcuts</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <kbd className="px-2 py-1 rounded bg-muted text-xs font-mono">Space</kbd>
+                <span className="ml-2 text-muted-foreground">Toggle UI</span>
+              </div>
+              <div>
+                <kbd className="px-2 py-1 rounded bg-muted text-xs font-mono">Tab</kbd>
+                <span className="ml-2 text-muted-foreground">Toggle menu</span>
+              </div>
+              <div>
+                <kbd className="px-2 py-1 rounded bg-muted text-xs font-mono">← →</kbd>
+                <span className="ml-2 text-muted-foreground">Navigate tests</span>
+              </div>
+              <div>
+                <kbd className="px-2 py-1 rounded bg-muted text-xs font-mono">Esc</kbd>
+                <span className="ml-2 text-muted-foreground">Exit fullscreen</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </main>
