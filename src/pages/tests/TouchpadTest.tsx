@@ -89,6 +89,26 @@ const TouchpadTest = () => {
             </div>
           </motion.div>
 
+          {/* Start Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-12"
+          >
+            <Button
+              size="lg"
+              className="h-14 px-8 text-lg font-semibold gap-3"
+              onClick={() => {
+                trackingAreaRef.current?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <Mouse className="h-5 w-5" />
+              Start Touchpad Test
+            </Button>
+            <p className="text-sm text-muted-foreground mt-2">Move your cursor to the tracking area below</p>
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Tracking Area */}
             <motion.div
