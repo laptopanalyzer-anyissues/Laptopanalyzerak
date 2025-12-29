@@ -189,7 +189,7 @@ const AudioTest = () => {
             className="glass-card rounded-2xl p-6 mb-8"
           >
             <h3 className="font-semibold text-foreground mb-6">Stereo Speaker Test</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Left Speaker */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -261,6 +261,35 @@ const AudioTest = () => {
                   </p>
                 </div>
               </motion.div>
+
+              {/* Music - How You Like That */}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className={`p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
+                  isPlaying === "music-blackpink"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover:border-primary/50"
+                }`}
+                onClick={() => {
+                  if (isPlaying === "music-blackpink") {
+                    stopTone();
+                  } else {
+                    playMusic("blackpink");
+                  }
+                }}
+              >
+                <div className="text-center">
+                  <div className={`inline-flex p-4 rounded-full mb-4 ${
+                    isPlaying === "music-blackpink" ? "bg-primary animate-pulse" : "bg-muted"
+                  }`}>
+                    <Music className={`h-8 w-8 ${isPlaying === "music-blackpink" ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                  </div>
+                  <h4 className="font-semibold text-foreground mb-1">How You Like That</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {isPlaying === "music-blackpink" ? "Playing..." : "Click to test"}
+                  </p>
+                </div>
+              </motion.div>
             </div>
 
             {isPlaying && (
@@ -311,79 +340,6 @@ const AudioTest = () => {
             </div>
           </motion.div>
 
-          {/* Music Test */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-            className="glass-card rounded-2xl p-6 mt-8"
-          >
-            <h3 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-              <Music className="h-5 w-5 text-primary" />
-              Music Test - How You Like That
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Test your speakers with a catchy melody inspired by Blackpink's hit song.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Button
-                size="lg"
-                variant={isPlaying === "music-blackpink" ? "hero" : "outline"}
-                className="h-auto py-4 px-6 flex items-center gap-3"
-                onClick={() => {
-                  if (isPlaying === "music-blackpink") {
-                    stopTone();
-                  } else {
-                    playMusic("blackpink");
-                  }
-                }}
-              >
-                {isPlaying === "music-blackpink" ? (
-                  <>
-                    <Square className="h-5 w-5" />
-                    <div className="text-left">
-                      <span className="block font-bold">Stop Music</span>
-                      <span className="text-xs opacity-70">Playing...</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-5 w-5" />
-                    <div className="text-left">
-                      <span className="block font-bold">How You Like That</span>
-                      <span className="text-xs opacity-70">BLACKPINK Style</span>
-                    </div>
-                  </>
-                )}
-              </Button>
-            </div>
-            
-            {isPlaying === "music-blackpink" && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="mt-4 flex items-center gap-2"
-              >
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      className="w-1 bg-primary rounded-full"
-                      animate={{
-                        height: [8, 24, 8],
-                      }}
-                      transition={{
-                        duration: 0.5,
-                        repeat: Infinity,
-                        delay: i * 0.1,
-                      }}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-primary font-medium">♪ Playing melody...</span>
-              </motion.div>
-            )}
-          </motion.div>
 
           {/* Tips */}
           <motion.div
