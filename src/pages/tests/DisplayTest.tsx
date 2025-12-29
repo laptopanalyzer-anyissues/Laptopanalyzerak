@@ -323,7 +323,7 @@ const DisplayTest = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Header />
 
       {/* Fullscreen Test Mode */}
@@ -333,7 +333,7 @@ const DisplayTest = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black"
+            className="fixed inset-0 z-[100] bg-black overflow-hidden"
           >
             {/* Test Content */}
             <div className="w-full h-full">
