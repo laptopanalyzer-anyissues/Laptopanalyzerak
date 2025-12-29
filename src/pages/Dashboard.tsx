@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { SystemInfo } from "@/components/dashboard/SystemInfo";
+
 import { TestCard } from "@/components/dashboard/TestCard";
 import {
   Monitor,
@@ -9,7 +9,7 @@ import {
   Camera,
   Mic,
   Speaker,
-  Battery,
+  
   Wifi,
   Mouse,
   HardDrive,
@@ -60,13 +60,6 @@ const tests = [
     gradient: "from-green-500 to-emerald-500",
   },
   {
-    icon: Battery,
-    title: "Battery Test",
-    description: "Check battery health and charging status",
-    path: "/test/battery",
-    gradient: "from-yellow-500 to-lime-500",
-  },
-  {
     icon: Wifi,
     title: "Network Test",
     description: "Test connection status and network speed",
@@ -95,7 +88,7 @@ const Dashboard = () => {
             </p>
           </motion.div>
 
-          <SystemInfo />
+          
 
           <motion.div
             initial={{ opacity: 0 }}
