@@ -1,0 +1,121 @@
+import { motion } from "framer-motion";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { SystemInfo } from "@/components/dashboard/SystemInfo";
+import { TestCard } from "@/components/dashboard/TestCard";
+import {
+  Monitor,
+  Keyboard,
+  Camera,
+  Mic,
+  Speaker,
+  Battery,
+  Wifi,
+  Mouse,
+  HardDrive,
+  Smartphone,
+} from "lucide-react";
+
+const tests = [
+  {
+    icon: Monitor,
+    title: "Display Test",
+    description: "Check for dead pixels, color accuracy, and screen quality",
+    path: "/test/display",
+    gradient: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: Keyboard,
+    title: "Keyboard Test",
+    description: "Verify every key on your keyboard works correctly",
+    path: "/test/keyboard",
+    gradient: "from-violet-500 to-purple-500",
+  },
+  {
+    icon: Mouse,
+    title: "Touchpad Test",
+    description: "Test cursor tracking, clicks, and scroll gestures",
+    path: "/test/touchpad",
+    gradient: "from-indigo-500 to-blue-500",
+  },
+  {
+    icon: Camera,
+    title: "Camera Test",
+    description: "Test your webcam with live preview and snapshot",
+    path: "/test/camera",
+    gradient: "from-pink-500 to-rose-500",
+  },
+  {
+    icon: Mic,
+    title: "Microphone Test",
+    description: "Audio input test with real-time visualization",
+    path: "/test/microphone",
+    gradient: "from-amber-500 to-orange-500",
+  },
+  {
+    icon: Speaker,
+    title: "Speaker Test",
+    description: "Verify left and right speaker audio output",
+    path: "/test/audio",
+    gradient: "from-green-500 to-emerald-500",
+  },
+  {
+    icon: Battery,
+    title: "Battery Test",
+    description: "Check battery health and charging status",
+    path: "/test/battery",
+    gradient: "from-yellow-500 to-lime-500",
+  },
+  {
+    icon: Wifi,
+    title: "Network Test",
+    description: "Test connection status and network speed",
+    path: "/test/network",
+    gradient: "from-teal-500 to-cyan-500",
+  },
+];
+
+const Dashboard = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+              Laptop Diagnostics
+            </h1>
+            <p className="text-muted-foreground">
+              Select a test to verify your laptop's hardware components
+            </p>
+          </motion.div>
+
+          <SystemInfo />
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h2 className="text-xl font-semibold text-foreground mb-4">
+              Available Tests
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {tests.map((test, index) => (
+                <TestCard key={index} {...test} index={index} />
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default Dashboard;
