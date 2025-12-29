@@ -103,22 +103,18 @@ const KeyboardTest = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-8 text-center"
           >
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  Keyboard Test
-                </h1>
-                <p className="text-muted-foreground">
-                  Press any key to test. Keys will light up green when pressed.
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={resetTest}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset Test
-              </Button>
-            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Keyboard Test
+            </h1>
+            <p className="text-muted-foreground">
+              Press any key to test. Keys will light up green when pressed.
+            </p>
+            <Button variant="outline" size="sm" onClick={resetTest} className="mt-4">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset Test
+            </Button>
           </motion.div>
 
 
