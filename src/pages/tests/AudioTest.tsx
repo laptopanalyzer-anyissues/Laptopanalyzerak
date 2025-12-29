@@ -4,13 +4,14 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Volume2, VolumeX, Play, Square } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, Play, Square, Music } from "lucide-react";
 
 const AudioTest = () => {
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const pannerRef = useRef<StereoPannerNode | null>(null);
+  const musicTimeoutRef = useRef<NodeJS.Timeout[]>([]);
 
   const playTone = (channel: "left" | "right" | "both", frequency: number = 440) => {
     stopTone();
@@ -54,7 +55,72 @@ const AudioTest = () => {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
+    musicTimeoutRef.current.forEach(timeout => clearTimeout(timeout));
+    musicTimeoutRef.current = [];
     setIsPlaying(null);
+  };
+
+  const playMusic = (musicType: string) => {
+    stopTone();
+    
+    const audioContext = new AudioContext();
+    audioContextRef.current = audioContext;
+    
+    // "How You Like That" inspired beat pattern (synthesized)
+    const notes = musicType === "blackpink" ? [
+      { freq: 392, duration: 0.2, delay: 0 },      // G4
+      { freq: 392, duration: 0.2, delay: 0.25 },   // G4
+      { freq: 440, duration: 0.2, delay: 0.5 },    // A4
+      { freq: 392, duration: 0.2, delay: 0.75 },   // G4
+      { freq: 349, duration: 0.4, delay: 1.0 },    // F4
+      { freq: 330, duration: 0.3, delay: 1.5 },    // E4
+      { freq: 294, duration: 0.3, delay: 1.85 },   // D4
+      { freq: 330, duration: 0.4, delay: 2.2 },    // E4
+      { freq: 392, duration: 0.2, delay: 2.7 },    // G4
+      { freq: 392, duration: 0.2, delay: 2.95 },   // G4
+      { freq: 440, duration: 0.2, delay: 3.2 },    // A4
+      { freq: 494, duration: 0.4, delay: 3.45 },   // B4
+      { freq: 523, duration: 0.5, delay: 3.9 },    // C5
+      { freq: 494, duration: 0.3, delay: 4.5 },    // B4
+      { freq: 440, duration: 0.3, delay: 4.85 },   // A4
+      { freq: 392, duration: 0.5, delay: 5.2 },    // G4
+    ] : [
+      { freq: 523, duration: 0.3, delay: 0 },
+      { freq: 587, duration: 0.3, delay: 0.35 },
+      { freq: 659, duration: 0.3, delay: 0.7 },
+      { freq: 698, duration: 0.5, delay: 1.05 },
+    ];
+
+    setIsPlaying(`music-${musicType}`);
+    
+    notes.forEach((note) => {
+      const timeout = setTimeout(() => {
+        if (!audioContextRef.current) return;
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.type = "square";
+        oscillator.frequency.value = note.freq;
+        
+        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + note.duration);
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + note.duration);
+      }, note.delay * 1000);
+      
+      musicTimeoutRef.current.push(timeout);
+    });
+
+    // Auto stop after melody ends
+    const endTimeout = setTimeout(() => {
+      setIsPlaying(null);
+    }, 6000);
+    musicTimeoutRef.current.push(endTimeout);
   };
 
   const frequencies = [
@@ -245,6 +311,80 @@ const AudioTest = () => {
             </div>
           </motion.div>
 
+          {/* Music Test */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="glass-card rounded-2xl p-6 mt-8"
+          >
+            <h3 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+              <Music className="h-5 w-5 text-primary" />
+              Music Test - How You Like That
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Test your speakers with a catchy melody inspired by Blackpink's hit song.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                size="lg"
+                variant={isPlaying === "music-blackpink" ? "hero" : "outline"}
+                className="h-auto py-4 px-6 flex items-center gap-3"
+                onClick={() => {
+                  if (isPlaying === "music-blackpink") {
+                    stopTone();
+                  } else {
+                    playMusic("blackpink");
+                  }
+                }}
+              >
+                {isPlaying === "music-blackpink" ? (
+                  <>
+                    <Square className="h-5 w-5" />
+                    <div className="text-left">
+                      <span className="block font-bold">Stop Music</span>
+                      <span className="text-xs opacity-70">Playing...</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-5 w-5" />
+                    <div className="text-left">
+                      <span className="block font-bold">How You Like That</span>
+                      <span className="text-xs opacity-70">BLACKPINK Style</span>
+                    </div>
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            {isPlaying === "music-blackpink" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="mt-4 flex items-center gap-2"
+              >
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="w-1 bg-primary rounded-full"
+                      animate={{
+                        height: [8, 24, 8],
+                      }}
+                      transition={{
+                        duration: 0.5,
+                        repeat: Infinity,
+                        delay: i * 0.1,
+                      }}
+                    />
+                  ))}
+                </div>
+                <span className="text-sm text-primary font-medium">♪ Playing melody...</span>
+              </motion.div>
+            )}
+          </motion.div>
+
           {/* Tips */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -258,6 +398,7 @@ const AudioTest = () => {
               <li>• Left speaker test should only produce sound from the left side</li>
               <li>• Right speaker test should only produce sound from the right side</li>
               <li>• If you can't hear certain frequencies, it might indicate speaker issues</li>
+              <li>• The music test helps verify both speakers work together with dynamic audio</li>
             </ul>
           </motion.div>
         </div>
