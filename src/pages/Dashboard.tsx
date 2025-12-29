@@ -98,7 +98,7 @@ const Dashboard = () => {
             <h2 className="text-xl font-semibold text-foreground mb-4">
               Available Tests
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {tests.map((test, index) => (
                 <TestCard key={index} {...test} index={index} />
               ))}
