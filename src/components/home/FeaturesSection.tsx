@@ -6,7 +6,7 @@ import {
   Camera,
   Mic,
   Speaker,
-  Battery,
+  
   Wifi,
   HardDrive,
   Mouse,
@@ -48,13 +48,6 @@ const features = [
     description: "Stereo audio test for left and right speaker verification",
     path: "/test/audio",
     color: "from-green-500 to-emerald-500",
-  },
-  {
-    icon: Battery,
-    title: "Battery Test",
-    description: "Check battery health, charge level, and power status",
-    path: "/test/battery",
-    color: "from-yellow-500 to-lime-500",
   },
   {
     icon: Wifi,
