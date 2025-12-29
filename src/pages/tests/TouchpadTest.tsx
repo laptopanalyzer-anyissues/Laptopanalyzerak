@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mouse, MousePointer, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Mouse, RotateCcw, CheckCircle2 } from "lucide-react";
 
-const TouchpadTest = () => {
+const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
   const [leftClicks, setLeftClicks] = useState(0);
   const [rightClicks, setRightClicks] = useState(0);
   const [scrollEvents, setScrollEvents] = useState(0);
@@ -48,7 +48,7 @@ const TouchpadTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={ref} className="min-h-screen bg-background">
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
@@ -239,6 +239,8 @@ const TouchpadTest = () => {
       <Footer />
     </div>
   );
-};
+});
+
+TouchpadTest.displayName = "TouchpadTest";
 
 export default TouchpadTest;

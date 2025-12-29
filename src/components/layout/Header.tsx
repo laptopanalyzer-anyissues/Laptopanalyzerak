@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Laptop, Menu, X, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
 
 const navLinks = [
@@ -12,7 +12,7 @@ const navLinks = [
   { name: "Privacy", path: "/#privacy" },
 ];
 
-export function Header() {
+export const Header = forwardRef<HTMLElement>((_, ref) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -23,6 +23,7 @@ export function Header() {
 
   return (
     <motion.header
+      ref={ref}
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -128,4 +129,6 @@ export function Header() {
       </div>
     </motion.header>
   );
-}
+});
+
+Header.displayName = "Header";
