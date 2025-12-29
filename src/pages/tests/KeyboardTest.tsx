@@ -121,26 +121,6 @@ const KeyboardTest = () => {
             </div>
           </motion.div>
 
-          {/* Start Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-12"
-          >
-            <Button
-              size="lg"
-              className="h-14 px-8 text-lg font-semibold gap-3"
-              onClick={() => {
-                // Focus on the page to capture keyboard input
-                document.body.focus();
-              }}
-            >
-              <Keyboard className="h-5 w-5" />
-              Start Keyboard Test
-            </Button>
-            <p className="text-sm text-muted-foreground mt-2">Press any key to begin testing</p>
-          </motion.div>
 
           {/* Stats */}
           <motion.div
