@@ -191,7 +191,7 @@ const NetworkTest = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-8 text-center"
           >
             <h1 className="text-3xl font-bold text-foreground mb-2">
               Network & Internet Test
@@ -206,7 +206,7 @@ const NetworkTest = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-12"
+            className="mb-12 flex justify-center"
           >
             <Button
               size="lg"

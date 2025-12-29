@@ -71,22 +71,18 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8"
+            className="mb-8 text-center"
           >
-            <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  Touchpad & Mouse Test
-                </h1>
-                <p className="text-muted-foreground">
-                  Test cursor tracking, clicks, and scroll functionality.
-                </p>
-              </div>
-              <Button variant="outline" size="sm" onClick={resetTest}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset Test
-              </Button>
-            </div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Touchpad & Mouse Test
+            </h1>
+            <p className="text-muted-foreground">
+              Test cursor tracking, clicks, and scroll functionality.
+            </p>
+            <Button variant="outline" size="sm" onClick={resetTest} className="mt-4">
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset Test
+            </Button>
           </motion.div>
 
           {/* Start Button */}
@@ -94,7 +90,7 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-12"
+            className="mb-12 flex justify-center flex-col items-center"
           >
             <Button
               size="lg"
