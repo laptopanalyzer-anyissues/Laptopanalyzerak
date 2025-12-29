@@ -98,6 +98,23 @@ const AudioTest = () => {
             </p>
           </motion.div>
 
+          {/* Start Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-12"
+          >
+            <Button
+              size="lg"
+              onClick={() => playTone("both")}
+              className="h-14 px-8 text-lg font-semibold gap-3"
+            >
+              <Volume2 className="h-5 w-5" />
+              Start Audio Test
+            </Button>
+          </motion.div>
+
           {/* Stereo Test */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

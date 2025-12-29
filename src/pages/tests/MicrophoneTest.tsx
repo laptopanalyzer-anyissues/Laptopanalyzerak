@@ -168,6 +168,25 @@ const MicrophoneTest = () => {
             </p>
           </motion.div>
 
+          {/* Start Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-12"
+          >
+            {!isListening && (
+              <Button
+                size="lg"
+                onClick={startListening}
+                className="h-14 px-8 text-lg font-semibold gap-3"
+              >
+                <Mic className="h-5 w-5" />
+                Start Microphone Test
+              </Button>
+            )}
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Visualization */}
             <motion.div

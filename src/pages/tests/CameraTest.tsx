@@ -122,6 +122,25 @@ const CameraTest = () => {
             </p>
           </motion.div>
 
+          {/* Start Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-12"
+          >
+            {!stream && (
+              <Button
+                size="lg"
+                onClick={startCamera}
+                className="h-14 px-8 text-lg font-semibold gap-3"
+              >
+                <Camera className="h-5 w-5" />
+                Start Camera Test
+              </Button>
+            )}
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Video Preview */}
             <motion.div

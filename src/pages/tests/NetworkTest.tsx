@@ -127,6 +127,24 @@ const NetworkTest = () => {
             </p>
           </motion.div>
 
+          {/* Start Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-12"
+          >
+            <Button
+              size="lg"
+              onClick={runSpeedTest}
+              disabled={isTesting || !networkInfo?.online}
+              className="h-14 px-8 text-lg font-semibold gap-3"
+            >
+              <Activity className="h-5 w-5" />
+              Start Network Test
+            </Button>
+          </motion.div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Connection Status */}
             <motion.div
