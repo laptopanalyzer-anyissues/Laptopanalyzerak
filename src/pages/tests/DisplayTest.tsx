@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 // Test categories
-type TestCategory = "pixels" | "patterns" | "gradients" | "uniformity" | "sharpness";
+type TestCategory = "pixels" | "patterns" | "gradients" | "uniformity" | "sharpness" | "viewing";
 
 interface TestItem {
   id: string;
@@ -117,6 +117,14 @@ const tests: TestItem[] = [
     category: "sharpness",
     description: "Check text clarity and sharpness",
     render: (params) => <SharpnessTest fontSize={params.fontSize} invert={params.invertText} />,
+  },
+  // Viewing Angle
+  {
+    id: "viewing-angle",
+    name: "Viewing Angle",
+    category: "viewing",
+    description: "Test monitor's viewing angle stability",
+    render: () => <ViewingAngleTest />,
   },
 ];
 
@@ -235,6 +243,68 @@ function SharpnessTest({ fontSize, invert }: { fontSize: number; invert: boolean
   );
 }
 
+// Viewing Angle Test Component
+function ViewingAngleTest() {
+  return (
+    <div className="w-full h-full bg-black relative">
+      {/* Five radial gradient circles */}
+      {/* Top-left */}
+      <div 
+        className="absolute w-56 h-56 rounded-full"
+        style={{
+          top: '5%',
+          left: '5%',
+          background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+        }}
+      />
+      {/* Top-right */}
+      <div 
+        className="absolute w-56 h-56 rounded-full"
+        style={{
+          top: '5%',
+          right: '5%',
+          background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+        }}
+      />
+      {/* Center */}
+      <div 
+        className="absolute w-64 h-64 rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{
+          background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+        }}
+      />
+      {/* Bottom-left */}
+      <div 
+        className="absolute w-56 h-56 rounded-full"
+        style={{
+          bottom: '5%',
+          left: '5%',
+          background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+        }}
+      />
+      {/* Bottom-right */}
+      <div 
+        className="absolute w-56 h-56 rounded-full"
+        style={{
+          bottom: '5%',
+          right: '5%',
+          background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+        }}
+      />
+      
+      {/* Info box */}
+      <div className="absolute bottom-8 right-8 max-w-sm p-4 bg-white rounded-lg shadow-lg">
+        <h3 className="text-primary font-semibold text-lg mb-2">Viewing Angle</h3>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Test the monitor's viewing angle stability. When you increase the viewing angle, 
+          the size and shape of the circles displayed should remain almost the same. 
+          Slight changes may appear. Less is better.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // Category config
 const categories: { id: TestCategory; name: string; icon: React.ElementType }[] = [
   { id: "pixels", name: "Dead Pixels", icon: CircleDot },
@@ -242,6 +312,7 @@ const categories: { id: TestCategory; name: string; icon: React.ElementType }[] 
   { id: "gradients", name: "Gradients", icon: Palette },
   { id: "uniformity", name: "Uniformity", icon: Monitor },
   { id: "sharpness", name: "Sharpness", icon: Type },
+  { id: "viewing", name: "Viewing Angle", icon: Eye },
 ];
 
 const DisplayTest = () => {
