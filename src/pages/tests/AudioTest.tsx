@@ -189,7 +189,7 @@ const AudioTest = () => {
             className="glass-card rounded-2xl p-6 mb-8"
           >
             <h3 className="font-semibold text-foreground mb-6">Stereo Speaker Test</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Left Speaker */}
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -258,35 +258,6 @@ const AudioTest = () => {
                   <h4 className="font-semibold text-foreground mb-1">Right Speaker</h4>
                   <p className="text-sm text-muted-foreground">
                     {isPlaying === "right" ? "Playing..." : "Click to test"}
-                  </p>
-                </div>
-              </motion.div>
-
-              {/* Music - How You Like That */}
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className={`p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
-                  isPlaying === "music-blackpink"
-                    ? "bg-primary/10 border-primary"
-                    : "bg-card border-border hover:border-primary/50"
-                }`}
-                onClick={() => {
-                  if (isPlaying === "music-blackpink") {
-                    stopTone();
-                  } else {
-                    playMusic("blackpink");
-                  }
-                }}
-              >
-                <div className="text-center">
-                  <div className={`inline-flex p-4 rounded-full mb-4 ${
-                    isPlaying === "music-blackpink" ? "bg-primary animate-pulse" : "bg-muted"
-                  }`}>
-                    <Music className={`h-8 w-8 ${isPlaying === "music-blackpink" ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                  </div>
-                  <h4 className="font-semibold text-foreground mb-1">How You Like That</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {isPlaying === "music-blackpink" ? "Playing..." : "Click to test"}
                   </p>
                 </div>
               </motion.div>
