@@ -13,6 +13,7 @@ import MicrophoneTest from "./pages/tests/MicrophoneTest";
 import AudioTest from "./pages/tests/AudioTest";
 import NetworkTest from "./pages/tests/NetworkTest";
 import TouchpadTest from "./pages/tests/TouchpadTest";
+import PortsTest from "./pages/tests/PortsTest";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/test/audio" element={<AudioTest />} />
             <Route path="/test/network" element={<NetworkTest />} />
             <Route path="/test/touchpad" element={<TouchpadTest />} />
+            <Route path="/test/ports" element={<PortsTest />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

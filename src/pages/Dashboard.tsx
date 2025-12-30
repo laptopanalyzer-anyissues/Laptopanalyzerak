@@ -9,11 +9,9 @@ import {
   Camera,
   Mic,
   Speaker,
-  
   Wifi,
   Mouse,
-  HardDrive,
-  Smartphone,
+  Cable,
 } from "lucide-react";
 
 const tests = [
@@ -65,6 +63,13 @@ const tests = [
     description: "Test connection status and network speed",
     path: "/test/network",
     gradient: "from-teal-500 to-cyan-500",
+  },
+  {
+    icon: Cable,
+    title: "Ports & Connectivity",
+    description: "Verify physical ports and wireless connections",
+    path: "/test/ports",
+    gradient: "from-orange-500 to-red-500",
   },
 ];
 
