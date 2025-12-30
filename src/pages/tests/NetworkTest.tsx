@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
@@ -33,6 +33,7 @@ interface NetworkMetadata {
 }
 
 const TEST_DURATION_MS = 15000;
+const SAMPLE_INTERVAL_MS = 200; // Sample speed every 200ms for smooth updates
 
 const NetworkTest = () => {
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
@@ -50,9 +51,15 @@ const NetworkTest = () => {
   const [timeRemaining, setTimeRemaining] = useState<number>(15);
   const [testProgress, setTestProgress] = useState(0);
   const [speedHistory, setSpeedHistory] = useState<number[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  
+  // Refs for streaming measurement
+  const bytesReceivedRef = useRef(0);
+  const bytesUploadedRef = useRef(0);
+  const lastSampleTimeRef = useRef(0);
+  const lastBytesRef = useRef(0);
+  const isTestingRef = useRef(false);
 
-  // Fetch network metadata (IP and ISP)
+  // Fetch network metadata
   useEffect(() => {
     const fetchNetworkMetadata = async () => {
       try {
@@ -100,6 +107,42 @@ const NetworkTest = () => {
     };
   }, []);
 
+  // Streaming speed sampler - calculates instantaneous speed from byte deltas
+  const startSpeedSampler = useCallback((type: 'download' | 'upload') => {
+    const bytesRef = type === 'download' ? bytesReceivedRef : bytesUploadedRef;
+    lastSampleTimeRef.current = performance.now();
+    lastBytesRef.current = 0;
+    
+    const sampleSpeed = () => {
+      if (!isTestingRef.current) return;
+      
+      const now = performance.now();
+      const timeDelta = (now - lastSampleTimeRef.current) / 1000;
+      const bytesDelta = bytesRef.current - lastBytesRef.current;
+      
+      if (timeDelta > 0 && bytesDelta > 0) {
+        const instantSpeed = (bytesDelta * 8) / timeDelta / 1000000; // Mbps
+        
+        // Use exponential moving average for smooth transitions
+        setCurrentSpeed(prev => {
+          const smoothingFactor = 0.3; // Lower = smoother, higher = more responsive
+          return prev === 0 ? instantSpeed : prev * (1 - smoothingFactor) + instantSpeed * smoothingFactor;
+        });
+        
+        setSpeedHistory(prev => [...prev, instantSpeed]);
+      }
+      
+      lastSampleTimeRef.current = now;
+      lastBytesRef.current = bytesRef.current;
+      
+      if (isTestingRef.current) {
+        setTimeout(sampleSpeed, SAMPLE_INTERVAL_MS);
+      }
+    };
+    
+    setTimeout(sampleSpeed, SAMPLE_INTERVAL_MS);
+  }, []);
+
   const measurePing = async (): Promise<{ ping: number; jitter: number }> => {
     const testUrl = "https://speed.cloudflare.com/__down?bytes=1";
     const pings: number[] = [];
@@ -120,26 +163,25 @@ const NetworkTest = () => {
         const pingValue = pingEnd - pingStart;
         pings.push(pingValue);
         
+        // Smooth ping display using EMA
         const recentPings = pings.slice(-5);
         const avgPing = recentPings.reduce((a, b) => a + b, 0) / recentPings.length;
-        setCurrentSpeed(Math.round(avgPing));
+        setCurrentSpeed(prev => prev === 0 ? avgPing : prev * 0.7 + avgPing * 0.3);
         setSpeedHistory(prev => [...prev, Math.round(avgPing)]);
       } catch {
         // Skip failed pings
       }
       
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
     
     if (pings.length === 0) return { ping: 0, jitter: 0 };
     
-    // Calculate jitter (standard deviation of ping times)
     const avgPing = pings.reduce((a, b) => a + b, 0) / pings.length;
     const squaredDiffs = pings.map(p => Math.pow(p - avgPing, 2));
     const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
     const jitter = Math.sqrt(avgSquaredDiff);
     
-    // Return average ping, excluding top and bottom 10%
     pings.sort((a, b) => a - b);
     const trimCount = Math.floor(pings.length * 0.1);
     const trimmedPings = pings.slice(trimCount, pings.length - trimCount);
@@ -150,116 +192,109 @@ const NetworkTest = () => {
 
   const measureDownloadSpeed = async (): Promise<number> => {
     const startTime = performance.now();
-    let totalBytesReceived = 0;
-    const speedSamples: number[] = [];
-    const chunkSize = 10000000;
+    bytesReceivedRef.current = 0;
+    isTestingRef.current = true;
     
     setSpeedHistory([]);
+    startSpeedSampler('download');
     
-    while (performance.now() - startTime < TEST_DURATION_MS) {
+    const chunkSize = 25000000; // 25MB chunks for better saturation
+    
+    // Progress updater
+    const progressInterval = setInterval(() => {
       const elapsed = performance.now() - startTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
-      setTimeRemaining(remaining);
-      setTestProgress(Math.round((elapsed / TEST_DURATION_MS) * 100));
-      
-      try {
-        abortControllerRef.current = new AbortController();
-        const chunkStart = performance.now();
-        
-        const downloadPromises = Array(3).fill(null).map(() => 
-          fetch(`https://speed.cloudflare.com/__down?bytes=${chunkSize}`, { 
-            cache: "no-store",
-            signal: abortControllerRef.current?.signal
-          }).then(async (response) => {
+      setTimeRemaining(Math.max(0, remaining));
+      setTestProgress(Math.min(100, Math.round((elapsed / TEST_DURATION_MS) * 100)));
+    }, 100);
+    
+    // Continuous download loop with streaming reads
+    const downloadLoop = async () => {
+      while (performance.now() - startTime < TEST_DURATION_MS && isTestingRef.current) {
+        try {
+          // Start multiple parallel streams
+          const streams = Array(4).fill(null).map(async () => {
+            const response = await fetch(
+              `https://speed.cloudflare.com/__down?bytes=${chunkSize}`, 
+              { cache: "no-store" }
+            );
             const reader = response.body?.getReader();
-            if (!reader) return 0;
+            if (!reader) return;
             
-            let bytesReceived = 0;
+            // Stream read for real-time byte counting
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
-              bytesReceived += value.length;
+              if (done || !isTestingRef.current) break;
+              bytesReceivedRef.current += value.length;
             }
-            return bytesReceived;
-          }).catch(() => 0)
-        );
-        
-        const results = await Promise.all(downloadPromises);
-        const chunkBytesReceived = results.reduce((a, b) => a + b, 0);
-        totalBytesReceived += chunkBytesReceived;
-        
-        const chunkEnd = performance.now();
-        const chunkDuration = (chunkEnd - chunkStart) / 1000;
-        
-        if (chunkDuration > 0 && chunkBytesReceived > 0) {
-          const chunkSpeedMbps = (chunkBytesReceived * 8) / chunkDuration / 1000000;
-          speedSamples.push(chunkSpeedMbps);
+          });
           
-          const recentSamples = speedSamples.slice(-5);
-          const avgSpeed = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
-          setCurrentSpeed(parseFloat(avgSpeed.toFixed(2)));
-          setSpeedHistory(prev => [...prev, parseFloat(avgSpeed.toFixed(2))]);
+          await Promise.all(streams);
+        } catch {
+          // Continue on error
         }
-      } catch {
-        // Continue on error
       }
-    }
+    };
+    
+    await downloadLoop();
+    
+    isTestingRef.current = false;
+    clearInterval(progressInterval);
     
     const totalDuration = (performance.now() - startTime) / 1000;
-    const finalSpeed = (totalBytesReceived * 8) / totalDuration / 1000000;
+    const finalSpeed = (bytesReceivedRef.current * 8) / totalDuration / 1000000;
     
     return parseFloat(finalSpeed.toFixed(2));
   };
 
   const measureUploadSpeed = async (): Promise<number> => {
     const startTime = performance.now();
-    let totalBytesUploaded = 0;
-    const speedSamples: number[] = [];
-    const chunkSize = 2000000;
-    const testData = new Blob([new ArrayBuffer(chunkSize)]);
+    bytesUploadedRef.current = 0;
+    isTestingRef.current = true;
     
     setSpeedHistory([]);
+    startSpeedSampler('upload');
     
-    while (performance.now() - startTime < TEST_DURATION_MS) {
+    // Create test data chunks
+    const chunkSize = 2000000; // 2MB chunks
+    const testData = new Blob([new ArrayBuffer(chunkSize)]);
+    
+    // Progress updater
+    const progressInterval = setInterval(() => {
       const elapsed = performance.now() - startTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
-      setTimeRemaining(remaining);
-      setTestProgress(Math.round((elapsed / TEST_DURATION_MS) * 100));
-      
-      try {
-        const chunkStart = performance.now();
-        
-        const uploadPromises = Array(2).fill(null).map(() => 
-          fetch("https://speed.cloudflare.com/__up", {
-            method: "POST",
-            body: testData,
-            cache: "no-store",
-          }).then(() => chunkSize).catch(() => 0)
-        );
-        
-        const results = await Promise.all(uploadPromises);
-        const chunkBytesUploaded = results.reduce((a, b) => a + b, 0);
-        totalBytesUploaded += chunkBytesUploaded;
-        
-        const chunkEnd = performance.now();
-        const chunkDuration = (chunkEnd - chunkStart) / 1000;
-        
-        if (chunkDuration > 0 && chunkBytesUploaded > 0) {
-          const chunkSpeedMbps = (chunkBytesUploaded * 8) / chunkDuration / 1000000;
-          speedSamples.push(chunkSpeedMbps);
+      setTimeRemaining(Math.max(0, remaining));
+      setTestProgress(Math.min(100, Math.round((elapsed / TEST_DURATION_MS) * 100)));
+    }, 100);
+    
+    // Continuous upload loop
+    const uploadLoop = async () => {
+      while (performance.now() - startTime < TEST_DURATION_MS && isTestingRef.current) {
+        try {
+          // Start multiple parallel uploads
+          const uploads = Array(3).fill(null).map(async () => {
+            await fetch("https://speed.cloudflare.com/__up", {
+              method: "POST",
+              body: testData,
+              cache: "no-store",
+            });
+            bytesUploadedRef.current += chunkSize;
+          });
           
-          const recentSamples = speedSamples.slice(-5);
-          const avgSpeed = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
-          setCurrentSpeed(parseFloat(avgSpeed.toFixed(2)));
-          setSpeedHistory(prev => [...prev, parseFloat(avgSpeed.toFixed(2))]);
+          await Promise.all(uploads);
+        } catch {
+          // Continue on error
         }
-      } catch {
-        // Continue on error
       }
-    }
+    };
+    
+    await uploadLoop();
+    
+    isTestingRef.current = false;
+    clearInterval(progressInterval);
     
     const totalDuration = (performance.now() - startTime) / 1000;
-    const finalSpeed = (totalBytesUploaded * 8) / totalDuration / 1000000;
+    const finalSpeed = (bytesUploadedRef.current * 8) / totalDuration / 1000000;
     
     return parseFloat(finalSpeed.toFixed(2));
   };
@@ -278,6 +313,9 @@ const NetworkTest = () => {
       const { ping, jitter } = await measurePing();
       setSpeedResults(prev => ({ ...prev, ping, jitter }));
 
+      // Brief pause between phases for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Phase 2: Download Test
       setTestPhase("download");
       setTestProgress(0);
@@ -285,6 +323,8 @@ const NetworkTest = () => {
       setTimeRemaining(15);
       const download = await measureDownloadSpeed();
       setSpeedResults(prev => ({ ...prev, download }));
+
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Phase 3: Upload Test
       setTestPhase("upload");
@@ -299,6 +339,7 @@ const NetworkTest = () => {
       console.error("Speed test failed:", err);
     } finally {
       setIsTesting(false);
+      isTestingRef.current = false;
       setTestProgress(100);
     }
   };
@@ -317,7 +358,7 @@ const NetworkTest = () => {
       case "ping": return 200;
       case "download": 
       case "upload": 
-        return Math.max(currentSpeed * 1.5, 100);
+        return Math.max(currentSpeed * 1.3, 100);
       default: return 100;
     }
   };
@@ -373,7 +414,7 @@ const NetworkTest = () => {
               className="glass-card rounded-3xl p-8 mb-8"
             >
               <div className="flex flex-col items-center">
-                {/* Speed Gauge */}
+                {/* Speed Gauge with spring animation */}
                 <SpeedGauge
                   value={currentSpeed}
                   maxValue={getMaxGaugeValue()}
@@ -392,7 +433,7 @@ const NetworkTest = () => {
                       className="flex items-center gap-2 mt-4 text-muted-foreground"
                     >
                       <Timer className="h-4 w-4" />
-                      <span className="font-medium">{timeRemaining}s remaining</span>
+                      <span className="font-medium tabular-nums">{timeRemaining}s remaining</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -411,7 +452,7 @@ const NetworkTest = () => {
 
               {/* Real-time Graph */}
               <AnimatePresence>
-                {isTesting && speedHistory.length > 0 && (
+                {isTesting && speedHistory.length > 1 && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -420,8 +461,9 @@ const NetworkTest = () => {
                   >
                     <SpeedGraph
                       data={speedHistory}
+                      maxDataPoints={75}
                       color={getPhaseColor()}
-                      label={`Real-time ${testPhase === "ping" ? "Ping" : "Speed"}`}
+                      label={`Real-time ${testPhase === "ping" ? "Latency" : "Speed"}`}
                     />
                   </motion.div>
                 )}
@@ -436,50 +478,50 @@ const NetworkTest = () => {
               className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
             >
               {/* Ping */}
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
-                testPhase === "ping" && isTesting ? "ring-2 ring-warning shadow-lg" : ""
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                testPhase === "ping" && isTesting ? "ring-2 ring-warning shadow-lg shadow-warning/20" : ""
               }`}>
                 <Gauge className="h-8 w-8 text-warning mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1">
+                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
                   {testPhase === "ping" && isTesting 
-                    ? currentSpeed 
+                    ? Math.round(currentSpeed)
                     : (speedResults.ping !== null ? speedResults.ping : "--")}
                 </p>
                 <p className="text-sm text-muted-foreground">Ping (ms)</p>
               </div>
 
               {/* Jitter */}
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
-                testPhase === "ping" && isTesting ? "ring-2 ring-warning/50 shadow-lg" : ""
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                testPhase === "ping" && isTesting ? "ring-2 ring-warning/50 shadow-lg shadow-warning/10" : ""
               }`}>
                 <Zap className="h-8 w-8 text-warning/70 mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1">
+                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
                   {speedResults.jitter !== null ? speedResults.jitter : "--"}
                 </p>
                 <p className="text-sm text-muted-foreground">Jitter (ms)</p>
               </div>
 
               {/* Download */}
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
-                testPhase === "download" && isTesting ? "ring-2 ring-success shadow-lg" : ""
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                testPhase === "download" && isTesting ? "ring-2 ring-success shadow-lg shadow-success/20" : ""
               }`}>
                 <ArrowDown className="h-8 w-8 text-success mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1">
+                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
                   {testPhase === "download" && isTesting 
-                    ? currentSpeed 
+                    ? currentSpeed.toFixed(1)
                     : (speedResults.download !== null ? speedResults.download : "--")}
                 </p>
                 <p className="text-sm text-muted-foreground">Download (Mbps)</p>
               </div>
 
               {/* Upload */}
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
-                testPhase === "upload" && isTesting ? "ring-2 ring-primary shadow-lg" : ""
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                testPhase === "upload" && isTesting ? "ring-2 ring-primary shadow-lg shadow-primary/20" : ""
               }`}>
                 <ArrowUp className="h-8 w-8 text-primary mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1">
+                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
                   {testPhase === "upload" && isTesting 
-                    ? currentSpeed 
+                    ? currentSpeed.toFixed(1)
                     : (speedResults.upload !== null ? speedResults.upload : "--")}
                 </p>
                 <p className="text-sm text-muted-foreground">Upload (Mbps)</p>
@@ -499,7 +541,6 @@ const NetworkTest = () => {
               </h3>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Connection Status */}
                 <div className="p-4 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2 mb-2">
                     {networkInfo?.online ? (
@@ -514,35 +555,32 @@ const NetworkTest = () => {
                   </p>
                 </div>
 
-                {/* IP Address */}
                 <div className="p-4 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2 mb-2">
                     <Globe className="h-4 w-4 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">IP Address</p>
                   </div>
-                  <p className="font-semibold text-foreground truncate">
+                  <p className="font-semibold text-foreground truncate text-sm">
                     {networkMetadata.ip || "Detecting..."}
                   </p>
                 </div>
 
-                {/* ISP */}
                 <div className="p-4 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2 mb-2">
                     <Wifi className="h-4 w-4 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">ISP</p>
                   </div>
-                  <p className="font-semibold text-foreground truncate">
+                  <p className="font-semibold text-foreground truncate text-sm">
                     {networkMetadata.isp || "Detecting..."}
                   </p>
                 </div>
 
-                {/* Server */}
                 <div className="p-4 rounded-xl bg-muted/50">
                   <div className="flex items-center gap-2 mb-2">
                     <Server className="h-4 w-4 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Test Server</p>
                   </div>
-                  <p className="font-semibold text-foreground">
+                  <p className="font-semibold text-foreground text-sm">
                     {networkMetadata.server}
                   </p>
                 </div>
@@ -558,9 +596,9 @@ const NetworkTest = () => {
             >
               <h3 className="font-semibold text-foreground mb-3">About This Test</h3>
               <p className="text-sm text-muted-foreground">
-                This test measures <strong>Ping</strong> (latency), <strong>Jitter</strong> (ping variation), 
-                <strong> Download</strong>, and <strong>Upload</strong> speeds over 15 seconds each using 
-                Cloudflare's global CDN with parallel connections for accurate saturation testing.
+                This test uses <strong>streaming measurement</strong> with real-time sampling every 200ms 
+                for smooth, accurate readings. Multiple parallel connections saturate your bandwidth while 
+                <strong> exponential moving averages</strong> provide fluid gauge animation.
               </p>
             </motion.div>
           </div>
