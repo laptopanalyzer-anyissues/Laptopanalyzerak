@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
+import { useEffect } from "react";
 
 interface SpeedGaugeProps {
   value: number;
@@ -22,12 +23,46 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
   const strokeWidth = 16;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  
-  // Use 270 degrees (3/4 of circle) for the gauge
   const arcLength = circumference * 0.75;
-  const valuePercent = Math.min(value / maxValue, 1);
-  const valueDashOffset = arcLength - (arcLength * valuePercent);
-  const progressDashOffset = arcLength - (arcLength * (progress / 100));
+
+  // Spring animation for smooth value transitions
+  const springValue = useSpring(0, {
+    stiffness: 100,
+    damping: 30,
+    mass: 1,
+  });
+
+  const springProgress = useSpring(0, {
+    stiffness: 50,
+    damping: 20,
+  });
+
+  // Update spring values when props change
+  useEffect(() => {
+    springValue.set(value);
+  }, [value, springValue]);
+
+  useEffect(() => {
+    springProgress.set(progress);
+  }, [progress, springProgress]);
+
+  // Transform spring value to stroke dash offset
+  const valueDashOffset = useTransform(springValue, (v) => {
+    const percent = Math.min(v / maxValue, 1);
+    return arcLength - (arcLength * percent);
+  });
+
+  const progressDashOffset = useTransform(springProgress, (p) => {
+    return arcLength - (arcLength * (p / 100));
+  });
+
+  // Transform for display value (smooth number) - always return string
+  const displayValue = useTransform(springValue, (v) => {
+    if (phase === "ping") {
+      return Math.round(v).toString();
+    }
+    return v.toFixed(1);
+  });
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -59,14 +94,11 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
           strokeWidth={4}
           strokeLinecap="round"
           strokeDasharray={`${arcLength} ${circumference}`}
-          strokeDashoffset={progressDashOffset}
+          style={{ strokeDashoffset: progressDashOffset }}
           className="text-muted/50"
-          initial={{ strokeDashoffset: arcLength }}
-          animate={{ strokeDashoffset: progressDashOffset }}
-          transition={{ duration: 0.3, ease: "linear" }}
         />
         
-        {/* Value arc */}
+        {/* Value arc with smooth spring animation */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -76,14 +108,28 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={`${arcLength} ${circumference}`}
-          strokeDashoffset={valueDashOffset}
-          initial={{ strokeDashoffset: arcLength }}
-          animate={{ strokeDashoffset: valueDashOffset }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{
-            filter: phase !== "idle" ? `drop-shadow(0 0 8px ${colors.primary})` : "none",
+          style={{ 
+            strokeDashoffset: valueDashOffset,
+            filter: phase !== "idle" ? `drop-shadow(0 0 10px ${colors.primary})` : "none",
           }}
         />
+        
+        {/* Glow effect for active phases */}
+        {phase !== "idle" && phase !== "complete" && (
+          <motion.circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            fill="none"
+            stroke={colors.primary}
+            strokeWidth={strokeWidth + 8}
+            strokeLinecap="round"
+            strokeDasharray={`${arcLength} ${circumference}`}
+            style={{ strokeDashoffset: valueDashOffset }}
+            opacity={0.15}
+            className="blur-sm"
+          />
+        )}
         
         <defs>
           <linearGradient id={`gaugeGradient-${phase}`} x1="0%" y1="0%" x2="100%" y2="0%">
@@ -96,9 +142,6 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
-          key={value}
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
           className="text-5xl font-bold text-foreground tabular-nums"
           style={{
             textShadow: phase !== "idle" && phase !== "complete" 
@@ -106,7 +149,7 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
               : "none",
           }}
         >
-          {value.toFixed(phase === "ping" ? 0 : 1)}
+          {displayValue}
         </motion.span>
         <span className="text-lg text-muted-foreground font-medium">{unit}</span>
         
