@@ -55,7 +55,8 @@ const SensorTest = () => {
     { id: "ambient-light", name: "Ambient Light", icon: Sun, description: "Measures surrounding light levels", status: "not-tested" },
     { id: "proximity", name: "Proximity Sensor", icon: Hand, description: "Detects nearby objects", status: "not-tested" },
     { id: "screen-orientation", name: "Screen Orientation", icon: Smartphone, description: "Detects portrait/landscape mode", status: "not-tested" },
-    { id: "touch", name: "Touchscreen", icon: Fingerprint, description: "Multi-touch capability", status: "not-tested" },
+    { id: "touch", name: "Touchscreen", icon: Activity, description: "Multi-touch capability", status: "not-tested" },
+    { id: "biometric", name: "Biometric Sensor", icon: Fingerprint, description: "Fingerprint or face recognition", status: "not-tested" },
   ]);
 
   const [isScanning, setIsScanning] = useState(false);
@@ -305,6 +306,33 @@ const SensorTest = () => {
     return false;
   }, [updateSensor]);
 
+  // Biometric/Fingerprint detection using WebAuthn
+  const detectBiometric = useCallback(async () => {
+    updateSensor("biometric", "testing");
+    
+    // Check if WebAuthn is available
+    if (!window.PublicKeyCredential) {
+      updateSensor("biometric", "not-supported", "WebAuthn not available");
+      return false;
+    }
+
+    try {
+      // Check if platform authenticator (fingerprint, face ID, Windows Hello) is available
+      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      
+      if (available) {
+        updateSensor("biometric", "available", "Windows Hello / Fingerprint");
+        return true;
+      } else {
+        updateSensor("biometric", "not-available", "No biometric hardware");
+        return false;
+      }
+    } catch (e) {
+      updateSensor("biometric", "not-available", "Detection failed");
+      return false;
+    }
+  }, [updateSensor]);
+
   // Handle touch events in test area
   const handleTouchStart = (e: React.TouchEvent) => {
     const touches = Array.from(e.touches).map(t => ({
@@ -396,13 +424,14 @@ const SensorTest = () => {
     });
 
     const steps = [
-      { fn: detectAccelerometer, progress: 15 },
-      { fn: detectGyroscope, progress: 30 },
-      { fn: detectOrientation, progress: 45 },
-      { fn: detectAmbientLight, progress: 60 },
-      { fn: detectProximity, progress: 75 },
-      { fn: detectScreenOrientation, progress: 90 },
-      { fn: detectTouch, progress: 100 },
+      { fn: detectAccelerometer, progress: 12 },
+      { fn: detectGyroscope, progress: 25 },
+      { fn: detectOrientation, progress: 37 },
+      { fn: detectAmbientLight, progress: 50 },
+      { fn: detectProximity, progress: 62 },
+      { fn: detectScreenOrientation, progress: 75 },
+      { fn: detectTouch, progress: 87 },
+      { fn: detectBiometric, progress: 100 },
     ];
 
     for (const step of steps) {
@@ -413,7 +442,7 @@ const SensorTest = () => {
 
     setIsScanning(false);
     toast({ title: "Scan complete" });
-  }, [detectAccelerometer, detectGyroscope, detectOrientation, detectAmbientLight, detectProximity, detectScreenOrientation, detectTouch]);
+  }, [detectAccelerometer, detectGyroscope, detectOrientation, detectAmbientLight, detectProximity, detectScreenOrientation, detectTouch, detectBiometric]);
 
   // Run full scan (for rescan button)
   const runFullScan = useCallback(async () => {
