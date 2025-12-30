@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Globe, Wifi, ArrowDown, ArrowUp } from "lucide-react";
+import { Globe, Wifi, ArrowDown, ArrowUp, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SpeedTestResultsProps {
   download: number;
@@ -11,6 +12,8 @@ interface SpeedTestResultsProps {
     isp: string | null;
     server: string;
   };
+  onTestAgain: () => void;
+  isOnline: boolean;
 }
 
 export const SpeedTestResults = ({
@@ -19,6 +22,8 @@ export const SpeedTestResults = ({
   ping,
   jitter,
   networkMetadata,
+  onTestAgain,
+  isOnline,
 }: SpeedTestResultsProps) => {
   // Calculate percentages for progress bars (assuming 100 Mbps as reference max)
   const maxSpeed = Math.max(download, upload, 100);
@@ -46,10 +51,10 @@ export const SpeedTestResults = ({
       </div>
 
       {/* Speed Bars */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-6 mb-6">
         {/* Download Bar */}
-        <div className="relative">
-          <div className="h-8 bg-muted/30 rounded-full overflow-hidden">
+        <div className="space-y-2">
+          <div className="h-10 bg-muted/30 rounded-full overflow-hidden relative">
             <motion.div
               className="h-full rounded-full"
               style={{
@@ -60,7 +65,7 @@ export const SpeedTestResults = ({
               transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
             />
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 pr-4 flex items-center gap-2">
+          <div className="flex justify-end items-center gap-2">
             <ArrowDown className="h-4 w-4 text-primary" />
             <span className="font-bold text-foreground tabular-nums">
               {download.toFixed(2)} Mbps
@@ -69,8 +74,8 @@ export const SpeedTestResults = ({
         </div>
 
         {/* Upload Bar */}
-        <div className="relative">
-          <div className="h-8 bg-muted/30 rounded-full overflow-hidden">
+        <div className="space-y-2">
+          <div className="h-10 bg-muted/30 rounded-full overflow-hidden relative">
             <motion.div
               className="h-full rounded-full"
               style={{
@@ -81,7 +86,7 @@ export const SpeedTestResults = ({
               transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
             />
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 pr-4 flex items-center gap-2">
+          <div className="flex justify-end items-center gap-2">
             <ArrowUp className="h-4 w-4 text-success" />
             <span className="font-bold text-foreground tabular-nums">
               {upload.toFixed(2)} Mbps
@@ -113,12 +118,12 @@ export const SpeedTestResults = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8"
       >
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Service Provider</span>
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-foreground text-right truncate max-w-[200px]">
               {networkMetadata.isp || "Unknown"}
             </span>
           </div>
@@ -148,6 +153,24 @@ export const SpeedTestResults = ({
             </p>
           </div>
         </div>
+      </motion.div>
+
+      {/* Test Again Button - Inside the card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1 }}
+        className="flex justify-center"
+      >
+        <Button
+          size="lg"
+          onClick={onTestAgain}
+          disabled={!isOnline}
+          className="h-14 px-10 text-lg font-semibold gap-3"
+        >
+          <Activity className="h-5 w-5" />
+          Test Again
+        </Button>
       </motion.div>
     </motion.div>
   );
