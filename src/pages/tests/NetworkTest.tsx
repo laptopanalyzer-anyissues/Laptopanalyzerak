@@ -103,81 +103,88 @@ const NetworkTest = () => {
     };
   }, []);
 
-  // Accurate speed measurement using individual timed requests
+  // Accurate speed measurement using parallel connections to saturate bandwidth
   const measureSpeed = useCallback(async (
     type: 'download' | 'upload',
     onProgress: (speed: number, progress: number, remaining: number) => void
   ): Promise<number> => {
-    const startTime = performance.now();
+    const testStartTime = performance.now();
     speedSamplesRef.current = [];
     isTestingRef.current = true;
     
-    // Use progressive file sizes for accurate measurement
-    const downloadSizes = [100000, 500000, 1000000, 5000000, 10000000, 25000000];
-    const uploadSizes = [100000, 500000, 1000000, 2000000, 5000000];
-    const sizes = type === 'download' ? downloadSizes : uploadSizes;
+    // Use larger chunk sizes and parallel connections for accurate measurement
+    const PARALLEL_CONNECTIONS = 6;
+    const CHUNK_SIZE = type === 'download' ? 10000000 : 2000000; // 10MB down, 2MB up
     
-    let currentSizeIndex = 0;
     let totalBytes = 0;
-    let totalDuration = 0;
+    let measurementStartTime = performance.now();
     
-    while (performance.now() - startTime < TEST_DURATION_MS && isTestingRef.current) {
-      const elapsed = performance.now() - startTime;
+    // Warm-up phase (first 2 seconds with smaller requests)
+    const warmupEnd = testStartTime + 2000;
+    while (performance.now() < warmupEnd && isTestingRef.current) {
+      try {
+        if (type === 'download') {
+          const response = await fetch(`https://speed.cloudflare.com/__down?bytes=500000`, { cache: "no-store" });
+          await response.arrayBuffer();
+        } else {
+          await fetch("https://speed.cloudflare.com/__up", {
+            method: "POST",
+            body: new ArrayBuffer(500000),
+            cache: "no-store",
+          });
+        }
+      } catch (e) {
+        console.error("Warmup error:", e);
+      }
+    }
+    
+    // Reset measurement after warmup
+    totalBytes = 0;
+    measurementStartTime = performance.now();
+    
+    // Main measurement loop with parallel connections
+    while (performance.now() - testStartTime < TEST_DURATION_MS && isTestingRef.current) {
+      const elapsed = performance.now() - testStartTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
       const progress = Math.round((elapsed / TEST_DURATION_MS) * 100);
       
-      // Adaptive size selection - increase size if requests are too fast
-      const currentSize = sizes[Math.min(currentSizeIndex, sizes.length - 1)];
-      
       try {
-        const requestStart = performance.now();
+        // Launch parallel requests
+        const promises: Promise<number>[] = [];
         
-        if (type === 'download') {
-          const response = await fetch(
-            `https://speed.cloudflare.com/__down?bytes=${currentSize}`,
-            { cache: "no-store" }
-          );
-          
-          // Read all bytes to ensure complete transfer
-          const reader = response.body?.getReader();
-          if (reader) {
-            let bytesReceived = 0;
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              bytesReceived += value.length;
-            }
-            totalBytes += bytesReceived;
+        for (let i = 0; i < PARALLEL_CONNECTIONS; i++) {
+          if (type === 'download') {
+            promises.push(
+              fetch(`https://speed.cloudflare.com/__down?bytes=${CHUNK_SIZE}`, { 
+                cache: "no-store" 
+              }).then(async (response) => {
+                const buffer = await response.arrayBuffer();
+                return buffer.byteLength;
+              }).catch(() => 0)
+            );
+          } else {
+            const data = new ArrayBuffer(CHUNK_SIZE);
+            promises.push(
+              fetch("https://speed.cloudflare.com/__up", {
+                method: "POST",
+                body: data,
+                cache: "no-store",
+              }).then(() => CHUNK_SIZE).catch(() => 0)
+            );
           }
-        } else {
-          // Upload
-          const testData = new ArrayBuffer(currentSize);
-          await fetch("https://speed.cloudflare.com/__up", {
-            method: "POST",
-            body: testData,
-            cache: "no-store",
-          });
-          totalBytes += currentSize;
         }
         
-        const requestEnd = performance.now();
-        const requestDuration = (requestEnd - requestStart) / 1000; // seconds
-        totalDuration += requestDuration;
+        // Wait for all parallel requests
+        const results = await Promise.all(promises);
+        const batchBytes = results.reduce((sum, bytes) => sum + bytes, 0);
+        totalBytes += batchBytes;
         
-        // Calculate speed for this request
-        const requestSpeedMbps = (currentSize * 8) / requestDuration / 1000000;
-        speedSamplesRef.current.push(requestSpeedMbps);
+        // Calculate current speed based on total bytes and elapsed time
+        const measurementDuration = (performance.now() - measurementStartTime) / 1000;
+        const currentSpeedMbps = (totalBytes * 8) / measurementDuration / 1000000;
         
-        // If request completed in under 500ms, try larger size
-        if (requestDuration < 0.5 && currentSizeIndex < sizes.length - 1) {
-          currentSizeIndex++;
-        }
-        
-        // Calculate rolling average (last 5 samples) for smooth display
-        const recentSamples = speedSamplesRef.current.slice(-5);
-        const avgSpeed = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
-        
-        onProgress(avgSpeed, progress, remaining);
+        speedSamplesRef.current.push(currentSpeedMbps);
+        onProgress(currentSpeedMbps, progress, remaining);
         
       } catch (error) {
         console.error(`${type} measurement error:`, error);
@@ -186,12 +193,14 @@ const NetworkTest = () => {
     
     isTestingRef.current = false;
     
-    // Calculate final speed using 90th percentile of samples (like Cloudflare does)
+    // Calculate final speed - use median of last samples for stability
     if (speedSamplesRef.current.length === 0) return 0;
     
-    const sortedSamples = [...speedSamplesRef.current].sort((a, b) => a - b);
-    const p90Index = Math.floor(sortedSamples.length * 0.9);
-    const finalSpeed = sortedSamples[p90Index] || sortedSamples[sortedSamples.length - 1];
+    // Use last 5 samples and take median for final result
+    const recentSamples = speedSamplesRef.current.slice(-5);
+    const sortedRecent = [...recentSamples].sort((a, b) => a - b);
+    const medianIndex = Math.floor(sortedRecent.length / 2);
+    const finalSpeed = sortedRecent[medianIndex];
     
     return parseFloat(finalSpeed.toFixed(2));
   }, []);
