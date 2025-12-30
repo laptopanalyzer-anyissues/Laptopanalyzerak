@@ -60,6 +60,8 @@ const SensorTest = () => {
 
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [showPermissionPrompt, setShowPermissionPrompt] = useState(true);
   
   // Real-time sensor data
   const [accelData, setAccelData] = useState({ x: 0, y: 0, z: 0 });
@@ -326,8 +328,62 @@ const SensorTest = () => {
     setTouchPoints([]);
   };
 
-  // Run full scan
-  const runFullScan = useCallback(async () => {
+  // Request all sensor permissions
+  const requestSensorPermissions = useCallback(async () => {
+    setShowPermissionPrompt(false);
+    
+    toast({
+      title: "Requesting permissions...",
+      description: "Please grant access when prompted",
+    });
+
+    // Request DeviceMotion permission (iOS 13+)
+    if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      try {
+        await (DeviceMotionEvent as any).requestPermission();
+      } catch (e) {
+        console.log("DeviceMotion permission denied or not required");
+      }
+    }
+
+    // Request DeviceOrientation permission (iOS 13+)
+    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        await (DeviceOrientationEvent as any).requestPermission();
+      } catch (e) {
+        console.log("DeviceOrientation permission denied or not required");
+      }
+    }
+
+    // Request generic sensor permission if available
+    if ('permissions' in navigator) {
+      try {
+        const sensors = ['accelerometer', 'gyroscope', 'ambient-light-sensor'];
+        for (const sensor of sensors) {
+          try {
+            await (navigator.permissions as any).query({ name: sensor });
+          } catch (e) {
+            // Permission query not supported for this sensor
+          }
+        }
+      } catch (e) {
+        console.log("Permission API not fully supported");
+      }
+    }
+
+    setPermissionGranted(true);
+    
+    toast({
+      title: "Permissions processed",
+      description: "Starting sensor detection...",
+    });
+
+    // Now run the full scan
+    runFullScanInternal();
+  }, []);
+
+  // Internal scan function (called after permissions)
+  const runFullScanInternal = useCallback(async () => {
     setIsScanning(true);
     setScanProgress(0);
     
@@ -359,9 +415,29 @@ const SensorTest = () => {
     toast({ title: "Scan complete" });
   }, [detectAccelerometer, detectGyroscope, detectOrientation, detectAmbientLight, detectProximity, detectScreenOrientation, detectTouch]);
 
-  // Auto-scan on mount
+  // Run full scan (for rescan button)
+  const runFullScan = useCallback(async () => {
+    if (!permissionGranted) {
+      requestSensorPermissions();
+    } else {
+      runFullScanInternal();
+    }
+  }, [permissionGranted, requestSensorPermissions, runFullScanInternal]);
+
+  // No auto-scan on mount - wait for user permission
   useEffect(() => {
-    runFullScan();
+    // Check if permissions might already be granted (non-iOS or already granted)
+    const checkExistingPermissions = async () => {
+      // On non-iOS devices, permissions are often implicitly granted
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (!isIOS) {
+        // Check if sensors are available without explicit permission
+        if ('Accelerometer' in window || 'DeviceMotionEvent' in window) {
+          // Sensors might be available, but still show the prompt for clarity
+        }
+      }
+    };
+    checkExistingPermissions();
   }, []);
 
   // Calculate summary
@@ -417,6 +493,48 @@ const SensorTest = () => {
             </div>
           </motion.div>
 
+          {/* Permission Prompt */}
+          <AnimatePresence>
+            {showPermissionPrompt && !permissionGranted && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="mb-6"
+              >
+                <Card className="border-primary/30 bg-primary/5">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col items-center text-center gap-4">
+                      <div className="p-4 rounded-full bg-primary/20">
+                        <Shield className="h-8 w-8 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground mb-2">
+                          Grant Sensor Permissions
+                        </h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                          To detect and test your device sensors, we need your permission. 
+                          Click the button below and grant access when prompted by your browser.
+                        </p>
+                      </div>
+                      <Button 
+                        size="lg" 
+                        onClick={requestSensorPermissions}
+                        className="mt-2"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Grant Permission & Scan
+                      </Button>
+                      <p className="text-xs text-muted-foreground">
+                        All data stays on your device. Nothing is sent to any server.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Scan Progress */}
           <AnimatePresence>
             {isScanning && (
@@ -437,50 +555,53 @@ const SensorTest = () => {
             )}
           </AnimatePresence>
 
-          {/* Privacy Notice */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-6"
-          >
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-3">
-              <Shield className="h-4 w-4 text-success" />
-              <span>Sensor data is processed locally. No data leaves your device.</span>
-            </div>
-          </motion.div>
-
-          {/* Summary */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-8"
-          >
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Sensor Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-success/10">
-                    <div className="text-2xl font-bold text-success">{available}</div>
-                    <div className="text-xs text-muted-foreground">Available</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-warning/10">
-                    <div className="text-2xl font-bold text-warning">{notAvailable}</div>
-                    <div className="text-xs text-muted-foreground">No Data</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-muted-foreground">{notSupported}</div>
-                    <div className="text-xs text-muted-foreground">Not Supported</div>
-                  </div>
+          {/* Content shown after permission granted */}
+          {permissionGranted && (
+            <>
+              {/* Privacy Notice */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mb-6"
+              >
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-3">
+                  <Shield className="h-4 w-4 text-success" />
+                  <span>Sensor data is processed locally. No data leaves your device.</span>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+              </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-6">
+              {/* Summary */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mb-8"
+              >
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Sensor Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center p-3 rounded-lg bg-success/10">
+                        <div className="text-2xl font-bold text-success">{available}</div>
+                        <div className="text-xs text-muted-foreground">Available</div>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-warning/10">
+                        <div className="text-2xl font-bold text-warning">{notAvailable}</div>
+                        <div className="text-xs text-muted-foreground">No Data</div>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-muted/50">
+                        <div className="text-2xl font-bold text-muted-foreground">{notSupported}</div>
+                        <div className="text-xs text-muted-foreground">Not Supported</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
             {/* Sensor List */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -703,35 +824,37 @@ const SensorTest = () => {
             </motion.div>
           </div>
 
-          {/* Tips */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-6"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Testing Tips</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-3 gap-4 text-sm">
-                  <div className="p-3 rounded-lg bg-muted/30">
-                    <div className="font-medium text-foreground mb-1">Motion Sensors</div>
-                    <p className="text-muted-foreground">Move or rotate your device to activate accelerometer and gyroscope readings.</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/30">
-                    <div className="font-medium text-foreground mb-1">Touch Screen</div>
-                    <p className="text-muted-foreground">Use multiple fingers in the touch test area to verify multi-touch support.</p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-muted/30">
-                    <div className="font-medium text-foreground mb-1">Browser Support</div>
-                    <p className="text-muted-foreground">Some sensors require HTTPS and may need permission. Use Chrome for best results.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+              {/* Tips */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-6"
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Testing Tips</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-3 gap-4 text-sm">
+                      <div className="p-3 rounded-lg bg-muted/30">
+                        <div className="font-medium text-foreground mb-1">Motion Sensors</div>
+                        <p className="text-muted-foreground">Move or rotate your device to activate accelerometer and gyroscope readings.</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-muted/30">
+                        <div className="font-medium text-foreground mb-1">Touch Screen</div>
+                        <p className="text-muted-foreground">Use multiple fingers in the touch test area to verify multi-touch support.</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-muted/30">
+                        <div className="font-medium text-foreground mb-1">Browser Support</div>
+                        <p className="text-muted-foreground">Some sensors require HTTPS and may need permission. Use Chrome for best results.</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </>
+          )}
         </div>
       </main>
       <Footer />
