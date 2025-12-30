@@ -251,20 +251,8 @@ const NetworkTest = () => {
     setSpeedResults({ download: null, upload: null, ping: null, jitter: null });
 
     try {
-      // Phase 1: Ping Test
-      setTestPhase("ping");
-      const { ping, jitter } = await measurePing();
-      setSpeedResults(prev => ({ ...prev, ping, jitter }));
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Phase 2: Download Test
+      // Phase 1: Download Test
       setTestPhase("download");
-      setTestProgress(0);
-      setCurrentSpeed(0);
-      setTimeRemaining(15);
-      setSpeedHistory([]);
-      
       const download = await measureSpeed('download', (speed, progress, remaining) => {
         setCurrentSpeed(speed);
         setTestProgress(progress);
@@ -275,7 +263,7 @@ const NetworkTest = () => {
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Phase 3: Upload Test
+      // Phase 2: Upload Test
       setTestPhase("upload");
       setTestProgress(0);
       setCurrentSpeed(0);
@@ -289,6 +277,18 @@ const NetworkTest = () => {
         setSpeedHistory(prev => [...prev, speed]);
       });
       setSpeedResults(prev => ({ ...prev, upload }));
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Phase 3: Ping Test
+      setTestPhase("ping");
+      setTestProgress(0);
+      setCurrentSpeed(0);
+      setTimeRemaining(15);
+      setSpeedHistory([]);
+      
+      const { ping, jitter } = await measurePing();
+      setSpeedResults(prev => ({ ...prev, ping, jitter }));
 
       setTestPhase("complete");
     } catch (err) {
