@@ -6,11 +6,9 @@ import {
   Camera,
   Mic,
   Speaker,
-  
   Wifi,
-  HardDrive,
   Mouse,
-  Activity,
+  Cable,
 } from "lucide-react";
 
 const features = [
@@ -62,6 +60,13 @@ const features = [
     description: "Track cursor movement, clicks, and scroll gestures",
     path: "/test/touchpad",
     color: "from-indigo-500 to-blue-500",
+  },
+  {
+    icon: Cable,
+    title: "Ports & Connectivity",
+    description: "Verify physical ports and wireless connections",
+    path: "/test/ports",
+    color: "from-orange-500 to-red-500",
   },
 ];
 
