@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -11,7 +11,6 @@ import {
   Monitor,
   Headphones,
   Mic,
-  HardDrive,
   Plug,
   Wifi,
   Bluetooth,
@@ -26,11 +25,13 @@ import {
   RefreshCw,
   Zap,
   Cable,
+  ScanLine,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
-type PortStatus = "not-tested" | "testing" | "working" | "intermittent" | "not-working";
+type PortStatus = "not-tested" | "testing" | "connected" | "not-connected" | "not-supported";
 
 interface PortItem {
   id: string;
@@ -38,6 +39,8 @@ interface PortItem {
   icon: React.ElementType;
   description: string;
   status: PortStatus;
+  deviceName?: string;
+  autoDetect: boolean;
 }
 
 interface WirelessTest {
@@ -49,209 +52,340 @@ interface WirelessTest {
   value?: string | number;
 }
 
-const portInstructions: Record<string, string[]> = {
-  "usb-a": [
-    "Connect a USB device (mouse, keyboard, or flash drive)",
-    "Wait for Windows/macOS to recognize the device",
-    "If it's a flash drive, try opening a file from it",
-    "Check if the device works without disconnecting randomly"
-  ],
-  "usb-c": [
-    "Connect a USB-C device or cable",
-    "Check if the device is recognized by the system",
-    "If it supports charging, verify power delivery",
-    "Try transferring a file if using storage device"
-  ],
-  "hdmi": [
-    "Connect an HDMI cable to an external monitor/TV",
-    "Check if the display is detected in display settings",
-    "Verify the image appears on the external screen",
-    "Test different resolutions if needed"
-  ],
-  "headphone": [
-    "Plug in headphones or earbuds",
-    "Play some audio (music or video)",
-    "Check if sound comes through clearly",
-    "Listen for any static, crackling, or cutouts"
-  ],
-  "mic": [
-    "Plug in an external microphone",
-    "Open a voice recorder or audio app",
-    "Speak and check if audio is being recorded",
-    "Listen to the playback for clarity"
-  ],
-  "sd-card": [
-    "Insert an SD card or microSD card",
-    "Wait for the system to detect the card",
-    "Check if you can browse files on the card",
-    "Try copying a small file to/from the card"
-  ],
-  "charging": [
-    "Connect your laptop charger",
-    "Check for the charging indicator light",
-    "Verify battery percentage is increasing",
-    "Ensure the connection feels secure"
-  ],
-};
-
-const initialPorts: PortItem[] = [
-  { id: "usb-a", name: "USB-A Port", icon: Usb, description: "Standard USB Type-A port for peripherals", status: "not-tested" },
-  { id: "usb-c", name: "USB-C Port", icon: Cable, description: "Universal USB Type-C port for data and charging", status: "not-tested" },
-  { id: "hdmi", name: "HDMI Output", icon: Monitor, description: "Video output for external displays", status: "not-tested" },
-  { id: "headphone", name: "Headphone Jack", icon: Headphones, description: "3.5mm audio output jack", status: "not-tested" },
-  { id: "mic", name: "Microphone Jack", icon: Mic, description: "3.5mm audio input or combo jack", status: "not-tested" },
-  { id: "sd-card", name: "SD Card Reader", icon: HardDrive, description: "SD/microSD card slot", status: "not-tested" },
-  { id: "charging", name: "Charging Port", icon: Plug, description: "Power input for charging the laptop", status: "not-tested" },
-];
-
-const initialWirelessTests: WirelessTest[] = [
-  { id: "wifi-status", name: "Wi-Fi Status", icon: Wifi, description: "Check if Wi-Fi is connected", status: "not-tested" },
-  { id: "wifi-strength", name: "Signal Strength", icon: Signal, description: "Measure Wi-Fi signal quality", status: "not-tested" },
-  { id: "wifi-stability", name: "Connection Stability", icon: Activity, description: "Test connection consistency", status: "not-tested" },
-  { id: "bluetooth", name: "Bluetooth Status", icon: Bluetooth, description: "Check Bluetooth availability", status: "not-tested" },
-];
-
 const statusConfig = {
-  "not-tested": { label: "Not Tested", color: "bg-muted text-muted-foreground", icon: HelpCircle },
-  "testing": { label: "Testing...", color: "bg-primary/20 text-primary", icon: RefreshCw },
-  "working": { label: "Working", color: "bg-success/20 text-success", icon: Check },
-  "intermittent": { label: "Intermittent", color: "bg-warning/20 text-warning", icon: AlertTriangle },
-  "not-working": { label: "Not Working", color: "bg-destructive/20 text-destructive", icon: X },
+  "not-tested": { label: "Waiting...", color: "bg-muted text-muted-foreground", icon: HelpCircle },
+  "testing": { label: "Scanning...", color: "bg-primary/20 text-primary", icon: RefreshCw },
+  "connected": { label: "Connected", color: "bg-success/20 text-success", icon: Check },
+  "not-connected": { label: "Not Connected", color: "bg-muted text-muted-foreground", icon: X },
+  "not-supported": { label: "Not Supported", color: "bg-warning/20 text-warning", icon: AlertTriangle },
 };
 
 const PortsTest = () => {
-  const [ports, setPorts] = useState<PortItem[]>(initialPorts);
-  const [wirelessTests, setWirelessTests] = useState<WirelessTest[]>(initialWirelessTests);
-  const [isTestingWireless, setIsTestingWireless] = useState(false);
-  const [testProgress, setTestProgress] = useState(0);
-  const [latencyResults, setLatencyResults] = useState<number[]>([]);
-  const [packetLoss, setPacketLoss] = useState<number | null>(null);
-  const [expandedPort, setExpandedPort] = useState<string | null>(null);
+  const [ports, setPorts] = useState<PortItem[]>([
+    { id: "usb", name: "USB Devices", icon: Usb, description: "USB-A and USB-C connected devices", status: "not-tested", autoDetect: true },
+    { id: "display", name: "External Display", icon: Monitor, description: "HDMI/DisplayPort output", status: "not-tested", autoDetect: true },
+    { id: "audio-output", name: "Audio Output", icon: Headphones, description: "Headphones or speakers connected", status: "not-tested", autoDetect: true },
+    { id: "audio-input", name: "Microphone", icon: Mic, description: "External microphone connected", status: "not-tested", autoDetect: true },
+    { id: "charging", name: "Power/Charging", icon: Plug, description: "Charging cable connected", status: "not-tested", autoDetect: true },
+  ]);
 
-  const togglePortExpanded = (portId: string) => {
-    setExpandedPort(prev => prev === portId ? null : portId);
-  };
+  const [wirelessTests, setWirelessTests] = useState<WirelessTest[]>([
+    { id: "wifi-status", name: "Wi-Fi Status", icon: Wifi, description: "Network connection", status: "not-tested" },
+    { id: "wifi-strength", name: "Signal Strength", icon: Signal, description: "Connection quality", status: "not-tested" },
+    { id: "bluetooth", name: "Bluetooth", icon: Bluetooth, description: "Bluetooth availability", status: "not-tested" },
+  ]);
 
-  const updatePortStatus = (portId: string, status: PortStatus) => {
-    setPorts(prev => prev.map(p => p.id === portId ? { ...p, status } : p));
-  };
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
+  const [detectedDevices, setDetectedDevices] = useState<string[]>([]);
+  const scanIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const runWirelessTests = useCallback(async () => {
-    setIsTestingWireless(true);
-    setTestProgress(0);
-    setLatencyResults([]);
-    setPacketLoss(null);
-
-    // Reset wireless tests
-    setWirelessTests(initialWirelessTests.map(t => ({ ...t, status: "testing" })));
-
-    // Test Wi-Fi Status
-    await new Promise(r => setTimeout(r, 500));
-    setTestProgress(20);
-    
-    const isOnline = navigator.onLine;
-    setWirelessTests(prev => prev.map(t => 
-      t.id === "wifi-status" ? { ...t, status: isOnline ? "working" : "not-working", value: isOnline ? "Connected" : "Disconnected" } : t
-    ));
-
-    // Test Signal Strength (simulated based on connection quality)
-    await new Promise(r => setTimeout(r, 500));
-    setTestProgress(40);
-
-    if (isOnline && 'connection' in navigator) {
-      const connection = (navigator as any).connection;
-      const effectiveType = connection?.effectiveType || "4g";
-      const signalStrength = effectiveType === "4g" ? "Excellent" : effectiveType === "3g" ? "Good" : "Fair";
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "wifi-strength" ? { ...t, status: "working", value: signalStrength } : t
-      ));
-    } else {
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "wifi-strength" ? { ...t, status: isOnline ? "working" : "not-working", value: isOnline ? "Unknown" : "N/A" } : t
-      ));
-    }
-
-    // Test Connection Stability (ping simulation)
-    await new Promise(r => setTimeout(r, 500));
-    setTestProgress(60);
-
-    if (isOnline) {
-      const latencies: number[] = [];
-      let successful = 0;
-      const totalPings = 10;
-
-      for (let i = 0; i < totalPings; i++) {
-        try {
-          const start = performance.now();
-          await fetch("https://www.google.com/favicon.ico", { 
-            mode: "no-cors",
-            cache: "no-store"
-          });
-          const latency = performance.now() - start;
-          latencies.push(latency);
-          successful++;
-        } catch {
-          // Packet lost
-        }
-        await new Promise(r => setTimeout(r, 100));
-      }
-
-      setLatencyResults(latencies);
-      const loss = ((totalPings - successful) / totalPings) * 100;
-      setPacketLoss(loss);
-
-      const avgLatency = latencies.length > 0 ? latencies.reduce((a, b) => a + b, 0) / latencies.length : 0;
-      const stability = loss === 0 && avgLatency < 100 ? "working" : loss < 20 ? "intermittent" : "not-working";
-      
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "wifi-stability" ? { ...t, status: stability, value: `${avgLatency.toFixed(0)}ms avg` } : t
-      ));
-    } else {
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "wifi-stability" ? { ...t, status: "not-working", value: "No connection" } : t
-      ));
-    }
-
-    // Test Bluetooth
-    await new Promise(r => setTimeout(r, 500));
-    setTestProgress(80);
-
-    if ('bluetooth' in navigator) {
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "bluetooth" ? { ...t, status: "working", value: "Available" } : t
-      ));
-    } else {
-      setWirelessTests(prev => prev.map(t => 
-        t.id === "bluetooth" ? { ...t, status: "intermittent", value: "Not supported in browser" } : t
-      ));
-    }
-
-    setTestProgress(100);
-    setIsTestingWireless(false);
+  // Update port status helper
+  const updatePort = useCallback((id: string, status: PortStatus, deviceName?: string) => {
+    setPorts(prev => prev.map(p => p.id === id ? { ...p, status, deviceName } : p));
   }, []);
 
-  const getTestSummary = () => {
-    const allItems = [...ports, ...wirelessTests];
-    const working = allItems.filter(i => i.status === "working").length;
-    const intermittent = allItems.filter(i => i.status === "intermittent").length;
-    const notWorking = allItems.filter(i => i.status === "not-working").length;
-    const notTested = allItems.filter(i => i.status === "not-tested" || i.status === "testing").length;
+  // Update wireless status helper
+  const updateWireless = useCallback((id: string, status: PortStatus, value?: string) => {
+    setWirelessTests(prev => prev.map(t => t.id === id ? { ...t, status, value } : t));
+  }, []);
+
+  // Detect USB devices
+  const detectUSBDevices = useCallback(async () => {
+    updatePort("usb", "testing");
     
-    return { working, intermittent, notWorking, notTested, total: allItems.length };
-  };
+    if ('usb' in navigator) {
+      try {
+        const devices = await (navigator as any).usb.getDevices();
+        if (devices.length > 0) {
+          const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
+          updatePort("usb", "connected", `${devices.length} device(s): ${names}`);
+          setDetectedDevices(prev => [...prev, ...devices.map((d: any) => d.productName || "USB Device")]);
+          return true;
+        }
+      } catch (e) {
+        // WebUSB not available or permission denied
+      }
+    }
+    
+    // Fallback: check for HID devices (keyboards, mice)
+    if ('hid' in navigator) {
+      try {
+        const devices = await (navigator as any).hid.getDevices();
+        if (devices.length > 0) {
+          updatePort("usb", "connected", `${devices.length} HID device(s) detected`);
+          return true;
+        }
+      } catch (e) {
+        // HID not available
+      }
+    }
+    
+    updatePort("usb", "not-connected", "No USB devices detected");
+    return false;
+  }, [updatePort]);
 
-  const summary = getTestSummary();
-  const healthScore = summary.total > 0 
-    ? Math.round(((summary.working + summary.intermittent * 0.5) / (summary.total - summary.notTested)) * 100) || 0
-    : 0;
+  // Detect external displays
+  const detectDisplays = useCallback(async () => {
+    updatePort("display", "testing");
+    
+    if ('getScreenDetails' in window) {
+      try {
+        const screenDetails = await (window as any).getScreenDetails();
+        const screens = screenDetails.screens;
+        if (screens.length > 1) {
+          updatePort("display", "connected", `${screens.length} displays connected`);
+          setDetectedDevices(prev => [...prev, `${screens.length} External Display(s)`]);
+          return true;
+        }
+      } catch (e) {
+        // Permission denied or not supported
+      }
+    }
+    
+    // Fallback: check screen count
+    if (window.screen && 'isExtended' in window.screen) {
+      if ((window.screen as any).isExtended) {
+        updatePort("display", "connected", "Extended display detected");
+        setDetectedDevices(prev => [...prev, "External Display"]);
+        return true;
+      }
+    }
+    
+    updatePort("display", "not-connected", "No external display detected");
+    return false;
+  }, [updatePort]);
 
-  const resetAllTests = () => {
-    setPorts(initialPorts);
-    setWirelessTests(initialWirelessTests);
-    setLatencyResults([]);
-    setPacketLoss(null);
-    setTestProgress(0);
-  };
+  // Detect audio devices
+  const detectAudioDevices = useCallback(async () => {
+    updatePort("audio-output", "testing");
+    updatePort("audio-input", "testing");
+    
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      updatePort("audio-output", "not-supported");
+      updatePort("audio-input", "not-supported");
+      return false;
+    }
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      
+      // Check audio outputs (speakers/headphones)
+      const audioOutputs = devices.filter(d => d.kind === "audiooutput");
+      const externalOutputs = audioOutputs.filter(d => 
+        d.label.toLowerCase().includes("headphone") || 
+        d.label.toLowerCase().includes("external") ||
+        d.label.toLowerCase().includes("usb") ||
+        d.label.toLowerCase().includes("bluetooth") ||
+        d.label.toLowerCase().includes("airpods")
+      );
+      
+      if (externalOutputs.length > 0) {
+        updatePort("audio-output", "connected", externalOutputs[0].label || "External audio device");
+        setDetectedDevices(prev => [...prev, externalOutputs[0].label || "Audio Output"]);
+      } else if (audioOutputs.length > 1) {
+        // More than just built-in speaker
+        updatePort("audio-output", "connected", `${audioOutputs.length} audio outputs available`);
+      } else {
+        updatePort("audio-output", "not-connected", "Using built-in speaker");
+      }
+      
+      // Check audio inputs (microphones)
+      const audioInputs = devices.filter(d => d.kind === "audioinput");
+      const externalInputs = audioInputs.filter(d => 
+        d.label.toLowerCase().includes("external") ||
+        d.label.toLowerCase().includes("usb") ||
+        d.label.toLowerCase().includes("bluetooth") ||
+        d.label.toLowerCase().includes("airpods")
+      );
+      
+      if (externalInputs.length > 0) {
+        updatePort("audio-input", "connected", externalInputs[0].label || "External microphone");
+        setDetectedDevices(prev => [...prev, externalInputs[0].label || "Microphone"]);
+      } else if (audioInputs.length > 1) {
+        updatePort("audio-input", "connected", `${audioInputs.length} microphones available`);
+      } else {
+        updatePort("audio-input", "not-connected", "Using built-in microphone");
+      }
+      
+      return externalOutputs.length > 0 || externalInputs.length > 0;
+    } catch (e) {
+      updatePort("audio-output", "not-supported", "Permission required");
+      updatePort("audio-input", "not-supported", "Permission required");
+      return false;
+    }
+  }, [updatePort]);
+
+  // Detect charging status
+  const detectCharging = useCallback(async () => {
+    updatePort("charging", "testing");
+    
+    if ('getBattery' in navigator) {
+      try {
+        const battery = await (navigator as any).getBattery();
+        if (battery.charging) {
+          const level = Math.round(battery.level * 100);
+          updatePort("charging", "connected", `Charging (${level}%)`);
+          setDetectedDevices(prev => [...prev, "Power Adapter"]);
+          return true;
+        } else {
+          const level = Math.round(battery.level * 100);
+          updatePort("charging", "not-connected", `On battery (${level}%)`);
+          return false;
+        }
+      } catch (e) {
+        updatePort("charging", "not-supported", "Battery API not available");
+        return false;
+      }
+    }
+    
+    updatePort("charging", "not-supported", "Battery API not supported");
+    return false;
+  }, [updatePort]);
+
+  // Detect Wi-Fi status
+  const detectWifi = useCallback(() => {
+    updateWireless("wifi-status", "testing");
+    updateWireless("wifi-strength", "testing");
+    
+    const isOnline = navigator.onLine;
+    
+    if (isOnline) {
+      updateWireless("wifi-status", "connected", "Connected");
+      
+      if ('connection' in navigator) {
+        const connection = (navigator as any).connection;
+        const effectiveType = connection?.effectiveType || "unknown";
+        const downlink = connection?.downlink;
+        
+        let strength = "Unknown";
+        if (effectiveType === "4g" && downlink > 5) strength = "Excellent";
+        else if (effectiveType === "4g") strength = "Good";
+        else if (effectiveType === "3g") strength = "Fair";
+        else strength = "Weak";
+        
+        updateWireless("wifi-strength", "connected", strength);
+      } else {
+        updateWireless("wifi-strength", "connected", "Available");
+      }
+    } else {
+      updateWireless("wifi-status", "not-connected", "Disconnected");
+      updateWireless("wifi-strength", "not-connected", "N/A");
+    }
+  }, [updateWireless]);
+
+  // Detect Bluetooth
+  const detectBluetooth = useCallback(async () => {
+    updateWireless("bluetooth", "testing");
+    
+    if ('bluetooth' in navigator) {
+      updateWireless("bluetooth", "connected", "Available");
+    } else {
+      updateWireless("bluetooth", "not-supported", "Not supported in browser");
+    }
+  }, [updateWireless]);
+
+  // Run full scan
+  const runFullScan = useCallback(async () => {
+    setIsScanning(true);
+    setScanProgress(0);
+    setDetectedDevices([]);
+    
+    // Reset all to testing
+    setPorts(prev => prev.map(p => ({ ...p, status: "testing" as PortStatus, deviceName: undefined })));
+    setWirelessTests(prev => prev.map(t => ({ ...t, status: "testing" as PortStatus, value: undefined })));
+
+    toast({
+      title: "Scanning ports...",
+      description: "Connect your devices now for automatic detection",
+    });
+
+    const steps = [
+      { fn: detectUSBDevices, progress: 20 },
+      { fn: detectDisplays, progress: 35 },
+      { fn: detectAudioDevices, progress: 55 },
+      { fn: detectCharging, progress: 70 },
+      { fn: detectWifi, progress: 85 },
+      { fn: detectBluetooth, progress: 100 },
+    ];
+
+    for (const step of steps) {
+      await step.fn();
+      setScanProgress(step.progress);
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    setIsScanning(false);
+    
+    toast({
+      title: "Scan complete",
+      description: `Detected ${detectedDevices.length} connected devices`,
+    });
+  }, [detectUSBDevices, detectDisplays, detectAudioDevices, detectCharging, detectWifi, detectBluetooth, detectedDevices.length]);
+
+  // Listen for device changes
+  useEffect(() => {
+    const handleOnline = () => detectWifi();
+    const handleOffline = () => detectWifi();
+    
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Listen for USB connect/disconnect
+    if ('usb' in navigator) {
+      (navigator as any).usb.addEventListener("connect", () => {
+        detectUSBDevices();
+        toast({ title: "USB device connected" });
+      });
+      (navigator as any).usb.addEventListener("disconnect", () => {
+        detectUSBDevices();
+        toast({ title: "USB device disconnected", variant: "destructive" });
+      });
+    }
+
+    // Listen for audio device changes
+    if (navigator.mediaDevices) {
+      navigator.mediaDevices.addEventListener("devicechange", () => {
+        detectAudioDevices();
+        toast({ title: "Audio device changed" });
+      });
+    }
+
+    // Listen for battery/charging changes
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((battery: any) => {
+        battery.addEventListener("chargingchange", () => {
+          detectCharging();
+          toast({ 
+            title: battery.charging ? "Charger connected" : "Charger disconnected",
+            variant: battery.charging ? "default" : "destructive"
+          });
+        });
+      });
+    }
+
+    // Listen for screen changes
+    if ('screen' in window && 'addEventListener' in window.screen) {
+      (window.screen as any).addEventListener?.("change", detectDisplays);
+    }
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [detectUSBDevices, detectDisplays, detectAudioDevices, detectCharging, detectWifi]);
+
+  // Auto-scan on mount
+  useEffect(() => {
+    runFullScan();
+  }, []);
+
+  // Calculate summary
+  const allItems = [...ports, ...wirelessTests];
+  const connected = allItems.filter(i => i.status === "connected").length;
+  const notConnected = allItems.filter(i => i.status === "not-connected").length;
+  const notSupported = allItems.filter(i => i.status === "not-supported").length;
+  const healthScore = Math.round((connected / (allItems.length - notSupported)) * 100) || 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -271,20 +405,55 @@ const PortsTest = () => {
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Link>
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
-                <Cable className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
+                  <Cable className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground">
+                    Ports & Connectivity
+                  </h1>
+                  <p className="text-muted-foreground">
+                    Real-time detection of connected devices
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  Ports & Connectivity Test
-                </h1>
-                <p className="text-muted-foreground">
-                  Verify all physical ports and wireless connections
-                </p>
-              </div>
+              <Button onClick={runFullScan} disabled={isScanning} size="lg">
+                {isScanning ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Scanning...
+                  </>
+                ) : (
+                  <>
+                    <ScanLine className="h-4 w-4 mr-2" />
+                    Scan All Ports
+                  </>
+                )}
+              </Button>
             </div>
           </motion.div>
+
+          {/* Scan Progress */}
+          <AnimatePresence>
+            {isScanning && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6"
+              >
+                <div className="bg-primary/10 rounded-lg p-4">
+                  <div className="flex items-center gap-3 mb-2">
+                    <RefreshCw className="h-5 w-5 text-primary animate-spin" />
+                    <span className="font-medium text-foreground">Scanning for connected devices...</span>
+                  </div>
+                  <Progress value={scanProgress} className="h-2" />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Privacy Notice */}
           <motion.div
@@ -295,11 +464,11 @@ const PortsTest = () => {
           >
             <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-4 py-3">
               <Shield className="h-4 w-4 text-success" />
-              <span>No data is transferred outside your device. All tests run locally in your browser.</span>
+              <span>Real-time detection. Connect or disconnect devices to see instant updates.</span>
             </div>
           </motion.div>
 
-          {/* Summary Card */}
+          {/* Summary */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -308,37 +477,27 @@ const PortsTest = () => {
           >
             <Card>
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Test Summary</CardTitle>
-                  <Button variant="outline" size="sm" onClick={resetAllTests}>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Reset All
-                  </Button>
-                </div>
+                <CardTitle className="text-lg">Detection Summary</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <div className="text-2xl font-bold text-foreground">{summary.total}</div>
-                    <div className="text-xs text-muted-foreground">Total Tests</div>
-                  </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-3 rounded-lg bg-success/10">
-                    <div className="text-2xl font-bold text-success">{summary.working}</div>
-                    <div className="text-xs text-muted-foreground">Working</div>
+                    <div className="text-2xl font-bold text-success">{connected}</div>
+                    <div className="text-xs text-muted-foreground">Connected</div>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <div className="text-2xl font-bold text-muted-foreground">{notConnected}</div>
+                    <div className="text-xs text-muted-foreground">Not Connected</div>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-warning/10">
-                    <div className="text-2xl font-bold text-warning">{summary.intermittent}</div>
-                    <div className="text-xs text-muted-foreground">Intermittent</div>
-                  </div>
-                  <div className="text-center p-3 rounded-lg bg-destructive/10">
-                    <div className="text-2xl font-bold text-destructive">{summary.notWorking}</div>
-                    <div className="text-xs text-muted-foreground">Not Working</div>
+                    <div className="text-2xl font-bold text-warning">{notSupported}</div>
+                    <div className="text-xs text-muted-foreground">Not Supported</div>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-primary/10">
                     <div className="text-2xl font-bold text-primary">
-                      {summary.notTested === summary.total ? "—" : `${healthScore}%`}
+                      {isScanning ? "—" : `${healthScore}%`}
                     </div>
-                    <div className="text-xs text-muted-foreground">Health Score</div>
+                    <div className="text-xs text-muted-foreground">Connectivity</div>
                   </div>
                 </div>
               </CardContent>
@@ -346,7 +505,7 @@ const PortsTest = () => {
           </motion.div>
 
           <div className="grid lg:grid-cols-2 gap-6">
-            {/* Physical Ports Section */}
+            {/* Physical Ports */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -356,123 +515,63 @@ const PortsTest = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Usb className="h-5 w-5 text-primary" />
-                    Physical Ports Check
+                    Physical Ports
                   </CardTitle>
                   <CardDescription>
-                    Manually test each port and mark its status
+                    Auto-detected connected devices
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {ports.map((port, index) => (
-                    <motion.div
-                      key={port.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.3 + index * 0.05 }}
-                      className="rounded-lg bg-muted/30 overflow-hidden"
-                    >
-                      <div 
-                        className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => togglePortExpanded(port.id)}
+                  {ports.map((port, index) => {
+                    const StatusIcon = statusConfig[port.status].icon;
+                    return (
+                      <motion.div
+                        key={port.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 + index * 0.05 }}
+                        className={cn(
+                          "flex items-center gap-3 p-4 rounded-lg transition-all",
+                          port.status === "connected" 
+                            ? "bg-success/10 border border-success/20" 
+                            : "bg-muted/30"
+                        )}
                       >
-                        <div className="p-2 rounded-lg bg-muted">
-                          <port.icon className="h-5 w-5 text-foreground" />
+                        <div className={cn(
+                          "p-2 rounded-lg",
+                          port.status === "connected" ? "bg-success/20" : "bg-muted"
+                        )}>
+                          <port.icon className={cn(
+                            "h-5 w-5",
+                            port.status === "connected" ? "text-success" : "text-foreground"
+                          )} />
                         </div>
                         
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-foreground text-sm">{port.name}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {expandedPort === port.id ? "Click to collapse" : "Click for testing instructions"}
+                          <div className="text-xs text-muted-foreground truncate">
+                            {port.deviceName || port.description}
                           </div>
                         </div>
 
-                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                  "h-8 w-8 p-0",
-                                  port.status === "working" && "bg-success/20 text-success"
-                                )}
-                                onClick={() => updatePortStatus(port.id, "working")}
-                              >
-                                <Check className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Working</TooltipContent>
-                          </Tooltip>
-                          
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                  "h-8 w-8 p-0",
-                                  port.status === "intermittent" && "bg-warning/20 text-warning"
-                                )}
-                                onClick={() => updatePortStatus(port.id, "intermittent")}
-                              >
-                                <AlertTriangle className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Intermittent</TooltipContent>
-                          </Tooltip>
-                          
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                  "h-8 w-8 p-0",
-                                  port.status === "not-working" && "bg-destructive/20 text-destructive"
-                                )}
-                                onClick={() => updatePortStatus(port.id, "not-working")}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Not Working</TooltipContent>
-                          </Tooltip>
+                        <div className={cn(
+                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                          statusConfig[port.status].color
+                        )}>
+                          <StatusIcon className={cn(
+                            "h-3.5 w-3.5",
+                            port.status === "testing" && "animate-spin"
+                          )} />
+                          {statusConfig[port.status].label}
                         </div>
-                      </div>
-
-                      {/* Expandable Instructions */}
-                      <AnimatePresence>
-                        {expandedPort === port.id && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-4 pb-4 pt-1 border-t border-border/50">
-                              <div className="text-xs font-medium text-primary mb-2">How to test:</div>
-                              <ol className="space-y-1.5">
-                                {portInstructions[port.id]?.map((step, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-medium">
-                                      {i + 1}
-                                    </span>
-                                    <span className="pt-0.5">{step}</span>
-                                  </li>
-                                ))}
-                              </ol>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
-                  ))}
+                      </motion.div>
+                    );
+                  })}
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Wireless Connectivity Section */}
+            {/* Wireless */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -480,37 +579,13 @@ const PortsTest = () => {
             >
               <Card className="h-full">
                 <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Wifi className="h-5 w-5 text-primary" />
-                        Wireless Connectivity
-                      </CardTitle>
-                      <CardDescription>
-                        Automated tests for Wi-Fi and Bluetooth
-                      </CardDescription>
-                    </div>
-                    <Button 
-                      onClick={runWirelessTests} 
-                      disabled={isTestingWireless}
-                      size="sm"
-                    >
-                      {isTestingWireless ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                          Testing...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4 mr-2" />
-                          Run Tests
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                  {isTestingWireless && (
-                    <Progress value={testProgress} className="mt-3" />
-                  )}
+                  <CardTitle className="flex items-center gap-2">
+                    <Wifi className="h-5 w-5 text-primary" />
+                    Wireless Connectivity
+                  </CardTitle>
+                  <CardDescription>
+                    Network and Bluetooth status
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {wirelessTests.map((test, index) => {
@@ -521,10 +596,21 @@ const PortsTest = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + index * 0.05 }}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-muted/30"
+                        className={cn(
+                          "flex items-center gap-3 p-4 rounded-lg transition-all",
+                          test.status === "connected" 
+                            ? "bg-success/10 border border-success/20" 
+                            : "bg-muted/30"
+                        )}
                       >
-                        <div className="p-2 rounded-lg bg-muted">
-                          <test.icon className="h-5 w-5 text-foreground" />
+                        <div className={cn(
+                          "p-2 rounded-lg",
+                          test.status === "connected" ? "bg-success/20" : "bg-muted"
+                        )}>
+                          <test.icon className={cn(
+                            "h-5 w-5",
+                            test.status === "connected" ? "text-success" : "text-foreground"
+                          )} />
                         </div>
                         
                         <div className="flex-1 min-w-0">
@@ -547,48 +633,49 @@ const PortsTest = () => {
                       </motion.div>
                     );
                   })}
-
-                  {/* Latency Visualization */}
-                  <AnimatePresence>
-                    {latencyResults.length > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="mt-4 p-4 rounded-lg bg-muted/50"
-                      >
-                        <div className="text-sm font-medium text-foreground mb-3">Packet Stability</div>
-                        <div className="flex items-end gap-1 h-16">
-                          {latencyResults.map((latency, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ height: 0 }}
-                              animate={{ height: `${Math.min((latency / 200) * 100, 100)}%` }}
-                              transition={{ delay: i * 0.05 }}
-                              className={cn(
-                                "flex-1 rounded-t",
-                                latency < 50 ? "bg-success" : latency < 100 ? "bg-warning" : "bg-destructive"
-                              )}
-                            />
-                          ))}
-                        </div>
-                        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                          <span>Avg: {(latencyResults.reduce((a, b) => a + b, 0) / latencyResults.length).toFixed(0)}ms</span>
-                          {packetLoss !== null && (
-                            <span className={packetLoss > 0 ? "text-warning" : "text-success"}>
-                              Packet Loss: {packetLoss.toFixed(0)}%
-                            </span>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
                 </CardContent>
               </Card>
             </motion.div>
           </div>
 
-          {/* Data & Speed Validation */}
+          {/* Detected Devices List */}
+          <AnimatePresence>
+            {detectedDevices.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="mt-6"
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Zap className="h-5 w-5 text-primary" />
+                      Detected Devices
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {detectedDevices.map((device, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: i * 0.05 }}
+                          className="px-3 py-1.5 bg-success/10 text-success rounded-full text-sm font-medium flex items-center gap-1.5"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          {device}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Tips */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -599,34 +686,23 @@ const PortsTest = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Activity className="h-5 w-5 text-primary" />
-                  Quick Reference Guide
+                  Tips for Testing
                 </CardTitle>
-                <CardDescription>
-                  Step-by-step instructions for testing physical ports
-                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[
-                    { title: "USB Ports", steps: ["Connect a USB device", "Check if it's recognized", "Try copying a small file"] },
-                    { title: "HDMI/DisplayPort", steps: ["Connect external display", "Check if signal is detected", "Verify resolution works"] },
-                    { title: "Audio Jacks", steps: ["Plug in headphones", "Play audio/record test", "Check for static/noise"] },
-                    { title: "SD Card Reader", steps: ["Insert SD card", "Check if it mounts", "Try reading a file"] },
-                    { title: "Charging Port", steps: ["Connect charger", "Check charging indicator", "Verify power delivery"] },
-                    { title: "Network Ports", steps: ["Connect ethernet cable", "Check link light", "Test internet access"] },
-                  ].map((guide, index) => (
-                    <div key={index} className="p-4 rounded-lg bg-muted/30">
-                      <h4 className="font-medium text-foreground mb-2">{guide.title}</h4>
-                      <ol className="text-sm text-muted-foreground space-y-1">
-                        {guide.steps.map((step, i) => (
-                          <li key={i} className="flex items-start gap-2">
-                            <span className="text-primary font-medium">{i + 1}.</span>
-                            {step}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  ))}
+                <div className="grid md:grid-cols-3 gap-4 text-sm">
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    <div className="font-medium text-foreground mb-1">USB Devices</div>
+                    <p className="text-muted-foreground">Connect USB devices and they'll be detected automatically. Some browsers require permission.</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    <div className="font-medium text-foreground mb-1">Audio Devices</div>
+                    <p className="text-muted-foreground">Plug in headphones or a microphone. Detection updates instantly when devices change.</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    <div className="font-medium text-foreground mb-1">Charging</div>
+                    <p className="text-muted-foreground">Connect or disconnect your charger to verify the charging port is working properly.</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
