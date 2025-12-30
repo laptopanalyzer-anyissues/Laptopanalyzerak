@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SpeedGauge } from "@/components/network/SpeedGauge";
 import { SpeedGraph } from "@/components/network/SpeedGraph";
+import { SpeedTestResults } from "@/components/network/SpeedTestResults";
 import { 
   ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
   Gauge, Timer, Server, Globe, Zap 
@@ -362,119 +363,158 @@ const NetworkTest = () => {
 
           {/* Main Test Area */}
           <div className="max-w-4xl mx-auto">
-            {/* Central Gauge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="glass-card rounded-3xl p-8 mb-8"
-            >
-              <div className="flex flex-col items-center">
-                <SpeedGauge
-                  value={currentSpeed}
-                  maxValue={getMaxGaugeValue()}
-                  unit={getPhaseUnit()}
-                  phase={testPhase}
-                  progress={testProgress}
-                />
-
-                <AnimatePresence>
-                  {isTesting && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="flex items-center gap-2 mt-4 text-muted-foreground"
-                    >
-                      <Timer className="h-4 w-4" />
-                      <span className="font-medium tabular-nums">{timeRemaining}s remaining</span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <Button
-                  size="lg"
-                  onClick={runSpeedTest}
-                  disabled={isTesting || !networkInfo?.online}
-                  className="mt-6 h-14 px-10 text-lg font-semibold gap-3"
+            {/* Show Results View when complete, otherwise show Gauge */}
+            <AnimatePresence mode="wait">
+              {testPhase === "complete" && speedResults.download !== null ? (
+                <motion.div
+                  key="results"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <Activity className="h-5 w-5" />
-                  {isTesting ? "Testing..." : testPhase === "complete" ? "Test Again" : "Start Test"}
-                </Button>
-              </div>
-
-              <AnimatePresence>
-                {isTesting && speedHistory.length > 1 && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mt-8"
-                  >
-                    <SpeedGraph
-                      data={speedHistory}
-                      maxDataPoints={75}
-                      color={getPhaseColor()}
-                      label={`Real-time ${testPhase === "ping" ? "Latency" : "Speed"}`}
+                  <SpeedTestResults
+                    download={speedResults.download || 0}
+                    upload={speedResults.upload || 0}
+                    ping={speedResults.ping || 0}
+                    jitter={speedResults.jitter || 0}
+                    networkMetadata={networkMetadata}
+                  />
+                  
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      size="lg"
+                      onClick={runSpeedTest}
+                      disabled={isTesting || !networkInfo?.online}
+                      className="h-14 px-10 text-lg font-semibold gap-3"
+                    >
+                      <Activity className="h-5 w-5" />
+                      Test Again
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="gauge"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                  className="glass-card rounded-3xl p-8 mb-8"
+                >
+                  <div className="flex flex-col items-center">
+                    <SpeedGauge
+                      value={currentSpeed}
+                      maxValue={getMaxGaugeValue()}
+                      unit={getPhaseUnit()}
+                      phase={testPhase}
+                      progress={testProgress}
                     />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
 
-            {/* Results Grid */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
-            >
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
-                testPhase === "ping" && isTesting ? "ring-2 ring-warning shadow-lg shadow-warning/20" : ""
-              }`}>
-                <Gauge className="h-8 w-8 text-warning mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
-                  {testPhase === "ping" && isTesting 
-                    ? Math.round(currentSpeed)
-                    : (speedResults.ping !== null ? speedResults.ping : "--")}
-                </p>
-                <p className="text-sm text-muted-foreground">Ping (ms)</p>
-              </div>
+                    <AnimatePresence>
+                      {isTesting && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="flex items-center gap-2 mt-4 text-muted-foreground"
+                        >
+                          <Timer className="h-4 w-4" />
+                          <span className="font-medium tabular-nums">{timeRemaining}s remaining</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
-                testPhase === "ping" && isTesting ? "ring-2 ring-warning/50 shadow-lg shadow-warning/10" : ""
-              }`}>
-                <Zap className="h-8 w-8 text-warning/70 mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
-                  {speedResults.jitter !== null ? speedResults.jitter : "--"}
-                </p>
-                <p className="text-sm text-muted-foreground">Jitter (ms)</p>
-              </div>
+                    <Button
+                      size="lg"
+                      onClick={runSpeedTest}
+                      disabled={isTesting || !networkInfo?.online}
+                      className="mt-6 h-14 px-10 text-lg font-semibold gap-3"
+                    >
+                      <Activity className="h-5 w-5" />
+                      {isTesting ? "Testing..." : "Start Test"}
+                    </Button>
+                  </div>
 
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
-                testPhase === "download" && isTesting ? "ring-2 ring-success shadow-lg shadow-success/20" : ""
-              }`}>
-                <ArrowDown className="h-8 w-8 text-success mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
-                  {testPhase === "download" && isTesting 
-                    ? currentSpeed.toFixed(1)
-                    : (speedResults.download !== null ? speedResults.download : "--")}
-                </p>
-                <p className="text-sm text-muted-foreground">Download (Mbps)</p>
-              </div>
+                  <AnimatePresence>
+                    {isTesting && speedHistory.length > 1 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-8"
+                      >
+                        <SpeedGraph
+                          data={speedHistory}
+                          maxDataPoints={75}
+                          color={getPhaseColor()}
+                          label={`Real-time ${testPhase === "ping" ? "Latency" : "Speed"}`}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
-                testPhase === "upload" && isTesting ? "ring-2 ring-primary shadow-lg shadow-primary/20" : ""
-              }`}>
-                <ArrowUp className="h-8 w-8 text-primary mx-auto mb-3" />
-                <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
-                  {testPhase === "upload" && isTesting 
-                    ? currentSpeed.toFixed(1)
-                    : (speedResults.upload !== null ? speedResults.upload : "--")}
-                </p>
-                <p className="text-sm text-muted-foreground">Upload (Mbps)</p>
-              </div>
-            </motion.div>
+            {/* Results Grid - only show during testing */}
+            <AnimatePresence>
+              {isTesting && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+                >
+                  <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                    testPhase === "download" ? "ring-2 ring-success shadow-lg shadow-success/20" : ""
+                  }`}>
+                    <ArrowDown className="h-8 w-8 text-success mx-auto mb-3" />
+                    <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+                      {testPhase === "download" 
+                        ? currentSpeed.toFixed(1)
+                        : (speedResults.download !== null ? speedResults.download : "--")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Download (Mbps)</p>
+                  </div>
+
+                  <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                    testPhase === "upload" ? "ring-2 ring-primary shadow-lg shadow-primary/20" : ""
+                  }`}>
+                    <ArrowUp className="h-8 w-8 text-primary mx-auto mb-3" />
+                    <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+                      {testPhase === "upload" 
+                        ? currentSpeed.toFixed(1)
+                        : (speedResults.upload !== null ? speedResults.upload : "--")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Upload (Mbps)</p>
+                  </div>
+
+                  <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                    testPhase === "ping" ? "ring-2 ring-warning shadow-lg shadow-warning/20" : ""
+                  }`}>
+                    <Gauge className="h-8 w-8 text-warning mx-auto mb-3" />
+                    <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+                      {testPhase === "ping" 
+                        ? Math.round(currentSpeed)
+                        : (speedResults.ping !== null ? speedResults.ping : "--")}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Ping (ms)</p>
+                  </div>
+
+                  <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-500 ${
+                    testPhase === "ping" ? "ring-2 ring-warning/50 shadow-lg shadow-warning/10" : ""
+                  }`}>
+                    <Zap className="h-8 w-8 text-warning/70 mx-auto mb-3" />
+                    <p className="text-3xl font-bold text-foreground mb-1 tabular-nums">
+                      {speedResults.jitter !== null ? speedResults.jitter : "--"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Jitter (ms)</p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Network Metadata */}
             <motion.div
