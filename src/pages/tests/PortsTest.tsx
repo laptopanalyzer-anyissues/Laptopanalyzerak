@@ -49,6 +49,51 @@ interface WirelessTest {
   value?: string | number;
 }
 
+const portInstructions: Record<string, string[]> = {
+  "usb-a": [
+    "Connect a USB device (mouse, keyboard, or flash drive)",
+    "Wait for Windows/macOS to recognize the device",
+    "If it's a flash drive, try opening a file from it",
+    "Check if the device works without disconnecting randomly"
+  ],
+  "usb-c": [
+    "Connect a USB-C device or cable",
+    "Check if the device is recognized by the system",
+    "If it supports charging, verify power delivery",
+    "Try transferring a file if using storage device"
+  ],
+  "hdmi": [
+    "Connect an HDMI cable to an external monitor/TV",
+    "Check if the display is detected in display settings",
+    "Verify the image appears on the external screen",
+    "Test different resolutions if needed"
+  ],
+  "headphone": [
+    "Plug in headphones or earbuds",
+    "Play some audio (music or video)",
+    "Check if sound comes through clearly",
+    "Listen for any static, crackling, or cutouts"
+  ],
+  "mic": [
+    "Plug in an external microphone",
+    "Open a voice recorder or audio app",
+    "Speak and check if audio is being recorded",
+    "Listen to the playback for clarity"
+  ],
+  "sd-card": [
+    "Insert an SD card or microSD card",
+    "Wait for the system to detect the card",
+    "Check if you can browse files on the card",
+    "Try copying a small file to/from the card"
+  ],
+  "charging": [
+    "Connect your laptop charger",
+    "Check for the charging indicator light",
+    "Verify battery percentage is increasing",
+    "Ensure the connection feels secure"
+  ],
+};
+
 const initialPorts: PortItem[] = [
   { id: "usb-a", name: "USB-A Port", icon: Usb, description: "Standard USB Type-A port for peripherals", status: "not-tested" },
   { id: "usb-c", name: "USB-C Port", icon: Cable, description: "Universal USB Type-C port for data and charging", status: "not-tested" },
@@ -81,6 +126,11 @@ const PortsTest = () => {
   const [testProgress, setTestProgress] = useState(0);
   const [latencyResults, setLatencyResults] = useState<number[]>([]);
   const [packetLoss, setPacketLoss] = useState<number | null>(null);
+  const [expandedPort, setExpandedPort] = useState<string | null>(null);
+
+  const togglePortExpanded = (portId: string) => {
+    setExpandedPort(prev => prev === portId ? null : portId);
+  };
 
   const updatePortStatus = (portId: string, status: PortStatus) => {
     setPorts(prev => prev.map(p => p.id === portId ? { ...p, status } : p));
@@ -319,74 +369,103 @@ const PortsTest = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 + index * 0.05 }}
-                      className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                      className="rounded-lg bg-muted/30 overflow-hidden"
                     >
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="p-2 rounded-lg bg-muted">
-                            <port.icon className="h-5 w-5 text-foreground" />
+                      <div 
+                        className="flex items-center gap-3 p-3 hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => togglePortExpanded(port.id)}
+                      >
+                        <div className="p-2 rounded-lg bg-muted">
+                          <port.icon className="h-5 w-5 text-foreground" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-foreground text-sm">{port.name}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {expandedPort === port.id ? "Click to collapse" : "Click for testing instructions"}
                           </div>
-                        </TooltipTrigger>
-                        <TooltipContent>{port.description}</TooltipContent>
-                      </Tooltip>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-foreground text-sm">{port.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{port.description}</div>
+                        </div>
+
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn(
+                                  "h-8 w-8 p-0",
+                                  port.status === "working" && "bg-success/20 text-success"
+                                )}
+                                onClick={() => updatePortStatus(port.id, "working")}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Working</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn(
+                                  "h-8 w-8 p-0",
+                                  port.status === "intermittent" && "bg-warning/20 text-warning"
+                                )}
+                                onClick={() => updatePortStatus(port.id, "intermittent")}
+                              >
+                                <AlertTriangle className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Intermittent</TooltipContent>
+                          </Tooltip>
+                          
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className={cn(
+                                  "h-8 w-8 p-0",
+                                  port.status === "not-working" && "bg-destructive/20 text-destructive"
+                                )}
+                                onClick={() => updatePortStatus(port.id, "not-working")}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Not Working</TooltipContent>
+                          </Tooltip>
+                        </div>
                       </div>
 
-                      <div className="flex gap-1">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "h-8 w-8 p-0",
-                                port.status === "working" && "bg-success/20 text-success"
-                              )}
-                              onClick={() => updatePortStatus(port.id, "working")}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Working</TooltipContent>
-                        </Tooltip>
-                        
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "h-8 w-8 p-0",
-                                port.status === "intermittent" && "bg-warning/20 text-warning"
-                              )}
-                              onClick={() => updatePortStatus(port.id, "intermittent")}
-                            >
-                              <AlertTriangle className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Intermittent</TooltipContent>
-                        </Tooltip>
-                        
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className={cn(
-                                "h-8 w-8 p-0",
-                                port.status === "not-working" && "bg-destructive/20 text-destructive"
-                              )}
-                              onClick={() => updatePortStatus(port.id, "not-working")}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Not Working</TooltipContent>
-                        </Tooltip>
-                      </div>
+                      {/* Expandable Instructions */}
+                      <AnimatePresence>
+                        {expandedPort === port.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 pt-1 border-t border-border/50">
+                              <div className="text-xs font-medium text-primary mb-2">How to test:</div>
+                              <ol className="space-y-1.5">
+                                {portInstructions[port.id]?.map((step, i) => (
+                                  <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-medium">
+                                      {i + 1}
+                                    </span>
+                                    <span className="pt-0.5">{step}</span>
+                                  </li>
+                                ))}
+                              </ol>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </motion.div>
                   ))}
                 </CardContent>
