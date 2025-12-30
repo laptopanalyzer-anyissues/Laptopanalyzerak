@@ -108,7 +108,8 @@ const NetworkTest = () => {
   // Accurate speed measurement using parallel connections to saturate bandwidth
   const measureSpeed = useCallback(async (
     type: 'download' | 'upload',
-    onProgress: (speed: number, progress: number, remaining: number) => void
+    onProgress: (speed: number, progress: number, remaining: number) => void,
+    onTimerUpdate: (remaining: number, progress: number) => void
   ): Promise<number> => {
     const testStartTime = performance.now();
     speedSamplesRef.current = [];
@@ -119,30 +120,34 @@ const NetworkTest = () => {
     const CHUNK_SIZE = type === 'download' ? 10000000 : 2000000; // 10MB down, 2MB up
     
     let totalBytes = 0;
-    let measurementStartTime = performance.now();
     
-    // Warm-up phase (first 2 seconds with smaller requests)
-    const warmupEnd = testStartTime + 2000;
-    while (performance.now() < warmupEnd && isTestingRef.current) {
-      try {
-        if (type === 'download') {
-          const response = await fetch(`https://speed.cloudflare.com/__down?bytes=500000`, { cache: "no-store" });
-          await response.arrayBuffer();
-        } else {
-          await fetch("https://speed.cloudflare.com/__up", {
-            method: "POST",
-            body: new ArrayBuffer(500000),
-            cache: "no-store",
-          });
-        }
-      } catch (e) {
-        console.error("Warmup error:", e);
+    // Start timer update interval for smooth countdown
+    const timerInterval = setInterval(() => {
+      const elapsed = performance.now() - testStartTime;
+      const remaining = Math.max(0, Math.ceil((TEST_DURATION_MS - elapsed) / 1000));
+      const progress = Math.min(100, Math.round((elapsed / TEST_DURATION_MS) * 100));
+      onTimerUpdate(remaining, progress);
+    }, 100);
+    
+    // Quick connection warmup (single small request)
+    try {
+      if (type === 'download') {
+        const response = await fetch(`https://speed.cloudflare.com/__down?bytes=100000`, { cache: "no-store" });
+        await response.arrayBuffer();
+      } else {
+        await fetch("https://speed.cloudflare.com/__up", {
+          method: "POST",
+          body: new ArrayBuffer(100000),
+          cache: "no-store",
+        });
       }
+    } catch (e) {
+      console.error("Warmup error:", e);
     }
     
     // Reset measurement after warmup
     totalBytes = 0;
-    measurementStartTime = performance.now();
+    const measurementStartTime = performance.now();
     
     // Main measurement loop with parallel connections
     while (performance.now() - testStartTime < TEST_DURATION_MS && isTestingRef.current) {
@@ -183,16 +188,18 @@ const NetworkTest = () => {
         
         // Calculate current speed based on total bytes and elapsed time
         const measurementDuration = (performance.now() - measurementStartTime) / 1000;
-        const currentSpeedMbps = (totalBytes * 8) / measurementDuration / 1000000;
-        
-        speedSamplesRef.current.push(currentSpeedMbps);
-        onProgress(currentSpeedMbps, progress, remaining);
+        if (measurementDuration > 0.1) { // Only update after initial data
+          const currentSpeedMbps = (totalBytes * 8) / measurementDuration / 1000000;
+          speedSamplesRef.current.push(currentSpeedMbps);
+          onProgress(currentSpeedMbps, progress, remaining);
+        }
         
       } catch (error) {
         console.error(`${type} measurement error:`, error);
       }
     }
     
+    clearInterval(timerInterval);
     isTestingRef.current = false;
     
     // Calculate final speed - use median of last samples for stability
@@ -254,38 +261,10 @@ const NetworkTest = () => {
     return { ping, jitter: Math.round(jitter * 10) / 10 };
   };
 
-  // Start a smooth timer for each phase
-  const startPhaseTimer = useCallback(() => {
-    // Clear any existing timer
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-    
-    testStartTimeRef.current = performance.now();
-    setTimeRemaining(15);
-    setTestProgress(0);
-    
-    timerIntervalRef.current = setInterval(() => {
-      const elapsed = performance.now() - testStartTimeRef.current;
-      const remaining = Math.max(0, Math.ceil((TEST_DURATION_MS - elapsed) / 1000));
-      const progress = Math.min(100, Math.round((elapsed / TEST_DURATION_MS) * 100));
-      
-      setTimeRemaining(remaining);
-      setTestProgress(progress);
-      
-      if (elapsed >= TEST_DURATION_MS) {
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current);
-        }
-      }
-    }, 100); // Update every 100ms for smooth progress
-  }, []);
-
-  const stopPhaseTimer = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
+  // Timer update callback for measureSpeed
+  const handleTimerUpdate = useCallback((remaining: number, progress: number) => {
+    setTimeRemaining(remaining);
+    setTestProgress(progress);
   }, []);
 
   const runSpeedTest = async () => {
@@ -299,12 +278,12 @@ const NetworkTest = () => {
     try {
       // Phase 1: Download Test
       setTestPhase("download");
-      startPhaseTimer();
+      setTimeRemaining(15);
+      setTestProgress(0);
       const download = await measureSpeed('download', (speed) => {
         setCurrentSpeed(speed);
         setSpeedHistory(prev => [...prev, speed]);
-      });
-      stopPhaseTimer();
+      }, handleTimerUpdate);
       setSpeedResults(prev => ({ ...prev, download }));
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -313,13 +292,13 @@ const NetworkTest = () => {
       setTestPhase("upload");
       setCurrentSpeed(0);
       setSpeedHistory([]);
-      startPhaseTimer();
+      setTimeRemaining(15);
+      setTestProgress(0);
       
       const upload = await measureSpeed('upload', (speed) => {
         setCurrentSpeed(speed);
         setSpeedHistory(prev => [...prev, speed]);
-      });
-      stopPhaseTimer();
+      }, handleTimerUpdate);
       setSpeedResults(prev => ({ ...prev, upload }));
 
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -328,31 +307,22 @@ const NetworkTest = () => {
       setTestPhase("ping");
       setCurrentSpeed(0);
       setSpeedHistory([]);
-      startPhaseTimer();
+      setTimeRemaining(15);
+      setTestProgress(0);
       
       const { ping, jitter } = await measurePing();
-      stopPhaseTimer();
       setSpeedResults(prev => ({ ...prev, ping, jitter }));
 
       setTestPhase("complete");
     } catch (err) {
       console.error("Speed test failed:", err);
     } finally {
-      stopPhaseTimer();
       setIsTesting(false);
       isTestingRef.current = false;
       setTestProgress(100);
     }
   };
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-    };
-  }, []);
 
   const getPhaseColor = () => {
     switch (testPhase) {
