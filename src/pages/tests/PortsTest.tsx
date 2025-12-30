@@ -589,20 +589,19 @@ const PortsTest = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                           {/* Scan button for USB/Display when not connected */}
                           {canRescan && (
                             <Button 
                               size="sm" 
                               variant="ghost" 
-                              className="h-8 px-2 text-primary hover:bg-primary/10"
+                              className="h-7 px-2 text-xs text-primary hover:bg-primary/10"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePortClick(port);
                               }}
                             >
-                              <ScanLine className="h-4 w-4 mr-1" />
-                              Scan
+                              <ScanLine className="h-3.5 w-3.5" />
                             </Button>
                           )}
 
@@ -613,7 +612,7 @@ const PortsTest = () => {
                             </Button>
                           ) : (
                             <div className={cn(
-                              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap",
                               statusConfig[port.status].color
                             )}>
                               <StatusIcon className={cn(
