@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Wifi, WifiOff, Globe, ArrowDown, ArrowUp, Activity, Gauge, Timer } from "lucide-react";
+import { SpeedGauge } from "@/components/network/SpeedGauge";
+import { SpeedGraph } from "@/components/network/SpeedGraph";
+import { 
+  ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
+  Gauge, Timer, Server, Globe, Zap 
+} from "lucide-react";
 
 interface NetworkInfo {
   online: boolean;
@@ -18,19 +23,52 @@ interface SpeedResults {
   download: number | null;
   upload: number | null;
   ping: number | null;
+  jitter: number | null;
 }
 
-const TEST_DURATION_MS = 15000; // 15 seconds per test
+interface NetworkMetadata {
+  ip: string | null;
+  isp: string | null;
+  server: string;
+}
+
+const TEST_DURATION_MS = 15000;
 
 const NetworkTest = () => {
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [networkMetadata, setNetworkMetadata] = useState<NetworkMetadata>({
+    ip: null,
+    isp: null,
+    server: "Cloudflare",
+  });
   const [isTesting, setIsTesting] = useState(false);
   const [testPhase, setTestPhase] = useState<"idle" | "ping" | "download" | "upload" | "complete">("idle");
-  const [speedResults, setSpeedResults] = useState<SpeedResults>({ download: null, upload: null, ping: null });
+  const [speedResults, setSpeedResults] = useState<SpeedResults>({ 
+    download: null, upload: null, ping: null, jitter: null 
+  });
   const [currentSpeed, setCurrentSpeed] = useState<number>(0);
   const [timeRemaining, setTimeRemaining] = useState<number>(15);
   const [testProgress, setTestProgress] = useState(0);
+  const [speedHistory, setSpeedHistory] = useState<number[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Fetch network metadata (IP and ISP)
+  useEffect(() => {
+    const fetchNetworkMetadata = async () => {
+      try {
+        const response = await fetch("https://speed.cloudflare.com/meta");
+        const data = await response.json();
+        setNetworkMetadata({
+          ip: data.clientIp || null,
+          isp: data.asOrganization || null,
+          server: "Cloudflare CDN",
+        });
+      } catch {
+        // Keep defaults
+      }
+    };
+    fetchNetworkMetadata();
+  }, []);
 
   useEffect(() => {
     const updateNetworkInfo = () => {
@@ -45,7 +83,6 @@ const NetworkTest = () => {
     };
 
     updateNetworkInfo();
-
     window.addEventListener("online", updateNetworkInfo);
     window.addEventListener("offline", updateNetworkInfo);
     
@@ -63,12 +100,13 @@ const NetworkTest = () => {
     };
   }, []);
 
-  const measurePing = async (): Promise<number> => {
+  const measurePing = async (): Promise<{ ping: number; jitter: number }> => {
     const testUrl = "https://speed.cloudflare.com/__down?bytes=1";
     const pings: number[] = [];
     const startTime = performance.now();
     
-    // Run ping tests for 15 seconds
+    setSpeedHistory([]);
+    
     while (performance.now() - startTime < TEST_DURATION_MS) {
       const elapsed = performance.now() - startTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
@@ -82,36 +120,42 @@ const NetworkTest = () => {
         const pingValue = pingEnd - pingStart;
         pings.push(pingValue);
         
-        // Update current ping (average of last 5)
         const recentPings = pings.slice(-5);
         const avgPing = recentPings.reduce((a, b) => a + b, 0) / recentPings.length;
         setCurrentSpeed(Math.round(avgPing));
+        setSpeedHistory(prev => [...prev, Math.round(avgPing)]);
       } catch {
         // Skip failed pings
       }
       
-      // Small delay between pings
       await new Promise(resolve => setTimeout(resolve, 200));
     }
     
-    if (pings.length === 0) return 0;
+    if (pings.length === 0) return { ping: 0, jitter: 0 };
+    
+    // Calculate jitter (standard deviation of ping times)
+    const avgPing = pings.reduce((a, b) => a + b, 0) / pings.length;
+    const squaredDiffs = pings.map(p => Math.pow(p - avgPing, 2));
+    const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / squaredDiffs.length;
+    const jitter = Math.sqrt(avgSquaredDiff);
     
     // Return average ping, excluding top and bottom 10%
     pings.sort((a, b) => a - b);
     const trimCount = Math.floor(pings.length * 0.1);
     const trimmedPings = pings.slice(trimCount, pings.length - trimCount);
-    return Math.round(trimmedPings.reduce((a, b) => a + b, 0) / trimmedPings.length);
+    const ping = Math.round(trimmedPings.reduce((a, b) => a + b, 0) / trimmedPings.length);
+    
+    return { ping, jitter: Math.round(jitter * 10) / 10 };
   };
 
   const measureDownloadSpeed = async (): Promise<number> => {
     const startTime = performance.now();
     let totalBytesReceived = 0;
     const speedSamples: number[] = [];
+    const chunkSize = 10000000;
     
-    // Use larger chunk size for more accurate measurement
-    const chunkSize = 10000000; // 10MB chunks
+    setSpeedHistory([]);
     
-    // Run download test for 15 seconds with parallel connections
     while (performance.now() - startTime < TEST_DURATION_MS) {
       const elapsed = performance.now() - startTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
@@ -122,7 +166,6 @@ const NetworkTest = () => {
         abortControllerRef.current = new AbortController();
         const chunkStart = performance.now();
         
-        // Start multiple parallel downloads for better saturation
         const downloadPromises = Array(3).fill(null).map(() => 
           fetch(`https://speed.cloudflare.com/__down?bytes=${chunkSize}`, { 
             cache: "no-store",
@@ -152,17 +195,16 @@ const NetworkTest = () => {
           const chunkSpeedMbps = (chunkBytesReceived * 8) / chunkDuration / 1000000;
           speedSamples.push(chunkSpeedMbps);
           
-          // Calculate rolling average of last 5 samples
           const recentSamples = speedSamples.slice(-5);
           const avgSpeed = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
           setCurrentSpeed(parseFloat(avgSpeed.toFixed(2)));
+          setSpeedHistory(prev => [...prev, parseFloat(avgSpeed.toFixed(2))]);
         }
       } catch {
         // Continue on error
       }
     }
     
-    // Calculate final speed from total data and time
     const totalDuration = (performance.now() - startTime) / 1000;
     const finalSpeed = (totalBytesReceived * 8) / totalDuration / 1000000;
     
@@ -173,12 +215,11 @@ const NetworkTest = () => {
     const startTime = performance.now();
     let totalBytesUploaded = 0;
     const speedSamples: number[] = [];
-    
-    // Create reusable test data (2MB chunks)
     const chunkSize = 2000000;
     const testData = new Blob([new ArrayBuffer(chunkSize)]);
     
-    // Run upload test for 15 seconds
+    setSpeedHistory([]);
+    
     while (performance.now() - startTime < TEST_DURATION_MS) {
       const elapsed = performance.now() - startTime;
       const remaining = Math.ceil((TEST_DURATION_MS - elapsed) / 1000);
@@ -188,7 +229,6 @@ const NetworkTest = () => {
       try {
         const chunkStart = performance.now();
         
-        // Start multiple parallel uploads for better saturation
         const uploadPromises = Array(2).fill(null).map(() => 
           fetch("https://speed.cloudflare.com/__up", {
             method: "POST",
@@ -208,17 +248,16 @@ const NetworkTest = () => {
           const chunkSpeedMbps = (chunkBytesUploaded * 8) / chunkDuration / 1000000;
           speedSamples.push(chunkSpeedMbps);
           
-          // Calculate rolling average of last 5 samples
           const recentSamples = speedSamples.slice(-5);
           const avgSpeed = recentSamples.reduce((a, b) => a + b, 0) / recentSamples.length;
           setCurrentSpeed(parseFloat(avgSpeed.toFixed(2)));
+          setSpeedHistory(prev => [...prev, parseFloat(avgSpeed.toFixed(2))]);
         }
       } catch {
         // Continue on error
       }
     }
     
-    // Calculate final speed from total data and time
     const totalDuration = (performance.now() - startTime) / 1000;
     const finalSpeed = (totalBytesUploaded * 8) / totalDuration / 1000000;
     
@@ -230,15 +269,16 @@ const NetworkTest = () => {
     setTestProgress(0);
     setCurrentSpeed(0);
     setTimeRemaining(15);
-    setSpeedResults({ download: null, upload: null, ping: null });
+    setSpeedHistory([]);
+    setSpeedResults({ download: null, upload: null, ping: null, jitter: null });
 
     try {
-      // Phase 1: Ping Test (15 seconds)
+      // Phase 1: Ping Test
       setTestPhase("ping");
-      const ping = await measurePing();
-      setSpeedResults(prev => ({ ...prev, ping }));
+      const { ping, jitter } = await measurePing();
+      setSpeedResults(prev => ({ ...prev, ping, jitter }));
 
-      // Phase 2: Download Test (15 seconds)
+      // Phase 2: Download Test
       setTestPhase("download");
       setTestProgress(0);
       setCurrentSpeed(0);
@@ -246,7 +286,7 @@ const NetworkTest = () => {
       const download = await measureDownloadSpeed();
       setSpeedResults(prev => ({ ...prev, download }));
 
-      // Phase 3: Upload Test (15 seconds)
+      // Phase 3: Upload Test
       setTestPhase("upload");
       setTestProgress(0);
       setCurrentSpeed(0);
@@ -263,22 +303,29 @@ const NetworkTest = () => {
     }
   };
 
-  const getPhaseLabel = () => {
+  const getPhaseColor = () => {
     switch (testPhase) {
-      case "ping": return "Measuring ping latency...";
-      case "download": return "Testing download speed...";
-      case "upload": return "Testing upload speed...";
-      default: return "Click the button to start";
+      case "ping": return "hsl(38, 92%, 50%)";
+      case "download": return "hsl(142, 76%, 36%)";
+      case "upload": return "hsl(199, 89%, 48%)";
+      default: return "hsl(215, 16%, 47%)";
+    }
+  };
+
+  const getMaxGaugeValue = () => {
+    switch (testPhase) {
+      case "ping": return 200;
+      case "download": 
+      case "upload": 
+        return Math.max(currentSpeed * 1.5, 100);
+      default: return 100;
     }
   };
 
   const getPhaseUnit = () => {
     switch (testPhase) {
       case "ping": return "ms";
-      case "download": 
-      case "upload": 
-        return "Mbps";
-      default: return "";
+      default: return "Mbps";
     }
   };
 
@@ -309,254 +356,214 @@ const NetworkTest = () => {
             className="mb-8 text-center"
           >
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Network & Internet Test
+              Network Speed Test
             </h1>
             <p className="text-muted-foreground">
-              Comprehensive 15-second tests for accurate ping, download, and upload speeds.
+              Comprehensive 15-second tests for accurate speed measurements
             </p>
           </motion.div>
 
-          {/* Start Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-12 flex justify-center"
-          >
-            <Button
-              size="lg"
-              onClick={runSpeedTest}
-              disabled={isTesting || !networkInfo?.online}
-              className="h-14 px-8 text-lg font-semibold gap-3"
+          {/* Main Test Area */}
+          <div className="max-w-4xl mx-auto">
+            {/* Central Gauge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="glass-card rounded-3xl p-8 mb-8"
             >
-              <Activity className="h-5 w-5" />
-              Start Network Test
-            </Button>
-          </motion.div>
+              <div className="flex flex-col items-center">
+                {/* Speed Gauge */}
+                <SpeedGauge
+                  value={currentSpeed}
+                  maxValue={getMaxGaugeValue()}
+                  unit={getPhaseUnit()}
+                  phase={testPhase}
+                  progress={testProgress}
+                />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Connection Status */}
+                {/* Time Remaining */}
+                <AnimatePresence>
+                  {isTesting && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="flex items-center gap-2 mt-4 text-muted-foreground"
+                    >
+                      <Timer className="h-4 w-4" />
+                      <span className="font-medium">{timeRemaining}s remaining</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Start Button */}
+                <Button
+                  size="lg"
+                  onClick={runSpeedTest}
+                  disabled={isTesting || !networkInfo?.online}
+                  className="mt-6 h-14 px-10 text-lg font-semibold gap-3"
+                >
+                  <Activity className="h-5 w-5" />
+                  {isTesting ? "Testing..." : testPhase === "complete" ? "Test Again" : "Start Test"}
+                </Button>
+              </div>
+
+              {/* Real-time Graph */}
+              <AnimatePresence>
+                {isTesting && speedHistory.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-8"
+                  >
+                    <SpeedGraph
+                      data={speedHistory}
+                      color={getPhaseColor()}
+                      label={`Real-time ${testPhase === "ping" ? "Ping" : "Speed"}`}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Results Grid */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="glass-card rounded-2xl p-8"
+              className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
             >
-              <div className="text-center mb-8">
-                <motion.div
-                  animate={{ scale: networkInfo?.online ? [1, 1.1, 1] : 1 }}
-                  transition={{ repeat: networkInfo?.online ? Infinity : 0, duration: 2 }}
-                  className={`inline-flex p-6 rounded-full mb-4 ${
-                    networkInfo?.online ? "bg-success/10" : "bg-destructive/10"
-                  }`}
-                >
-                  {networkInfo?.online ? (
-                    <Wifi className="h-16 w-16 text-success" />
-                  ) : (
-                    <WifiOff className="h-16 w-16 text-destructive" />
-                  )}
-                </motion.div>
-                <h3 className={`text-2xl font-bold ${
-                  networkInfo?.online ? "text-success" : "text-destructive"
-                }`}>
-                  {networkInfo?.online ? "Connected" : "Offline"}
-                </h3>
-                <p className="text-muted-foreground mt-1">
-                  {networkInfo?.online
-                    ? "Your device is connected to the internet"
-                    : "No internet connection detected"}
+              {/* Ping */}
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
+                testPhase === "ping" && isTesting ? "ring-2 ring-warning shadow-lg" : ""
+              }`}>
+                <Gauge className="h-8 w-8 text-warning mx-auto mb-3" />
+                <p className="text-3xl font-bold text-foreground mb-1">
+                  {testPhase === "ping" && isTesting 
+                    ? currentSpeed 
+                    : (speedResults.ping !== null ? speedResults.ping : "--")}
                 </p>
+                <p className="text-sm text-muted-foreground">Ping (ms)</p>
               </div>
 
-              {networkInfo && networkInfo.online && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Connection Type</p>
-                    <p className="font-semibold text-foreground capitalize">
-                      {networkInfo.type !== "unknown" ? networkInfo.type : "Unknown"}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Effective Type</p>
-                    <p className="font-semibold text-foreground uppercase">
-                      {networkInfo.effectiveType}
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Est. Downlink</p>
-                    <p className="font-semibold text-foreground">
-                      {networkInfo.downlink} Mbps
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-muted/50">
-                    <p className="text-xs text-muted-foreground mb-1">Latency (RTT)</p>
-                    <p className="font-semibold text-foreground">
-                      {networkInfo.rtt} ms
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Jitter */}
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
+                testPhase === "ping" && isTesting ? "ring-2 ring-warning/50 shadow-lg" : ""
+              }`}>
+                <Zap className="h-8 w-8 text-warning/70 mx-auto mb-3" />
+                <p className="text-3xl font-bold text-foreground mb-1">
+                  {speedResults.jitter !== null ? speedResults.jitter : "--"}
+                </p>
+                <p className="text-sm text-muted-foreground">Jitter (ms)</p>
+              </div>
+
+              {/* Download */}
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
+                testPhase === "download" && isTesting ? "ring-2 ring-success shadow-lg" : ""
+              }`}>
+                <ArrowDown className="h-8 w-8 text-success mx-auto mb-3" />
+                <p className="text-3xl font-bold text-foreground mb-1">
+                  {testPhase === "download" && isTesting 
+                    ? currentSpeed 
+                    : (speedResults.download !== null ? speedResults.download : "--")}
+                </p>
+                <p className="text-sm text-muted-foreground">Download (Mbps)</p>
+              </div>
+
+              {/* Upload */}
+              <div className={`glass-card rounded-2xl p-6 text-center transition-all duration-300 ${
+                testPhase === "upload" && isTesting ? "ring-2 ring-primary shadow-lg" : ""
+              }`}>
+                <ArrowUp className="h-8 w-8 text-primary mx-auto mb-3" />
+                <p className="text-3xl font-bold text-foreground mb-1">
+                  {testPhase === "upload" && isTesting 
+                    ? currentSpeed 
+                    : (speedResults.upload !== null ? speedResults.upload : "--")}
+                </p>
+                <p className="text-sm text-muted-foreground">Upload (Mbps)</p>
+              </div>
             </motion.div>
 
-            {/* Speed Test */}
+            {/* Network Metadata */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="glass-card rounded-2xl p-8"
+              className="glass-card rounded-2xl p-6"
             >
-              <h3 className="font-semibold text-foreground mb-6 flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Speed Test
+              <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" />
+                Network Information
               </h3>
-
-              {/* Results Grid */}
-              {(speedResults.download !== null || speedResults.upload !== null || speedResults.ping !== null) && (
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  {/* Ping */}
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className={`p-4 rounded-xl text-center ${
-                      testPhase === "ping" && isTesting ? "bg-warning/20 ring-2 ring-warning" : "bg-muted/50"
-                    }`}
-                  >
-                    <Gauge className="h-6 w-6 text-warning mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-foreground">
-                      {testPhase === "ping" && isTesting ? currentSpeed : (speedResults.ping !== null ? speedResults.ping : "--")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Ping (ms)</p>
-                  </motion.div>
-
-                  {/* Download */}
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className={`p-4 rounded-xl text-center ${
-                      testPhase === "download" && isTesting ? "bg-success/20 ring-2 ring-success" : "bg-muted/50"
-                    }`}
-                  >
-                    <ArrowDown className="h-6 w-6 text-success mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-foreground">
-                      {testPhase === "download" && isTesting ? currentSpeed : (speedResults.download !== null ? speedResults.download : "--")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Download (Mbps)</p>
-                  </motion.div>
-
-                  {/* Upload */}
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className={`p-4 rounded-xl text-center ${
-                      testPhase === "upload" && isTesting ? "bg-primary/20 ring-2 ring-primary" : "bg-muted/50"
-                    }`}
-                  >
-                    <ArrowUp className="h-6 w-6 text-primary mx-auto mb-2" />
-                    <p className="text-2xl font-bold text-foreground">
-                      {testPhase === "upload" && isTesting ? currentSpeed : (speedResults.upload !== null ? speedResults.upload : "--")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Upload (Mbps)</p>
-                  </motion.div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {/* Connection Status */}
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    {networkInfo?.online ? (
+                      <Wifi className="h-4 w-4 text-success" />
+                    ) : (
+                      <WifiOff className="h-4 w-4 text-destructive" />
+                    )}
+                    <p className="text-xs text-muted-foreground">Status</p>
+                  </div>
+                  <p className={`font-semibold ${networkInfo?.online ? "text-success" : "text-destructive"}`}>
+                    {networkInfo?.online ? "Connected" : "Offline"}
+                  </p>
                 </div>
-              )}
 
-              <div className="text-center mb-8">
-                {isTesting ? (
-                  <div>
-                    <div className="relative w-40 h-40 mx-auto mb-4">
-                      <svg className="w-40 h-40 transform -rotate-90">
-                        <circle
-                          cx="80"
-                          cy="80"
-                          r="70"
-                          stroke="currentColor"
-                          strokeWidth="10"
-                          fill="none"
-                          className="text-muted"
-                        />
-                        <circle
-                          cx="80"
-                          cy="80"
-                          r="70"
-                          stroke="url(#gradient)"
-                          strokeWidth="10"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeDasharray={`${testProgress * 4.4} 440`}
-                        />
-                        <defs>
-                          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="hsl(199, 89%, 48%)" />
-                            <stop offset="100%" stopColor="hsl(172, 66%, 50%)" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold text-foreground">
-                          {currentSpeed}
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {getPhaseUnit()}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground mb-2">
-                      <Timer className="h-4 w-4" />
-                      <span className="font-medium">{timeRemaining}s remaining</span>
-                    </div>
-                    <p className="text-muted-foreground">{getPhaseLabel()}</p>
+                {/* IP Address */}
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">IP Address</p>
                   </div>
-                ) : testPhase === "complete" ? (
-                  <div className="py-4">
-                    <p className="text-success font-semibold">Test Complete!</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Total test duration: ~45 seconds
-                    </p>
+                  <p className="font-semibold text-foreground truncate">
+                    {networkMetadata.ip || "Detecting..."}
+                  </p>
+                </div>
+
+                {/* ISP */}
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wifi className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">ISP</p>
                   </div>
-                ) : (
-                  <div className="py-8">
-                    <Globe className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Click the button below to start</p>
+                  <p className="font-semibold text-foreground truncate">
+                    {networkMetadata.isp || "Detecting..."}
+                  </p>
+                </div>
+
+                {/* Server */}
+                <div className="p-4 rounded-xl bg-muted/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Server className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">Test Server</p>
                   </div>
-                )}
+                  <p className="font-semibold text-foreground">
+                    {networkMetadata.server}
+                  </p>
+                </div>
               </div>
+            </motion.div>
 
-              <Button
-                variant="hero"
-                className="w-full"
-                onClick={runSpeedTest}
-                disabled={isTesting || !networkInfo?.online}
-              >
-                {isTesting ? (
-                  <>Testing...</>
-                ) : testPhase === "complete" ? (
-                  <>Run Again</>
-                ) : (
-                  <>
-                    <Activity className="h-4 w-4 mr-2" />
-                    Start Speed Test
-                  </>
-                )}
-              </Button>
+            {/* Info */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/10"
+            >
+              <h3 className="font-semibold text-foreground mb-3">About This Test</h3>
+              <p className="text-sm text-muted-foreground">
+                This test measures <strong>Ping</strong> (latency), <strong>Jitter</strong> (ping variation), 
+                <strong> Download</strong>, and <strong>Upload</strong> speeds over 15 seconds each using 
+                Cloudflare's global CDN with parallel connections for accurate saturation testing.
+              </p>
             </motion.div>
           </div>
-
-          {/* Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/10"
-          >
-            <h3 className="font-semibold text-foreground mb-3">About This Test</h3>
-            <p className="text-sm text-muted-foreground">
-              This comprehensive test runs for 15 seconds per phase (ping, download, upload) using Cloudflare's servers with 
-              multiple parallel connections to accurately saturate your connection and measure true maximum speeds. 
-              For the most accurate results, close other applications that might be using bandwidth.
-            </p>
-          </motion.div>
         </div>
       </main>
       <Footer />
