@@ -333,20 +333,18 @@ const PortsTest = () => {
     }
   }, [updateWireless]);
 
-  // Handle port click for permission request
+  // Handle port click for permission request or rescan
   const handlePortClick = useCallback((port: PortItem) => {
-    if (port.status === "needs-permission" || !port.hasPermission) {
-      switch (port.permissionType) {
-        case "usb":
-          requestUSBPermission();
-          break;
-        case "audio":
-          requestAudioPermission();
-          break;
-        case "display":
-          requestDisplayPermission();
-          break;
-      }
+    switch (port.permissionType) {
+      case "usb":
+        requestUSBPermission();
+        break;
+      case "audio":
+        requestAudioPermission();
+        break;
+      case "display":
+        requestDisplayPermission();
+        break;
     }
   }, [requestUSBPermission, requestAudioPermission, requestDisplayPermission]);
 
@@ -553,6 +551,7 @@ const PortsTest = () => {
                   {ports.map((port, index) => {
                     const StatusIcon = statusConfig[port.status].icon;
                     const isClickable = port.status === "needs-permission" || (port.permissionType && !port.hasPermission);
+                    const canRescan = port.hasPermission && port.status === "not-connected" && (port.id === "usb" || port.id === "display");
                     
                     return (
                       <motion.div
@@ -590,23 +589,41 @@ const PortsTest = () => {
                           </div>
                         </div>
 
-                        {port.status === "needs-permission" ? (
-                          <Button size="sm" variant="outline" className="gap-1.5 text-warning border-warning/30 hover:bg-warning/10">
-                            <Unlock className="h-3.5 w-3.5" />
-                            Grant Access
-                          </Button>
-                        ) : (
-                          <div className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                            statusConfig[port.status].color
-                          )}>
-                            <StatusIcon className={cn(
-                              "h-3.5 w-3.5",
-                              port.status === "testing" && "animate-spin"
-                            )} />
-                            {statusConfig[port.status].label}
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {/* Scan button for USB/Display when not connected */}
+                          {canRescan && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-8 px-2 text-primary hover:bg-primary/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePortClick(port);
+                              }}
+                            >
+                              <ScanLine className="h-4 w-4 mr-1" />
+                              Scan
+                            </Button>
+                          )}
+
+                          {port.status === "needs-permission" ? (
+                            <Button size="sm" variant="outline" className="gap-1.5 text-warning border-warning/30 hover:bg-warning/10">
+                              <Unlock className="h-3.5 w-3.5" />
+                              Grant Access
+                            </Button>
+                          ) : (
+                            <div className={cn(
+                              "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                              statusConfig[port.status].color
+                            )}>
+                              <StatusIcon className={cn(
+                                "h-3.5 w-3.5",
+                                port.status === "testing" && "animate-spin"
+                              )} />
+                              {statusConfig[port.status].label}
+                            </div>
+                          )}
+                        </div>
                       </motion.div>
                     );
                   })}
