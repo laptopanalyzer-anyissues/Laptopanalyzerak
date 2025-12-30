@@ -54,6 +54,8 @@ const NetworkTest = () => {
   
   const isTestingRef = useRef(false);
   const speedSamplesRef = useRef<number[]>([]);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const testStartTimeRef = useRef<number>(0);
 
   // Fetch network metadata
   useEffect(() => {
@@ -252,6 +254,40 @@ const NetworkTest = () => {
     return { ping, jitter: Math.round(jitter * 10) / 10 };
   };
 
+  // Start a smooth timer for each phase
+  const startPhaseTimer = useCallback(() => {
+    // Clear any existing timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    
+    testStartTimeRef.current = performance.now();
+    setTimeRemaining(15);
+    setTestProgress(0);
+    
+    timerIntervalRef.current = setInterval(() => {
+      const elapsed = performance.now() - testStartTimeRef.current;
+      const remaining = Math.max(0, Math.ceil((TEST_DURATION_MS - elapsed) / 1000));
+      const progress = Math.min(100, Math.round((elapsed / TEST_DURATION_MS) * 100));
+      
+      setTimeRemaining(remaining);
+      setTestProgress(progress);
+      
+      if (elapsed >= TEST_DURATION_MS) {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+        }
+      }
+    }, 100); // Update every 100ms for smooth progress
+  }, []);
+
+  const stopPhaseTimer = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  }, []);
+
   const runSpeedTest = async () => {
     setIsTesting(true);
     setTestProgress(0);
@@ -263,52 +299,60 @@ const NetworkTest = () => {
     try {
       // Phase 1: Download Test
       setTestPhase("download");
-      const download = await measureSpeed('download', (speed, progress, remaining) => {
+      startPhaseTimer();
+      const download = await measureSpeed('download', (speed) => {
         setCurrentSpeed(speed);
-        setTestProgress(progress);
-        setTimeRemaining(remaining);
         setSpeedHistory(prev => [...prev, speed]);
       });
+      stopPhaseTimer();
       setSpeedResults(prev => ({ ...prev, download }));
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Phase 2: Upload Test
       setTestPhase("upload");
-      setTestProgress(0);
       setCurrentSpeed(0);
-      setTimeRemaining(15);
       setSpeedHistory([]);
+      startPhaseTimer();
       
-      const upload = await measureSpeed('upload', (speed, progress, remaining) => {
+      const upload = await measureSpeed('upload', (speed) => {
         setCurrentSpeed(speed);
-        setTestProgress(progress);
-        setTimeRemaining(remaining);
         setSpeedHistory(prev => [...prev, speed]);
       });
+      stopPhaseTimer();
       setSpeedResults(prev => ({ ...prev, upload }));
 
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // Phase 3: Ping Test
       setTestPhase("ping");
-      setTestProgress(0);
       setCurrentSpeed(0);
-      setTimeRemaining(15);
       setSpeedHistory([]);
+      startPhaseTimer();
       
       const { ping, jitter } = await measurePing();
+      stopPhaseTimer();
       setSpeedResults(prev => ({ ...prev, ping, jitter }));
 
       setTestPhase("complete");
     } catch (err) {
       console.error("Speed test failed:", err);
     } finally {
+      stopPhaseTimer();
       setIsTesting(false);
       isTestingRef.current = false;
       setTestProgress(100);
     }
   };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, []);
 
   const getPhaseColor = () => {
     switch (testPhase) {
@@ -388,19 +432,9 @@ const NetworkTest = () => {
                     ping={speedResults.ping || 0}
                     jitter={speedResults.jitter || 0}
                     networkMetadata={networkMetadata}
+                    onTestAgain={runSpeedTest}
+                    isOnline={networkInfo?.online ?? false}
                   />
-                  
-                  <div className="flex justify-center mt-6">
-                    <Button
-                      size="lg"
-                      onClick={runSpeedTest}
-                      disabled={isTesting || !networkInfo?.online}
-                      className="h-14 px-10 text-lg font-semibold gap-3"
-                    >
-                      <Activity className="h-5 w-5" />
-                      Test Again
-                    </Button>
-                  </div>
                 </motion.div>
               ) : (
                 <motion.div
