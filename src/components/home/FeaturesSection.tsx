@@ -9,7 +9,6 @@ import {
   Wifi,
   Mouse,
   Cable,
-  Activity,
 } from "lucide-react";
 
 const features = [
@@ -68,13 +67,6 @@ const features = [
     description: "Verify physical ports and wireless connections",
     path: "/test/ports",
     color: "from-orange-500 to-red-500",
-  },
-  {
-    icon: Activity,
-    title: "Sensor Suite",
-    description: "Test motion, orientation, and environment sensors",
-    path: "/test/sensors",
-    color: "from-purple-500 to-pink-500",
   },
 ];
 
