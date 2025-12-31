@@ -171,19 +171,11 @@ const FullSystemTest = () => {
     setIsRunningTest(true);
   };
 
-  // Called when an embedded test completes
-  const handleTestComplete = useCallback(() => {
-    setIsRunningTest(false);
-    setShowResultPopup(true);
-  }, []);
-
-  // User answers Yes (no issues) or No (issues found)
-  const handleResultAnswer = (noIssues: boolean) => {
-    setShowResultPopup(false);
-    
+  // Move to next test or complete
+  const moveToNextTest = useCallback((passed: boolean) => {
     setTests(prev => prev.map((t, i) => 
       i === currentTestIndex 
-        ? { ...t, status: noIssues ? "completed" : "failed", passed: noIssues } 
+        ? { ...t, status: passed ? "completed" : "failed", passed } 
         : t
     ));
     
@@ -194,6 +186,26 @@ const FullSystemTest = () => {
       setIsComplete(true);
       localStorage.removeItem(STORAGE_KEY);
     }
+  }, [currentTestIndex, tests.length]);
+
+  // Called when an embedded test completes
+  const handleTestComplete = useCallback(() => {
+    setIsRunningTest(false);
+    
+    // Only show verification popup for display test
+    const testId = tests[currentTestIndex]?.id;
+    if (testId === "display") {
+      setShowResultPopup(true);
+    } else {
+      // Auto-pass all other tests
+      moveToNextTest(true);
+    }
+  }, [tests, currentTestIndex, moveToNextTest]);
+
+  // User answers Yes (no issues) or No (issues found) - only for display test
+  const handleResultAnswer = (noIssues: boolean) => {
+    setShowResultPopup(false);
+    moveToNextTest(noIssues);
   };
 
   const resetTests = () => {
