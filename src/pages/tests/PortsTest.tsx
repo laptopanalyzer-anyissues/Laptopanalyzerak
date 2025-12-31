@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Usb,
   Monitor,
   Headphones,
@@ -26,6 +34,7 @@ import {
   ScanLine,
   Lock,
   Unlock,
+  Info,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -78,6 +87,7 @@ const PortsTest = () => {
 
   const [isScanning, setIsScanning] = useState(false);
   const [detectedDevices, setDetectedDevices] = useState<string[]>([]);
+  const [showBluetoothDialog, setShowBluetoothDialog] = useState(false);
   const [permissions, setPermissions] = useState({
     usb: false,
     audio: false,
@@ -324,15 +334,20 @@ const PortsTest = () => {
     }
   }, [updateWireless]);
 
-  // Request Bluetooth permission and detect
-  const requestBluetoothPermission = useCallback(async () => {
-    updateWireless("bluetooth", "testing");
-    
+  // Show Bluetooth confirmation dialog first
+  const handleBluetoothClick = useCallback(() => {
     if (!('bluetooth' in navigator)) {
       updateWireless("bluetooth", "not-connected", "Not supported in browser");
       toast({ title: "Bluetooth not supported", description: "Try using Chrome or Edge", variant: "destructive" });
       return;
     }
+    setShowBluetoothDialog(true);
+  }, [updateWireless]);
+
+  // Request Bluetooth permission and detect (called after dialog confirmation)
+  const requestBluetoothPermission = useCallback(async () => {
+    setShowBluetoothDialog(false);
+    updateWireless("bluetooth", "testing");
 
     try {
       // This triggers the browser's Bluetooth device picker
@@ -466,6 +481,43 @@ const PortsTest = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {/* Bluetooth Permission Dialog */}
+      <Dialog open={showBluetoothDialog} onOpenChange={setShowBluetoothDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <Bluetooth className="h-5 w-5 text-primary" />
+              </div>
+              Bluetooth Detection
+            </DialogTitle>
+            <DialogDescription className="text-left space-y-3 pt-2">
+              <p>
+                To verify your Bluetooth hardware, we need to request access through your browser.
+              </p>
+              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+                <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  A browser dialog will appear next. You can select any device or cancel - either will confirm your Bluetooth is working.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowBluetoothDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={requestBluetoothPermission}>
+              <Bluetooth className="h-4 w-4 mr-2" />
+              Verify Bluetooth
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
@@ -698,7 +750,7 @@ const PortsTest = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + index * 0.05 }}
-                        onClick={isClickable ? requestBluetoothPermission : undefined}
+                        onClick={isClickable ? handleBluetoothClick : undefined}
                         className={cn(
                           "flex items-center gap-3 p-4 rounded-lg transition-all",
                           test.status === "connected" 
