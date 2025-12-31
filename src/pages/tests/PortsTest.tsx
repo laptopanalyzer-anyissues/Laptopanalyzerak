@@ -73,7 +73,7 @@ const PortsTest = () => {
   const [wirelessTests, setWirelessTests] = useState<WirelessTest[]>([
     { id: "wifi-status", name: "Wi-Fi Status", icon: Wifi, description: "Network connection", status: "not-tested" },
     { id: "wifi-strength", name: "Signal Strength", icon: Signal, description: "Connection quality", status: "not-tested" },
-    { id: "bluetooth", name: "Bluetooth", icon: Bluetooth, description: "Bluetooth availability", status: "not-tested" },
+    { id: "bluetooth", name: "Bluetooth", icon: Bluetooth, description: "Click to check Bluetooth", status: "needs-permission" },
   ]);
 
   const [isScanning, setIsScanning] = useState(false);
@@ -324,14 +324,47 @@ const PortsTest = () => {
     }
   }, [updateWireless]);
 
-  // Detect Bluetooth
-  const detectBluetooth = useCallback(() => {
-    if ('bluetooth' in navigator) {
-      updateWireless("bluetooth", "connected", "Available");
-    } else {
+  // Request Bluetooth permission and detect
+  const requestBluetoothPermission = useCallback(async () => {
+    updateWireless("bluetooth", "testing");
+    
+    if (!('bluetooth' in navigator)) {
       updateWireless("bluetooth", "not-connected", "Not supported in browser");
+      toast({ title: "Bluetooth not supported", description: "Try using Chrome or Edge", variant: "destructive" });
+      return;
     }
-  }, [updateWireless]);
+
+    try {
+      // This triggers the browser's Bluetooth device picker
+      // If the system has no Bluetooth, it will show an error
+      const device = await (navigator as any).bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: []
+      });
+      
+      if (device) {
+        updateWireless("bluetooth", "connected", device.name || "Bluetooth device found");
+        if (!detectedDevices.includes(device.name || "Bluetooth Device")) {
+          setDetectedDevices(prev => [...prev, device.name || "Bluetooth Device"]);
+        }
+        toast({ title: "Bluetooth detected", description: device.name || "Device found" });
+      }
+    } catch (e: any) {
+      // User cancelled or no Bluetooth adapter found
+      if (e.name === "NotFoundError") {
+        // User cancelled the picker or no devices available
+        updateWireless("bluetooth", "not-connected", "No devices found");
+        toast({ title: "No Bluetooth devices found", description: "Make sure Bluetooth is enabled", variant: "destructive" });
+      } else if (e.message?.includes("adapter") || e.message?.includes("Bluetooth")) {
+        // No Bluetooth hardware
+        updateWireless("bluetooth", "not-connected", "No Bluetooth hardware");
+        toast({ title: "Bluetooth not available", description: "No Bluetooth adapter detected", variant: "destructive" });
+      } else {
+        // Permission denied or other error
+        updateWireless("bluetooth", "needs-permission", "Click to retry");
+      }
+    }
+  }, [updateWireless, detectedDevices]);
 
   // Handle port click for permission request or rescan
   const handlePortClick = useCallback((port: PortItem) => {
@@ -348,11 +381,11 @@ const PortsTest = () => {
     }
   }, [requestUSBPermission, requestAudioPermission, requestDisplayPermission]);
 
-  // Run all wireless tests
+  // Run all wireless tests (only Wi-Fi auto-runs, Bluetooth needs permission)
   const runWirelessTests = useCallback(() => {
     detectWifi();
-    detectBluetooth();
-  }, [detectWifi, detectBluetooth]);
+    // Bluetooth is not auto-run, it requires user permission click
+  }, [detectWifi]);
 
   // Listen for device changes
   useEffect(() => {
@@ -656,26 +689,35 @@ const PortsTest = () => {
                 <CardContent className="space-y-3">
                   {wirelessTests.map((test, index) => {
                     const StatusIcon = statusConfig[test.status].icon;
+                    const isBluetooth = test.id === "bluetooth";
+                    const isClickable = isBluetooth && (test.status === "needs-permission" || test.status === "not-connected");
+                    
                     return (
                       <motion.div
                         key={test.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + index * 0.05 }}
+                        onClick={isClickable ? requestBluetoothPermission : undefined}
                         className={cn(
                           "flex items-center gap-3 p-4 rounded-lg transition-all",
                           test.status === "connected" 
                             ? "bg-success/10 border border-success/20" 
-                            : "bg-muted/30"
+                            : test.status === "needs-permission"
+                            ? "bg-warning/5 border border-warning/20"
+                            : "bg-muted/30",
+                          isClickable && "cursor-pointer hover:bg-warning/10"
                         )}
                       >
                         <div className={cn(
                           "p-2 rounded-lg",
-                          test.status === "connected" ? "bg-success/20" : "bg-muted"
+                          test.status === "connected" ? "bg-success/20" : 
+                          test.status === "needs-permission" ? "bg-warning/20" : "bg-muted"
                         )}>
                           <test.icon className={cn(
                             "h-5 w-5",
-                            test.status === "connected" ? "text-success" : "text-foreground"
+                            test.status === "connected" ? "text-success" : 
+                            test.status === "needs-permission" ? "text-warning" : "text-foreground"
                           )} />
                         </div>
                         
@@ -686,16 +728,23 @@ const PortsTest = () => {
                           </div>
                         </div>
 
-                        <div className={cn(
-                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                          statusConfig[test.status].color
-                        )}>
-                          <StatusIcon className={cn(
-                            "h-3.5 w-3.5",
-                            test.status === "testing" && "animate-spin"
-                          )} />
-                          {statusConfig[test.status].label}
-                        </div>
+                        {test.status === "needs-permission" ? (
+                          <Button size="sm" variant="outline" className="gap-1.5 text-warning border-warning/30 hover:bg-warning/10">
+                            <Unlock className="h-3.5 w-3.5" />
+                            Grant Access
+                          </Button>
+                        ) : (
+                          <div className={cn(
+                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                            statusConfig[test.status].color
+                          )}>
+                            <StatusIcon className={cn(
+                              "h-3.5 w-3.5",
+                              test.status === "testing" && "animate-spin"
+                            )} />
+                            {statusConfig[test.status].label}
+                          </div>
+                        )}
                       </motion.div>
                     );
                   })}
