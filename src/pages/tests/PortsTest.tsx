@@ -88,6 +88,7 @@ const PortsTest = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [detectedDevices, setDetectedDevices] = useState<string[]>([]);
   const [showBluetoothDialog, setShowBluetoothDialog] = useState(false);
+  const [showUSBDialog, setShowUSBDialog] = useState(false);
   const [permissions, setPermissions] = useState({
     usb: false,
     audio: false,
@@ -109,15 +110,20 @@ const PortsTest = () => {
     setWirelessTests(prev => prev.map(t => t.id === id ? { ...t, status, value } : t));
   }, []);
 
-  // Request USB permission and detect devices
-  const requestUSBPermission = useCallback(async () => {
-    updatePort("usb", "testing");
-    
+  // Show USB confirmation dialog first
+  const handleUSBClick = useCallback(() => {
     if (!('usb' in navigator)) {
       updatePort("usb", "not-connected", "WebUSB not supported in this browser");
       toast({ title: "USB detection not supported", description: "Try using Chrome or Edge", variant: "destructive" });
       return;
     }
+    setShowUSBDialog(true);
+  }, [updatePort]);
+
+  // Request USB permission and detect devices (called after dialog confirmation)
+  const requestUSBPermission = useCallback(async () => {
+    setShowUSBDialog(false);
+    updatePort("usb", "testing");
 
     try {
       // This triggers the browser's USB device picker
@@ -385,7 +391,7 @@ const PortsTest = () => {
   const handlePortClick = useCallback((port: PortItem) => {
     switch (port.permissionType) {
       case "usb":
-        requestUSBPermission();
+        handleUSBClick();
         break;
       case "audio":
         requestAudioPermission();
@@ -394,7 +400,7 @@ const PortsTest = () => {
         requestDisplayPermission();
         break;
     }
-  }, [requestUSBPermission, requestAudioPermission, requestDisplayPermission]);
+  }, [handleUSBClick, requestAudioPermission, requestDisplayPermission]);
 
   // Run all wireless tests (only Wi-Fi auto-runs, Bluetooth needs permission)
   const runWirelessTests = useCallback(() => {
@@ -514,6 +520,43 @@ const PortsTest = () => {
             <Button onClick={requestBluetoothPermission}>
               <Bluetooth className="h-4 w-4 mr-2" />
               Verify Bluetooth
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* USB Permission Dialog */}
+      <Dialog open={showUSBDialog} onOpenChange={setShowUSBDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="p-2 rounded-lg bg-primary/20">
+                <Usb className="h-5 w-5 text-primary" />
+              </div>
+              USB Detection
+            </DialogTitle>
+            <DialogDescription className="text-left space-y-3 pt-2">
+              <p>
+                To detect connected USB devices, we need to request access through your browser.
+              </p>
+              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+                <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  A browser dialog will appear next. Select a connected USB device to verify your USB ports are working.
+                </p>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setShowUSBDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={requestUSBPermission}>
+              <Usb className="h-4 w-4 mr-2" />
+              Detect USB Devices
             </Button>
           </DialogFooter>
         </DialogContent>
