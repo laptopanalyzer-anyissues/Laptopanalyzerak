@@ -163,6 +163,7 @@ const FullSystemTest = () => {
   };
 
   const startTests = () => {
+    localStorage.removeItem(STORAGE_KEY); // Clear any old state
     setHasStarted(true);
     setTests(initialTests);
     setCurrentTestIndex(0);
@@ -282,26 +283,53 @@ const FullSystemTest = () => {
               </p>
             </motion.div>
 
-            {/* Not Started State */}
+            {/* Not Started State - Show Start Button + Test List */}
             {!hasStarted && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-card rounded-3xl p-8 text-center mb-8"
               >
-                <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                  <Play className="h-10 w-10 text-primary" />
+                {/* Start Button Card */}
+                <div className="glass-card rounded-3xl p-8 text-center mb-6">
+                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                    <Play className="h-10 w-10 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                    Ready to Test Your Laptop?
+                  </h2>
+                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                    We'll run {tests.length} diagnostic tests. After each test, you'll confirm if everything looked okay.
+                  </p>
+                  <Button size="lg" onClick={startTests}>
+                    <Play className="h-5 w-5 mr-2" />
+                    Start Full System Test
+                  </Button>
                 </div>
-                <h2 className="text-xl font-semibold text-foreground mb-2">
-                  Ready to Test Your Laptop?
-                </h2>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                  You'll go through {tests.length} tests. After each test, tell us if you noticed any issues.
-                </p>
-                <Button size="lg" onClick={startTests}>
-                  <Play className="h-5 w-5 mr-2" />
-                  Start Full Test
-                </Button>
+
+                {/* Test List Preview */}
+                <div className="glass-card rounded-2xl overflow-hidden">
+                  <div className="p-4 border-b border-border">
+                    <h2 className="font-semibold text-foreground">Tests We'll Run</h2>
+                  </div>
+                  <div className="divide-y divide-border">
+                    {tests.map((test) => {
+                      const Icon = test.icon;
+                      return (
+                        <div
+                          key={test.id}
+                          className="flex items-center gap-4 p-4"
+                        >
+                          <div className="p-2 rounded-lg bg-muted/50">
+                            <Icon className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <span className="font-medium text-foreground">
+                            {test.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -442,8 +470,8 @@ const FullSystemTest = () => {
               )}
             </AnimatePresence>
 
-            {/* Tests List */}
-            {hasStarted && (
+            {/* Tests List - Only show when started */}
+            {hasStarted && !isComplete && !isRunningTest && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -451,13 +479,13 @@ const FullSystemTest = () => {
                 className="glass-card rounded-2xl overflow-hidden"
               >
                 <div className="p-4 border-b border-border">
-                  <h2 className="font-semibold text-foreground">All Tests</h2>
+                  <h2 className="font-semibold text-foreground">Test Progress</h2>
                 </div>
                 
                 <div className="divide-y divide-border">
                   {tests.map((test, index) => {
                     const Icon = test.icon;
-                    const isCurrent = index === currentTestIndex && !isComplete;
+                    const isCurrent = index === currentTestIndex;
                     
                     return (
                       <div
