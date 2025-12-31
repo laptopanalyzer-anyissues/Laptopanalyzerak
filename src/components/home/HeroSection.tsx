@@ -74,12 +74,8 @@ export function HeroSection() {
                 <ArrowRight className="h-5 w-5" />
               </Link>
             </Button>
-            <Button 
-              variant="hero-outline" 
-              size="xl" 
-              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              Learn How It Works
+            <Button variant="hero-outline" size="xl" asChild>
+              <Link to="/blog">Learn How It Works</Link>
             </Button>
           </motion.div>
 
