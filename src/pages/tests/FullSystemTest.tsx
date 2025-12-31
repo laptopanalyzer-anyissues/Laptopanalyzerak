@@ -109,6 +109,10 @@ const FullSystemTest = () => {
           setHasStarted(true);
           const allDone = state.tests.every(t => t.status !== "pending");
           setIsComplete(allDone);
+          // If not all done, resume running the current test
+          if (!allDone) {
+            setIsRunningTest(true);
+          }
         } else {
           localStorage.removeItem(STORAGE_KEY);
         }
