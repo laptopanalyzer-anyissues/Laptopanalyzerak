@@ -57,8 +57,27 @@ const initialTests: TestItem[] = [
 
 const STORAGE_KEY = "fullSystemTestState";
 
+// Map test IDs to their icons (icons can't be serialized to JSON)
+const testIconMap: Record<string, React.ElementType> = {
+  display: Monitor,
+  keyboard: Keyboard,
+  camera: Camera,
+  microphone: Mic,
+  audio: Speaker,
+  network: Wifi,
+  touchpad: MousePointer2,
+  ports: Usb,
+};
+
+interface StoredTestItem {
+  id: string;
+  name: string;
+  status: "pending" | "completed" | "failed";
+  passed: boolean | null;
+}
+
 interface StoredState {
-  tests: TestItem[];
+  tests: StoredTestItem[];
   currentIndex: number;
   startedAt: string;
 }
@@ -80,7 +99,12 @@ const FullSystemTest = () => {
         const startedAt = new Date(state.startedAt);
         const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
         if (startedAt > hourAgo) {
-          setTests(state.tests);
+          // Restore tests with icons mapped back from testIconMap
+          const restoredTests: TestItem[] = state.tests.map(t => ({
+            ...t,
+            icon: testIconMap[t.id] || Monitor,
+          }));
+          setTests(restoredTests);
           setCurrentTestIndex(state.currentIndex);
           setHasStarted(true);
           const allDone = state.tests.every(t => t.status !== "pending");
@@ -94,11 +118,17 @@ const FullSystemTest = () => {
     }
   }, []);
 
-  // Save state to localStorage
+  // Save state to localStorage (exclude icon since functions can't be serialized)
   useEffect(() => {
     if (hasStarted && !isComplete) {
+      const testsToStore: StoredTestItem[] = tests.map(({ id, name, status, passed }) => ({
+        id,
+        name,
+        status,
+        passed,
+      }));
       const state: StoredState = {
-        tests,
+        tests: testsToStore,
         currentIndex: currentTestIndex,
         startedAt: new Date().toISOString(),
       };
