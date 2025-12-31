@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 const navLinks = [
   { name: "Home", path: "/" },
   { name: "Tests", path: "/dashboard" },
-  { name: "How It Works", path: "/#how-it-works" },
+  { name: "How It Works", path: "/blog" },
   { name: "Privacy", path: "/#privacy" },
 ];
 
