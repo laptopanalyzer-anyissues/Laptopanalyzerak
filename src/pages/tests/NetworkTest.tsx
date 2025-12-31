@@ -115,11 +115,13 @@ const NetworkTest = () => {
     speedSamplesRef.current = [];
     isTestingRef.current = true;
     
-    // Use larger chunk sizes and parallel connections for accurate measurement
-    const PARALLEL_CONNECTIONS = 6;
-    const CHUNK_SIZE = type === 'download' ? 10000000 : 2000000; // 10MB down, 2MB up
+    // Use smaller chunk sizes for more reliable connections
+    const PARALLEL_CONNECTIONS = 4;
+    const CHUNK_SIZE = type === 'download' ? 2000000 : 500000; // 2MB down, 500KB up
     
     let totalBytes = 0;
+    let successfulRequests = 0;
+    let failedRequests = 0;
     
     // Start timer update interval for smooth countdown
     const timerInterval = setInterval(() => {
@@ -129,20 +131,33 @@ const NetworkTest = () => {
       onTimerUpdate(remaining, progress);
     }, 100);
     
-    // Quick connection warmup (single small request)
-    try {
-      if (type === 'download') {
-        const response = await fetch(`https://speed.cloudflare.com/__down?bytes=100000`, { cache: "no-store" });
-        await response.arrayBuffer();
-      } else {
-        await fetch("https://speed.cloudflare.com/__up", {
-          method: "POST",
-          body: new ArrayBuffer(100000),
-          cache: "no-store",
-        });
+    // Quick connection warmup with retry
+    let warmupSuccess = false;
+    for (let attempt = 0; attempt < 3 && !warmupSuccess; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        if (type === 'download') {
+          const response = await fetch(`https://speed.cloudflare.com/__down?bytes=50000`, { 
+            cache: "no-store",
+            signal: controller.signal
+          });
+          await response.arrayBuffer();
+        } else {
+          await fetch("https://speed.cloudflare.com/__up", {
+            method: "POST",
+            body: new ArrayBuffer(50000),
+            cache: "no-store",
+            signal: controller.signal
+          });
+        }
+        clearTimeout(timeoutId);
+        warmupSuccess = true;
+      } catch (e) {
+        console.warn(`Warmup attempt ${attempt + 1} failed:`, e);
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
-    } catch (e) {
-      console.error("Warmup error:", e);
     }
     
     // Reset measurement after warmup
@@ -156,18 +171,29 @@ const NetworkTest = () => {
       const progress = Math.round((elapsed / TEST_DURATION_MS) * 100);
       
       try {
-        // Launch parallel requests
+        // Launch parallel requests with individual timeouts
         const promises: Promise<number>[] = [];
         
         for (let i = 0; i < PARALLEL_CONNECTIONS; i++) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          
           if (type === 'download') {
             promises.push(
               fetch(`https://speed.cloudflare.com/__down?bytes=${CHUNK_SIZE}`, { 
-                cache: "no-store" 
+                cache: "no-store",
+                signal: controller.signal
               }).then(async (response) => {
+                clearTimeout(timeoutId);
                 const buffer = await response.arrayBuffer();
+                successfulRequests++;
                 return buffer.byteLength;
-              }).catch(() => 0)
+              }).catch((err) => {
+                clearTimeout(timeoutId);
+                failedRequests++;
+                console.warn("Download chunk failed:", err.message);
+                return 0;
+              })
             );
           } else {
             const data = new ArrayBuffer(CHUNK_SIZE);
@@ -176,7 +202,17 @@ const NetworkTest = () => {
                 method: "POST",
                 body: data,
                 cache: "no-store",
-              }).then(() => CHUNK_SIZE).catch(() => 0)
+                signal: controller.signal
+              }).then(() => {
+                clearTimeout(timeoutId);
+                successfulRequests++;
+                return CHUNK_SIZE;
+              }).catch((err) => {
+                clearTimeout(timeoutId);
+                failedRequests++;
+                console.warn("Upload chunk failed:", err.message);
+                return 0;
+              })
             );
           }
         }
@@ -188,7 +224,7 @@ const NetworkTest = () => {
         
         // Calculate current speed based on total bytes and elapsed time
         const measurementDuration = (performance.now() - measurementStartTime) / 1000;
-        if (measurementDuration > 0.1) { // Only update after initial data
+        if (measurementDuration > 0.05 && totalBytes > 0) {
           const currentSpeedMbps = (totalBytes * 8) / measurementDuration / 1000000;
           speedSamplesRef.current.push(currentSpeedMbps);
           onProgress(currentSpeedMbps, progress, remaining);
@@ -202,8 +238,13 @@ const NetworkTest = () => {
     clearInterval(timerInterval);
     isTestingRef.current = false;
     
+    console.log(`${type} test complete: ${successfulRequests} successful, ${failedRequests} failed`);
+    
     // Calculate final speed - use median of last samples for stability
-    if (speedSamplesRef.current.length === 0) return 0;
+    if (speedSamplesRef.current.length === 0) {
+      console.warn(`No ${type} samples collected`);
+      return 0;
+    }
     
     // Use last 5 samples and take median for final result
     const recentSamples = speedSamplesRef.current.slice(-5);
@@ -450,7 +491,7 @@ const NetworkTest = () => {
                   </div>
 
                   <AnimatePresence>
-                    {isTesting && speedHistory.length > 1 && (
+                    {isTesting && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
@@ -458,7 +499,7 @@ const NetworkTest = () => {
                         className="mt-8"
                       >
                         <SpeedGraph
-                          data={speedHistory}
+                          data={speedHistory.length > 0 ? speedHistory : [0]}
                           maxDataPoints={75}
                           color={getPhaseColor()}
                           label={`Real-time ${testPhase === "ping" ? "Latency" : "Speed"}`}
