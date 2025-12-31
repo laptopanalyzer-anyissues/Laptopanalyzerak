@@ -66,12 +66,9 @@ const SensorTest = () => {
     handleTouchEnd,
   } = useSensorDetection();
 
-  const [showPermissionPrompt, setShowPermissionPrompt] = useState(true);
-
-  const handleStartScan = async () => {
-    setShowPermissionPrompt(false);
+  const handleRescan = async () => {
     toast({
-      title: "Starting sensor scan...",
+      title: "Rescanning sensors...",
       description: "Move your device to help detect motion sensors",
     });
     await runFullScan();
@@ -142,13 +139,11 @@ const SensorTest = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                {permissionGranted && (
-                  <Button variant="outline" onClick={generateReport} size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Report
-                  </Button>
-                )}
-                <Button onClick={handleStartScan} disabled={isScanning} size="lg">
+                <Button variant="outline" onClick={generateReport} size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
+                </Button>
+                <Button onClick={handleRescan} disabled={isScanning} size="lg">
                   {isScanning ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -157,7 +152,7 @@ const SensorTest = () => {
                   ) : (
                     <>
                       <ScanLine className="h-4 w-4 mr-2" />
-                      {permissionGranted ? "Rescan" : "Start Scan"}
+                      Rescan
                     </>
                   )}
                 </Button>
@@ -165,45 +160,6 @@ const SensorTest = () => {
             </div>
           </motion.div>
 
-          {/* Permission Prompt */}
-          <AnimatePresence>
-            {showPermissionPrompt && !permissionGranted && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95, height: 0 }}
-                className="mb-6"
-              >
-                <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col items-center text-center gap-4">
-                      <div className="p-4 rounded-full bg-primary/20">
-                        <Shield className="h-10 w-10 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-foreground mb-2">
-                          Grant Sensor Permissions
-                        </h3>
-                        <p className="text-sm text-muted-foreground max-w-lg">
-                          This test will detect and verify your device's hardware sensors including 
-                          accelerometer, gyroscope, ambient light, touchscreen, and biometric sensors.
-                          Grant access when prompted by your browser.
-                        </p>
-                      </div>
-                      <Button size="lg" onClick={handleStartScan} className="mt-2">
-                        <Shield className="h-4 w-4 mr-2" />
-                        Grant Permission & Start Test
-                      </Button>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Shield className="h-3 w-3 text-success" />
-                        All sensor data is processed locally. Nothing is stored or transmitted.
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Scan Progress */}
           <AnimatePresence>
@@ -227,8 +183,8 @@ const SensorTest = () => {
             )}
           </AnimatePresence>
 
-          {/* Main Content - After Permission */}
-          {permissionGranted && (
+          {/* Main Content */}
+          {(
             <>
               {/* Privacy Notice */}
               <motion.div
