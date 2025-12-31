@@ -43,8 +43,20 @@ const statusConfig = {
   "not-tested": { label: "Waiting", color: "bg-muted text-muted-foreground", icon: HelpCircle },
   "testing": { label: "Detecting...", color: "bg-primary/20 text-primary", icon: RefreshCw },
   "available": { label: "Available", color: "bg-success/20 text-success", icon: Check },
-  "not-available": { label: "No Data", color: "bg-warning/20 text-warning", icon: AlertTriangle },
+  "not-available": { label: "Not Present", color: "bg-muted/50 text-muted-foreground", icon: X },
   "not-supported": { label: "Not Supported", color: "bg-muted text-muted-foreground", icon: X },
+};
+
+// Sensor explanations for desktop users
+const sensorExplanations: Record<string, string> = {
+  "accelerometer": "Motion sensor typically found in mobile devices and tablets. Not present in most laptops.",
+  "gyroscope": "Rotation sensor typically found in mobile devices and tablets. Not present in most laptops.",
+  "orientation": "3D orientation tracking typically found in mobile devices. Not present in most laptops.",
+  "ambient-light": "Light sensor for auto-brightness. Limited browser support (Firefox only behind flags).",
+  "proximity": "Detects nearby objects. Found in phones for call detection. Not present in laptops.",
+  "screen-orientation": "Detects portrait/landscape mode. Available on all devices.",
+  "touch": "Touchscreen capability. Available if your device has a touchscreen.",
+  "biometric": "Fingerprint or face recognition (Windows Hello, Touch ID). Uses WebAuthn API.",
 };
 
 const SensorTest = () => {
@@ -81,89 +93,129 @@ const SensorTest = () => {
     setSensors(prev => prev.map(s => s.id === id ? { ...s, status, value, data } : s));
   }, []);
 
-  // Accelerometer detection
+  // Accelerometer detection - with better handling for desktop devices
   const detectAccelerometer = useCallback(async () => {
     updateSensor("accelerometer", "testing");
     
+    // Check for Generic Sensor API (Accelerometer)
     if ('Accelerometer' in window) {
-      try {
-        const accelerometer = new (window as any).Accelerometer({ frequency: 60 });
-        accelerometer.addEventListener('reading', () => {
-          setAccelData({ x: accelerometer.x, y: accelerometer.y, z: accelerometer.z });
-          updateSensor("accelerometer", "available", `X: ${accelerometer.x.toFixed(2)}`);
-        });
-        accelerometer.addEventListener('error', () => {
-          updateSensor("accelerometer", "not-available", "Permission denied");
-        });
-        accelerometer.start();
-        return true;
-      } catch (e) {
-        updateSensor("accelerometer", "not-supported", "API not available");
-        return false;
-      }
-    }
-    
-    // Fallback to DeviceMotion
-    if ('DeviceMotionEvent' in window) {
-      const handleMotion = (e: DeviceMotionEvent) => {
-        if (e.accelerationIncludingGravity) {
-          const { x, y, z } = e.accelerationIncludingGravity;
-          setAccelData({ x: x || 0, y: y || 0, z: z || 0 });
-          updateSensor("accelerometer", "available", `Active`);
-        }
-      };
-      
-      // iOS 13+ requires permission
-      if (typeof (DeviceMotionEvent as any).requestPermission === 'function') {
+      return new Promise<boolean>((resolve) => {
         try {
-          const permission = await (DeviceMotionEvent as any).requestPermission();
-          if (permission === 'granted') {
-            window.addEventListener('devicemotion', handleMotion);
-            return true;
+          const accelerometer = new (window as any).Accelerometer({ frequency: 60 });
+          let hasReading = false;
+          
+          accelerometer.addEventListener('reading', () => {
+            hasReading = true;
+            setAccelData({ x: accelerometer.x, y: accelerometer.y, z: accelerometer.z });
+            updateSensor("accelerometer", "available", `X: ${accelerometer.x.toFixed(2)}`);
+          });
+          
+          accelerometer.addEventListener('error', (e: any) => {
+            if (e.error?.name === 'NotAllowedError') {
+              updateSensor("accelerometer", "not-available", "Access blocked by browser");
+            } else if (e.error?.name === 'NotReadableError') {
+              updateSensor("accelerometer", "not-available", "No hardware sensor");
+            } else {
+              updateSensor("accelerometer", "not-available", "Sensor not accessible");
+            }
+            resolve(false);
+          });
+          
+          accelerometer.start();
+          
+          // Wait to see if we get readings
+          setTimeout(() => {
+            if (!hasReading) {
+              updateSensor("accelerometer", "not-available", "No hardware sensor");
+            }
+            resolve(hasReading);
+          }, 800);
+        } catch (e: any) {
+          if (e.name === 'SecurityError') {
+            updateSensor("accelerometer", "not-available", "HTTPS required");
+          } else {
+            updateSensor("accelerometer", "not-available", "No hardware sensor");
           }
-        } catch (e) {
-          updateSensor("accelerometer", "not-available", "Permission denied");
-          return false;
+          resolve(false);
         }
-      } else {
-        window.addEventListener('devicemotion', handleMotion);
-        // Check if we get any data
-        setTimeout(() => {
-          if (accelData.x === 0 && accelData.y === 0 && accelData.z === 0) {
-            updateSensor("accelerometer", "not-available", "No motion data");
-          }
-        }, 1000);
-        return true;
-      }
+      });
     }
     
-    updateSensor("accelerometer", "not-supported", "Not available");
+    // Fallback: DeviceMotion API (mobile-oriented)
+    if ('DeviceMotionEvent' in window) {
+      return new Promise<boolean>((resolve) => {
+        let hasData = false;
+        
+        const handleMotion = (e: DeviceMotionEvent) => {
+          if (e.accelerationIncludingGravity && 
+              (e.accelerationIncludingGravity.x !== null || 
+               e.accelerationIncludingGravity.y !== null || 
+               e.accelerationIncludingGravity.z !== null)) {
+            hasData = true;
+            const { x, y, z } = e.accelerationIncludingGravity;
+            setAccelData({ x: x || 0, y: y || 0, z: z || 0 });
+            updateSensor("accelerometer", "available", "Active");
+            window.removeEventListener('devicemotion', handleMotion);
+          }
+        };
+        
+        window.addEventListener('devicemotion', handleMotion);
+        
+        setTimeout(() => {
+          window.removeEventListener('devicemotion', handleMotion);
+          if (!hasData) {
+            updateSensor("accelerometer", "not-available", "No hardware sensor");
+          }
+          resolve(hasData);
+        }, 800);
+      });
+    }
+    
+    updateSensor("accelerometer", "not-available", "No hardware sensor");
     return false;
-  }, [updateSensor, accelData]);
+  }, [updateSensor]);
 
-  // Gyroscope detection
+  // Gyroscope detection - with better handling for desktop devices
   const detectGyroscope = useCallback(async () => {
     updateSensor("gyroscope", "testing");
     
     if ('Gyroscope' in window) {
-      try {
-        const gyroscope = new (window as any).Gyroscope({ frequency: 60 });
-        gyroscope.addEventListener('reading', () => {
-          setGyroData({ alpha: gyroscope.x, beta: gyroscope.y, gamma: gyroscope.z });
-          updateSensor("gyroscope", "available", "Active");
-        });
-        gyroscope.addEventListener('error', () => {
-          updateSensor("gyroscope", "not-available", "Permission denied");
-        });
-        gyroscope.start();
-        return true;
-      } catch (e) {
-        updateSensor("gyroscope", "not-supported", "API not available");
-        return false;
-      }
+      return new Promise<boolean>((resolve) => {
+        try {
+          const gyroscope = new (window as any).Gyroscope({ frequency: 60 });
+          let hasReading = false;
+          
+          gyroscope.addEventListener('reading', () => {
+            hasReading = true;
+            setGyroData({ alpha: gyroscope.x, beta: gyroscope.y, gamma: gyroscope.z });
+            updateSensor("gyroscope", "available", "Active");
+          });
+          
+          gyroscope.addEventListener('error', (e: any) => {
+            if (e.error?.name === 'NotReadableError') {
+              updateSensor("gyroscope", "not-available", "No hardware sensor");
+            } else {
+              updateSensor("gyroscope", "not-available", "Sensor not accessible");
+            }
+            resolve(false);
+          });
+          
+          gyroscope.start();
+          
+          setTimeout(() => {
+            if (!hasReading) {
+              updateSensor("gyroscope", "not-available", "No hardware sensor");
+            }
+            resolve(hasReading);
+          }, 800);
+        } catch (e: any) {
+          updateSensor("gyroscope", "not-available", "No hardware sensor");
+          resolve(false);
+        }
+      });
     }
     
-    updateSensor("gyroscope", "not-supported", "Not available");
+    updateSensor("gyroscope", "not-available", "No hardware sensor");
     return false;
   }, [updateSensor]);
 
@@ -287,22 +339,31 @@ const SensorTest = () => {
     return true;
   }, [updateSensor]);
 
-  // Touch detection
+  // Touch detection - improved for touchscreen laptops
   const detectTouch = useCallback(() => {
     updateSensor("touch", "testing");
     
+    // Check multiple methods for touch support
     const maxTouch = navigator.maxTouchPoints || 0;
+    const hasOntouchstart = 'ontouchstart' in window;
+    const hasTouchEvent = 'TouchEvent' in window;
+    const hasPointerCoarse = window.matchMedia('(pointer: coarse)').matches;
+    const hasAnyPointer = window.matchMedia('(any-pointer: coarse)').matches;
+    
     setMaxTouchPoints(maxTouch);
     
     if (maxTouch > 0) {
-      updateSensor("touch", "available", `${maxTouch} touch points`);
+      updateSensor("touch", "available", `${maxTouch} touch points supported`);
       return true;
-    } else if ('ontouchstart' in window) {
-      updateSensor("touch", "available", "Touch supported");
+    } else if (hasOntouchstart || hasTouchEvent) {
+      updateSensor("touch", "available", "Touch events supported");
+      return true;
+    } else if (hasAnyPointer || hasPointerCoarse) {
+      updateSensor("touch", "available", "Touch input detected");
       return true;
     }
     
-    updateSensor("touch", "not-available", "No touch support detected");
+    updateSensor("touch", "not-available", "No touchscreen hardware");
     return false;
   }, [updateSensor]);
 
@@ -617,14 +678,23 @@ const SensorTest = () => {
                         <div className="text-2xl font-bold text-success">{available}</div>
                         <div className="text-xs text-muted-foreground">Available</div>
                       </div>
-                      <div className="text-center p-3 rounded-lg bg-warning/10">
-                        <div className="text-2xl font-bold text-warning">{notAvailable}</div>
-                        <div className="text-xs text-muted-foreground">No Data</div>
+                      <div className="text-center p-3 rounded-lg bg-muted/30">
+                        <div className="text-2xl font-bold text-muted-foreground">{notAvailable}</div>
+                        <div className="text-xs text-muted-foreground">Not Present</div>
                       </div>
                       <div className="text-center p-3 rounded-lg bg-muted/50">
                         <div className="text-2xl font-bold text-muted-foreground">{notSupported}</div>
                         <div className="text-xs text-muted-foreground">Not Supported</div>
                       </div>
+                    </div>
+                    
+                    {/* Device type info */}
+                    <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
+                      <p className="text-xs text-muted-foreground">
+                        <strong className="text-foreground">Note:</strong> Motion sensors (Accelerometer, Gyroscope, Orientation) are typically only found in mobile devices and tablets. 
+                        Most laptops don't have these sensors. Your <strong className="text-primary">Biometric Sensor</strong> (fingerprint/Windows Hello) 
+                        and <strong className="text-primary">Screen Orientation</strong> should work on laptops.
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -675,9 +745,14 @@ const SensorTest = () => {
                         
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-foreground text-sm">{sensor.name}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground truncate" title={sensorExplanations[sensor.id]}>
                             {sensor.value || sensor.description}
                           </div>
+                          {sensor.status === "not-available" && (
+                            <div className="text-xs text-muted-foreground/70 mt-1 italic">
+                              {sensorExplanations[sensor.id]}
+                            </div>
+                          )}
                         </div>
 
                         <div className={cn(
