@@ -14,6 +14,7 @@ import AudioTest from "./pages/tests/AudioTest";
 import NetworkTest from "./pages/tests/NetworkTest";
 import TouchpadTest from "./pages/tests/TouchpadTest";
 import PortsTest from "./pages/tests/PortsTest";
+import FullSystemTest from "./pages/tests/FullSystemTest";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/test/network" element={<NetworkTest />} />
             <Route path="/test/touchpad" element={<TouchpadTest />} />
             <Route path="/test/ports" element={<PortsTest />} />
+            <Route path="/test/full" element={<FullSystemTest />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
