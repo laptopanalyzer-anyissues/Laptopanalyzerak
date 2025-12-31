@@ -4,6 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- Security Headers -->
+    <!-- Content Security Policy - Protects against XSS, clickjacking, data injection -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.gpteng.co;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      font-src 'self' https://fonts.gstatic.com data:;
+      img-src 'self' data: blob: https:;
+      media-src 'self' blob: data:;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://speed.cloudflare.com https://*.cloudflare.com;
+      frame-ancestors 'self';
+      form-action 'self';
+      base-uri 'self';
+      object-src 'none';
+      upgrade-insecure-requests;
+    ">
+    
+    <!-- X-Frame-Options - Prevents clickjacking -->
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    
+    <!-- X-Content-Type-Options - Prevents MIME type sniffing -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    
+    <!-- Referrer Policy - Controls information sent in Referer header -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    
+    <!-- Permissions Policy - Restricts browser features -->
+    <meta http-equiv="Permissions-Policy" content="
+      camera=(self),
+      microphone=(self),
+      geolocation=(),
+      payment=(),
+      usb=(self),
+      bluetooth=(self),
+      accelerometer=(self),
+      gyroscope=(self)
+    ">
+    
     <!-- Primary Meta Tags -->
     <title>LaptopCheck - Free Online Laptop Hardware Diagnostic Tool</title>
     <meta name="title" content="LaptopCheck - Free Online Laptop Hardware Diagnostic Tool" />
@@ -62,9 +100,19 @@
     <!-- Theme Color -->
     <meta name="theme-color" content="#0d1117" />
     <meta name="msapplication-TileColor" content="#0d1117" />
+    
+    <!-- Favicon with integrity -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
   </head>
 
   <body>
+    <!-- Noscript fallback for security-conscious users -->
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>LaptopCheck requires JavaScript to run hardware diagnostic tests. Please enable JavaScript to continue.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
