@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Laptop, Menu, X, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,16 +9,31 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "Tests", path: "/dashboard" },
   { name: "How It Works", path: "/blog" },
-  { name: "Privacy", path: "/#privacy" },
+  { name: "Privacy", path: "/#privacy", isAnchor: true },
 ];
 
 export const Header = forwardRef<HTMLElement>((_, ref) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleNavClick = (link: typeof navLinks[0], e: React.MouseEvent) => {
+    if (link.isAnchor) {
+      e.preventDefault();
+      if (location.pathname !== "/") {
+        navigate("/");
+        setTimeout(() => {
+          document.getElementById("privacy")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      } else {
+        document.getElementById("privacy")?.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   return (
@@ -47,8 +62,9 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
               <Link
                 key={link.path}
                 to={link.path}
+                onClick={(e) => handleNavClick(link, e)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path
+                  location.pathname === link.path || (link.isAnchor && location.pathname === "/" && location.hash === "#privacy")
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
@@ -110,9 +126,12 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    handleNavClick(link, e);
+                    setMobileMenuOpen(false);
+                  }}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path
+                    location.pathname === link.path || (link.isAnchor && location.pathname === "/" && location.hash === "#privacy")
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
