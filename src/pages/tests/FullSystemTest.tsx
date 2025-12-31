@@ -171,7 +171,7 @@ const FullSystemTest = () => {
     setShowResultPopup(false);
   };
 
-  const currentTest = tests[currentTestIndex];
+  const currentTest = tests[currentTestIndex] || tests[0];
   const scoreData = getScoreGrade(overallScore);
 
   const getStatusIcon = (status: TestItem["status"], passed: boolean | null) => {
@@ -331,7 +331,7 @@ const FullSystemTest = () => {
             </AnimatePresence>
 
             {/* Running Test */}
-            {hasStarted && !isComplete && isRunningTest && (
+            {hasStarted && !isComplete && isRunningTest && currentTest && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -363,7 +363,7 @@ const FullSystemTest = () => {
 
             {/* Result Popup */}
             <AnimatePresence>
-              {showResultPopup && (
+              {showResultPopup && currentTest && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
