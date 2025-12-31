@@ -62,23 +62,17 @@ export function HeroSection() {
             verifying new or used laptops work perfectly.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
+            className="flex items-center justify-center mb-16"
           >
             <Button variant="hero" size="xl" asChild>
-              <Link to="/test/full">
-                <Play className="h-5 w-5" />
-                Run All Tests
-              </Link>
-            </Button>
-            <Button variant="hero-outline" size="xl" asChild>
               <Link to="/dashboard">
-                Individual Tests
-                <ArrowRight className="h-5 w-5" />
+                <Play className="h-5 w-5" />
+                Start Testing
               </Link>
             </Button>
           </motion.div>
