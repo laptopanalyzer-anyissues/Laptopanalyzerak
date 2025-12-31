@@ -9,7 +9,8 @@ import {
   Laptop,
   Cpu,
   Monitor,
-  Keyboard
+  Keyboard,
+  Play
 } from "lucide-react";
 
 const floatingIcons = [
@@ -69,13 +70,16 @@ export function HeroSection() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
           >
             <Button variant="hero" size="xl" asChild>
-              <Link to="/dashboard">
-                Start Laptop Check
-                <ArrowRight className="h-5 w-5" />
+              <Link to="/test/full">
+                <Play className="h-5 w-5" />
+                Run All Tests
               </Link>
             </Button>
             <Button variant="hero-outline" size="xl" asChild>
-              <Link to="/blog">Learn How It Works</Link>
+              <Link to="/dashboard">
+                Individual Tests
+                <ArrowRight className="h-5 w-5" />
+              </Link>
             </Button>
           </motion.div>
 
