@@ -660,15 +660,13 @@ export function useSensorDetection() {
 
   // Full Scan
   const runFullScan = useCallback(async () => {
-    if (!permissionGranted) {
-      await requestPermissions();
-    }
+    await requestPermissions();
 
     setIsScanning(true);
     setScanProgress(0);
 
     // Reset all sensors to testing
-    Object.keys(sensors).forEach(key => {
+    Object.keys(initialSensors).forEach(key => {
       updateSensor(key as keyof SensorState, { status: "testing", value: undefined, details: undefined });
     });
 
@@ -692,11 +690,20 @@ export function useSensorDetection() {
 
     setIsScanning(false);
   }, [
-    permissionGranted, requestPermissions, sensors, updateSensor,
+    requestPermissions, updateSensor,
     detectAccelerometer, detectGyroscope, detectOrientation,
     detectAmbientLight, detectProximity, detectScreenOrientation,
     detectTouch, detectBiometric, detectLid
   ]);
+
+  // Auto-scan on mount
+  const hasScanned = useRef(false);
+  useEffect(() => {
+    if (!hasScanned.current) {
+      hasScanned.current = true;
+      runFullScan();
+    }
+  }, [runFullScan]);
 
   // Touch event handlers
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
