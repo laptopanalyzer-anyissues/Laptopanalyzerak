@@ -1,5 +1,5 @@
 import { motion, useSpring, useTransform } from "framer-motion";
-import { useEffect, useMemo } from "react";
+import { forwardRef, useEffect, useMemo } from "react";
 
 interface SpeedGraphProps {
   data: number[];
@@ -8,7 +8,7 @@ interface SpeedGraphProps {
   label: string;
 }
 
-export const SpeedGraph = ({ data, maxDataPoints = 50, color, label }: SpeedGraphProps) => {
+export const SpeedGraph = forwardRef<HTMLDivElement, SpeedGraphProps>(({ data, maxDataPoints = 50, color, label }, ref) => {
   const displayData = data.slice(-maxDataPoints);
   const maxValue = Math.max(...displayData, 1) * 1.1; // Add 10% headroom
   const graphHeight = 80;
@@ -61,7 +61,7 @@ export const SpeedGraph = ({ data, maxDataPoints = 50, color, label }: SpeedGrap
   }, [displayData, maxDataPoints, maxValue, graphHeight, graphWidth]);
 
   return (
-    <div className="w-full">
+    <div ref={ref} className="w-full">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs text-muted-foreground">{label}</span>
         <motion.span className="text-xs font-medium text-foreground tabular-nums">
@@ -150,4 +150,6 @@ export const SpeedGraph = ({ data, maxDataPoints = 50, color, label }: SpeedGrap
       </div>
     </div>
   );
-};
+});
+
+SpeedGraph.displayName = "SpeedGraph";
