@@ -285,6 +285,7 @@ const categories: { id: TestCategory; name: string; icon: React.ElementType }[] 
 const DisplayTestEmbed = ({ onComplete }: Props) => {
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Test parameters
   const [grayscale, setGrayscale] = useState(50);
@@ -294,6 +295,35 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
 
   const currentTest = tests[currentTestIndex];
   const testParams: TestParams = { grayscale, gradientSteps, fontSize, invertText };
+
+  // Auto-enter fullscreen on mount
+  useEffect(() => {
+    const enterFullscreen = async () => {
+      try {
+        await document.documentElement.requestFullscreen?.();
+        setIsFullscreen(true);
+      } catch (e) {
+        // Fallback: still show the test even if fullscreen fails
+        setIsFullscreen(true);
+      }
+    };
+    enterFullscreen();
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const exitFullscreenAndComplete = useCallback(() => {
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    }
+    onComplete();
+  }, [onComplete]);
 
   const nextTest = useCallback(() => {
     if (currentTestIndex < tests.length - 1) {
@@ -311,6 +341,9 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
+        case "Escape":
+          exitFullscreenAndComplete();
+          break;
         case "ArrowRight":
         case "ArrowDown":
           nextTest();
@@ -323,12 +356,16 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
           e.preventDefault();
           setSidebarOpen((prev) => !prev);
           break;
+        case " ":
+          e.preventDefault();
+          setSidebarOpen((prev) => !prev);
+          break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextTest, prevTest]);
+  }, [nextTest, prevTest, exitFullscreenAndComplete]);
 
   // Group tests by category
   const testsByCategory = categories.map((cat) => ({
@@ -338,8 +375,9 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
 
   const isLastTest = currentTestIndex === tests.length - 1;
 
+  // Render fullscreen overlay
   return (
-    <div className="flex flex-col h-full min-h-[500px] relative overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-black flex flex-col overflow-hidden">
       {/* Test Display Area */}
       <div className="flex-1 relative">
         {/* Test Content */}
@@ -465,7 +503,7 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
 
         {/* Close button */}
         <button
-          onClick={onComplete}
+          onClick={exitFullscreenAndComplete}
           className="absolute top-4 right-4 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors z-10"
         >
           <X className="h-4 w-4" />
@@ -496,7 +534,7 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
           </div>
 
           {isLastTest ? (
-            <Button size="sm" onClick={onComplete}>
+            <Button size="sm" onClick={exitFullscreenAndComplete}>
               <CheckCircle2 className="h-4 w-4 mr-1" />
               Complete Test
             </Button>
@@ -514,7 +552,7 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
         
         {/* Keyboard shortcuts hint */}
         <p className="text-[10px] text-muted-foreground text-center mt-2">
-          Tab: toggle menu • ←→: navigate
+          Space/Tab: toggle menu • ←→: navigate • Esc: exit
         </p>
       </div>
     </div>
