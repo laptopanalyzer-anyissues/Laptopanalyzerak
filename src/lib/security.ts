@@ -329,6 +329,8 @@ export const clearRateLimit = (key: string): void => {
 export const isAllowedIframe = (): boolean => {
   const hostname = window.location.hostname;
   return hostname.includes('lovable.app') || 
+         hostname.includes('lovable.dev') ||
+         hostname.includes('lovableproject.com') ||
          hostname.includes('localhost') ||
          hostname === '127.0.0.1';
 };
