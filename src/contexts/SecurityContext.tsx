@@ -61,7 +61,13 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     const inIframe = detectClickjacking();
     setIsInIframe(inIframe);
     
-    if (inIframe && enableClickjackingProtection) {
+    // Allow Lovable preview iframes and localhost
+    const isAllowedIframe = 
+      window.location.hostname.includes('lovable.app') || 
+      window.location.hostname.includes('localhost') ||
+      window.location.hostname === '127.0.0.1';
+    
+    if (inIframe && enableClickjackingProtection && !isAllowedIframe) {
       preventClickjacking();
       setIsSecure(false);
       reportSecurityEvent({
