@@ -591,7 +591,15 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
             </div>
             
             {isLastTest ? (
-              <Button onClick={exitFullscreenAndComplete} size="sm">
+              <Button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  exitFullscreenAndComplete();
+                }} 
+                size="sm"
+                className="relative z-[10000]"
+              >
                 <CheckCircle2 className="h-4 w-4 mr-1" />
                 Complete
               </Button>
