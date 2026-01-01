@@ -314,11 +314,13 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   }, []);
 
   const exitFullscreenAndComplete = useCallback(() => {
+    console.log("[DisplayTestEmbed] exitFullscreenAndComplete called");
     if (document.fullscreenElement) {
-      document.exitFullscreen?.();
+      document.exitFullscreen?.().catch(() => {});
     }
-    setIsFullscreen(false);
+    // Call onComplete first before changing state to ensure it's executed
     onComplete();
+    setIsFullscreen(false);
   }, [onComplete]);
 
   const nextTest = useCallback(() => {
