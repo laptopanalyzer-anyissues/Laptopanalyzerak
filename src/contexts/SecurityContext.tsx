@@ -64,6 +64,8 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     // Allow Lovable preview iframes and localhost
     const isAllowedIframe = 
       window.location.hostname.includes('lovable.app') || 
+      window.location.hostname.includes('lovable.dev') ||
+      window.location.hostname.includes('lovableproject.com') ||
       window.location.hostname.includes('localhost') ||
       window.location.hostname === '127.0.0.1';
     
