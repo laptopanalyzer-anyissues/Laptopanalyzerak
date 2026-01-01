@@ -214,14 +214,17 @@ const FullSystemTest = () => {
 
   // Called when an embedded test completes
   const handleTestComplete = useCallback(() => {
+    console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id);
     setIsRunningTest(false);
     
     // Only show verification popup for display test
     const testId = tests[currentTestIndex]?.id;
     if (testId === "display") {
+      console.log("[FullSystemTest] Showing display popup");
       setShowDisplayPopup(true);
     } else {
       // Auto-pass all other tests
+      console.log("[FullSystemTest] Auto-passing test, moving to next");
       moveToNextTest(true);
     }
   }, [tests, currentTestIndex, moveToNextTest]);
