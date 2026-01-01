@@ -591,18 +591,15 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
             </div>
             
             {isLastTest ? (
-              <Button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  exitFullscreenAndComplete();
-                }} 
-                size="sm"
-                className="relative z-[10000]"
+              <button
+                type="button"
+                onClick={() => exitFullscreenAndComplete()}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors cursor-pointer"
+                style={{ pointerEvents: 'auto' }}
               >
-                <CheckCircle2 className="h-4 w-4 mr-1" />
+                <CheckCircle2 className="h-4 w-4" />
                 Complete
-              </Button>
+              </button>
             ) : (
               <button
                 onClick={nextTest}
