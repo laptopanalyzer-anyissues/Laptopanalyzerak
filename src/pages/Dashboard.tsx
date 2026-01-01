@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-
+import RunAllTestsCard from "@/components/dashboard/RunAllTestsCard";
 import { TestCard } from "@/components/dashboard/TestCard";
 import {
   Monitor,
@@ -93,7 +93,8 @@ const Dashboard = () => {
             </p>
           </motion.div>
 
-          
+          {/* Run All Tests Card */}
+          <RunAllTestsCard />
 
           <motion.div
             initial={{ opacity: 0 }}
