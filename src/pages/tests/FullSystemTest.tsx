@@ -6,11 +6,18 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   ArrowLeft,
   Play,
   CheckCircle2,
   XCircle,
-  AlertCircle,
+  AlertTriangle,
   Monitor,
   Keyboard,
   Camera,
@@ -24,6 +31,7 @@ import {
   ArrowRight,
   Sparkles,
   Loader2,
+  Shield,
 } from "lucide-react";
 
 // Lazy load test components
@@ -40,40 +48,43 @@ interface TestItem {
   id: string;
   name: string;
   icon: React.ElementType;
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "running" | "completed" | "issue";
   passed: boolean | null;
+  weight: number; // Score weight for this test
 }
 
+// Test order as specified: Display, Keyboard, Touchpad, Camera, Microphone, Speaker, Network, Ports
 const initialTests: TestItem[] = [
-  { id: "display", name: "Display Test", icon: Monitor, status: "pending", passed: null },
-  { id: "keyboard", name: "Keyboard Test", icon: Keyboard, status: "pending", passed: null },
-  { id: "camera", name: "Camera Test", icon: Camera, status: "pending", passed: null },
-  { id: "microphone", name: "Microphone Test", icon: Mic, status: "pending", passed: null },
-  { id: "audio", name: "Audio Test", icon: Speaker, status: "pending", passed: null },
-  { id: "network", name: "Network Test", icon: Wifi, status: "pending", passed: null },
-  { id: "touchpad", name: "Touchpad Test", icon: MousePointer2, status: "pending", passed: null },
-  { id: "ports", name: "Ports Test", icon: Usb, status: "pending", passed: null },
+  { id: "display", name: "Display Test", icon: Monitor, status: "pending", passed: null, weight: 15 },
+  { id: "keyboard", name: "Keyboard Test", icon: Keyboard, status: "pending", passed: null, weight: 12 },
+  { id: "touchpad", name: "Touchpad Test", icon: MousePointer2, status: "pending", passed: null, weight: 10 },
+  { id: "camera", name: "Camera Test", icon: Camera, status: "pending", passed: null, weight: 12 },
+  { id: "microphone", name: "Microphone Test", icon: Mic, status: "pending", passed: null, weight: 12 },
+  { id: "audio", name: "Speaker Test", icon: Speaker, status: "pending", passed: null, weight: 13 },
+  { id: "network", name: "Network Test", icon: Wifi, status: "pending", passed: null, weight: 13 },
+  { id: "ports", name: "Ports & Connectivity", icon: Usb, status: "pending", passed: null, weight: 13 },
 ];
 
-const STORAGE_KEY = "fullSystemTestState";
+const STORAGE_KEY = "fullSystemTestState_v2";
 
 // Map test IDs to their icons (icons can't be serialized to JSON)
 const testIconMap: Record<string, React.ElementType> = {
   display: Monitor,
   keyboard: Keyboard,
+  touchpad: MousePointer2,
   camera: Camera,
   microphone: Mic,
   audio: Speaker,
   network: Wifi,
-  touchpad: MousePointer2,
   ports: Usb,
 };
 
 interface StoredTestItem {
   id: string;
   name: string;
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "running" | "completed" | "issue";
   passed: boolean | null;
+  weight: number;
 }
 
 interface StoredState {
@@ -88,7 +99,7 @@ const FullSystemTest = () => {
   const [hasStarted, setHasStarted] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isRunningTest, setIsRunningTest] = useState(false);
-  const [showResultPopup, setShowResultPopup] = useState(false);
+  const [showDisplayPopup, setShowDisplayPopup] = useState(false);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -107,7 +118,7 @@ const FullSystemTest = () => {
           setTests(restoredTests);
           setCurrentTestIndex(state.currentIndex);
           setHasStarted(true);
-          const allDone = state.tests.every(t => t.status !== "pending");
+          const allDone = state.tests.every(t => t.status !== "pending" && t.status !== "running");
           setIsComplete(allDone);
           // If not all done, resume running the current test
           if (!allDone) {
@@ -125,11 +136,12 @@ const FullSystemTest = () => {
   // Save state to localStorage (exclude icon since functions can't be serialized)
   useEffect(() => {
     if (hasStarted && !isComplete) {
-      const testsToStore: StoredTestItem[] = tests.map(({ id, name, status, passed }) => ({
+      const testsToStore: StoredTestItem[] = tests.map(({ id, name, status, passed, weight }) => ({
         id,
         name,
         status,
         passed,
+        weight,
       }));
       const state: StoredState = {
         tests: testsToStore,
@@ -140,32 +152,42 @@ const FullSystemTest = () => {
     }
   }, [tests, currentTestIndex, hasStarted, isComplete]);
 
-  const completedCount = tests.filter(t => t.status !== "pending").length;
+  const completedCount = tests.filter(t => t.status === "completed" || t.status === "issue").length;
   const progress = (completedCount / tests.length) * 100;
   const passedCount = tests.filter(t => t.passed === true).length;
-  const failedCount = tests.filter(t => t.passed === false).length;
+  const issueCount = tests.filter(t => t.passed === false).length;
 
-  // Calculate score: passed tests get 100%, failed get 0%
-  const calculateOverallScore = () => {
-    const testedCount = tests.filter(t => t.status !== "pending").length;
-    if (testedCount === 0) return 0;
-    return Math.round((passedCount / testedCount) * 100);
-  };
+  // Calculate weighted score
+  const calculateOverallScore = useCallback(() => {
+    const totalWeight = tests.reduce((sum, t) => sum + t.weight, 0);
+    const earnedWeight = tests.reduce((sum, t) => {
+      if (t.passed === true) return sum + t.weight;
+      if (t.passed === false) return sum; // Issue reported = 0 points for that test
+      return sum; // Pending tests don't count
+    }, 0);
+    
+    const testedWeight = tests.reduce((sum, t) => {
+      if (t.status === "completed" || t.status === "issue") return sum + t.weight;
+      return sum;
+    }, 0);
+    
+    if (testedWeight === 0) return 0;
+    return Math.round((earnedWeight / testedWeight) * 100);
+  }, [tests]);
 
   const overallScore = calculateOverallScore();
 
-  const getScoreGrade = (score: number) => {
-    if (score >= 90) return { grade: "A+", color: "text-success", bg: "bg-success/20" };
-    if (score >= 80) return { grade: "A", color: "text-success", bg: "bg-success/20" };
-    if (score >= 70) return { grade: "B", color: "text-primary", bg: "bg-primary/20" };
-    if (score >= 60) return { grade: "C", color: "text-warning", bg: "bg-warning/20" };
-    return { grade: "D", color: "text-destructive", bg: "bg-destructive/20" };
+  const getScoreLabel = (score: number) => {
+    if (score >= 90) return { label: "Excellent", color: "text-success", bg: "bg-success/20", borderColor: "border-success" };
+    if (score >= 75) return { label: "Good", color: "text-primary", bg: "bg-primary/20", borderColor: "border-primary" };
+    if (score >= 50) return { label: "Fair", color: "text-warning", bg: "bg-warning/20", borderColor: "border-warning" };
+    return { label: "Needs Attention", color: "text-destructive", bg: "bg-destructive/20", borderColor: "border-destructive" };
   };
 
   const startTests = () => {
-    localStorage.removeItem(STORAGE_KEY); // Clear any old state
+    localStorage.removeItem(STORAGE_KEY);
     setHasStarted(true);
-    setTests(initialTests);
+    setTests(initialTests.map(t => ({ ...t, status: "pending", passed: null })));
     setCurrentTestIndex(0);
     setIsComplete(false);
     setIsRunningTest(true);
@@ -175,7 +197,7 @@ const FullSystemTest = () => {
   const moveToNextTest = useCallback((passed: boolean) => {
     setTests(prev => prev.map((t, i) => 
       i === currentTestIndex 
-        ? { ...t, status: passed ? "completed" : "failed", passed } 
+        ? { ...t, status: passed ? "completed" : "issue", passed } 
         : t
     ));
     
@@ -195,38 +217,41 @@ const FullSystemTest = () => {
     // Only show verification popup for display test
     const testId = tests[currentTestIndex]?.id;
     if (testId === "display") {
-      setShowResultPopup(true);
+      setShowDisplayPopup(true);
     } else {
       // Auto-pass all other tests
       moveToNextTest(true);
     }
   }, [tests, currentTestIndex, moveToNextTest]);
 
-  // User answers Yes (no issues) or No (issues found) - only for display test
-  const handleResultAnswer = (noIssues: boolean) => {
-    setShowResultPopup(false);
+  // User answers the display popup
+  const handleDisplayAnswer = (noIssues: boolean) => {
+    setShowDisplayPopup(false);
     moveToNextTest(noIssues);
   };
 
   const resetTests = () => {
     localStorage.removeItem(STORAGE_KEY);
-    setTests(initialTests);
+    setTests(initialTests.map(t => ({ ...t, status: "pending", passed: null })));
     setCurrentTestIndex(0);
     setHasStarted(false);
     setIsComplete(false);
     setIsRunningTest(false);
-    setShowResultPopup(false);
+    setShowDisplayPopup(false);
   };
 
   const currentTest = tests[currentTestIndex] || tests[0];
-  const scoreData = getScoreGrade(overallScore);
+  const scoreData = getScoreLabel(overallScore);
 
   const getStatusIcon = (status: TestItem["status"], passed: boolean | null) => {
-    if (status === "completed" && passed) {
+    if (status === "completed" && passed === true) {
       return <CheckCircle2 className="h-5 w-5 text-success" />;
     }
-    if (status === "failed" || (status === "completed" && !passed)) {
-      return <XCircle className="h-5 w-5 text-destructive" />;
+    if (status === "issue" || passed === false) {
+      return <AlertTriangle className="h-5 w-5 text-warning" />;
+    }
+    if (status === "running") {
+      return <Loader2 className="h-5 w-5 text-primary animate-spin" />;
     }
     return <div className="h-5 w-5 rounded-full border-2 border-muted-foreground/30" />;
   };
@@ -240,6 +265,8 @@ const FullSystemTest = () => {
         return <DisplayTestEmbed {...props} />;
       case "keyboard":
         return <KeyboardTestEmbed {...props} />;
+      case "touchpad":
+        return <TouchpadTestEmbed {...props} />;
       case "camera":
         return <CameraTestEmbed {...props} />;
       case "microphone":
@@ -248,8 +275,6 @@ const FullSystemTest = () => {
         return <AudioTestEmbed {...props} />;
       case "network":
         return <NetworkTestEmbed {...props} />;
-      case "touchpad":
-        return <TouchpadTestEmbed {...props} />;
       case "ports":
         return <PortsTestEmbed {...props} />;
       default:
@@ -269,9 +294,9 @@ const FullSystemTest = () => {
             className="mb-6"
           >
             <Button variant="ghost" size="sm" asChild>
-              <Link to="/">
+              <Link to="/dashboard">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
+                Back to Dashboard
               </Link>
             </Button>
           </motion.div>
@@ -290,9 +315,15 @@ const FullSystemTest = () => {
               <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                 Run All Tests
               </h1>
-              <p className="text-muted-foreground">
-                Complete each test to get your laptop's health score
+              <p className="text-muted-foreground mb-4">
+                Complete each test to get your laptop's health score out of 100
               </p>
+              
+              {/* Privacy notice */}
+              <div className="inline-flex items-center gap-2 text-muted-foreground text-sm">
+                <Shield className="h-4 w-4" />
+                All tests run locally in your browser. No data is uploaded or stored.
+              </div>
             </motion.div>
 
             {/* Not Started State - Show Start Button + Test List */}
@@ -303,34 +334,50 @@ const FullSystemTest = () => {
               >
                 {/* Start Button Card */}
                 <div className="glass-card rounded-3xl p-8 text-center mb-6">
-                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                    <Play className="h-10 w-10 text-primary" />
+                  <div className="relative w-24 h-24 mx-auto mb-6">
+                    {/* Animated rings */}
+                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s' }} />
+                    <div className="relative w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Play className="h-10 w-10 text-primary" />
+                    </div>
                   </div>
+                  
                   <h2 className="text-xl font-semibold text-foreground mb-2">
                     Ready to Test Your Laptop?
                   </h2>
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    We'll run {tests.length} diagnostic tests. After each test, you'll confirm if everything looked okay.
+                    We'll run {tests.length} diagnostic tests in sequence. Each test runs automatically, and you'll confirm the results when needed.
                   </p>
-                  <Button size="lg" onClick={startTests}>
-                    <Play className="h-5 w-5 mr-2" />
-                    Start Full System Test
+                  
+                  <Button 
+                    size="xl" 
+                    onClick={startTests}
+                    className="group"
+                  >
+                    <span className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary-foreground/20 mr-2 group-hover:animate-pulse">
+                      <Play className="h-4 w-4" />
+                    </span>
+                    Run All Tests
                   </Button>
                 </div>
 
                 {/* Test List Preview */}
                 <div className="glass-card rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-border">
+                  <div className="p-4 border-b border-border flex items-center justify-between">
                     <h2 className="font-semibold text-foreground">Tests We'll Run</h2>
+                    <span className="text-sm text-muted-foreground">{tests.length} tests</span>
                   </div>
                   <div className="divide-y divide-border">
-                    {tests.map((test) => {
+                    {tests.map((test, index) => {
                       const Icon = test.icon;
                       return (
                         <div
                           key={test.id}
                           className="flex items-center gap-4 p-4"
                         >
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground text-sm font-medium">
+                            {index + 1}
+                          </div>
                           <div className="p-2 rounded-lg bg-muted/50">
                             <Icon className="h-5 w-5 text-muted-foreground" />
                           </div>
@@ -352,48 +399,134 @@ const FullSystemTest = () => {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="glass-card rounded-3xl p-8 mb-8 text-center"
+                  className="space-y-6"
                 >
-                  <div className="flex items-center justify-center mb-4">
-                    <Trophy className="h-8 w-8 text-warning mr-3" />
-                    <span className="text-lg font-medium text-foreground">System Score</span>
+                  {/* Score Card */}
+                  <div className="glass-card rounded-3xl p-8 text-center">
+                    <div className="flex items-center justify-center mb-4">
+                      <Trophy className="h-8 w-8 text-warning mr-3" />
+                      <span className="text-lg font-medium text-foreground">Laptop Health Score</span>
+                    </div>
+                    
+                    {/* Score Circle */}
+                    <div className="relative w-40 h-40 mx-auto mb-6">
+                      <svg className="w-40 h-40 transform -rotate-90">
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          fill="none"
+                          className="text-muted"
+                        />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          stroke="currentColor"
+                          strokeWidth="8"
+                          fill="none"
+                          strokeDasharray={440}
+                          strokeDashoffset={440 - (440 * overallScore) / 100}
+                          strokeLinecap="round"
+                          className={scoreData.color}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className={`text-5xl font-bold ${scoreData.color}`}>
+                          {overallScore}
+                        </span>
+                        <span className="text-muted-foreground text-sm">out of 100</span>
+                      </div>
+                    </div>
+                    
+                    <div className={`inline-block px-6 py-2 rounded-full ${scoreData.bg} ${scoreData.color} font-semibold mb-4`}>
+                      {scoreData.label}
+                    </div>
+
+                    <div className="flex justify-center gap-8 mb-6">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-5 w-5 text-success" />
+                        <span className="text-foreground font-medium">{passedCount} Passed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-warning" />
+                        <span className="text-foreground font-medium">{issueCount} Issues</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                      {overallScore >= 90 
+                        ? "Your laptop is in excellent condition! All major components are working properly."
+                        : overallScore >= 75
+                        ? "Your laptop is in good condition with minor issues detected."
+                        : overallScore >= 50
+                        ? "Some issues were detected. Consider checking the highlighted components."
+                        : "Several issues were detected. We recommend addressing the flagged components."}
+                    </p>
                   </div>
                   
-                  <div className={`inline-flex items-center justify-center w-32 h-32 rounded-full ${scoreData.bg} mb-4`}>
-                    <span className={`text-5xl font-bold ${scoreData.color}`}>
-                      {overallScore}
-                    </span>
-                  </div>
-                  
-                  <div className={`inline-block px-4 py-1 rounded-full ${scoreData.bg} ${scoreData.color} font-semibold mb-4`}>
-                    Grade: {scoreData.grade}
+                  {/* Summary Breakdown */}
+                  <div className="glass-card rounded-2xl overflow-hidden">
+                    <div className="p-4 border-b border-border">
+                      <h2 className="font-semibold text-foreground">Test Summary</h2>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {tests.map((test) => {
+                        const Icon = test.icon;
+                        return (
+                          <div
+                            key={test.id}
+                            className={`flex items-center justify-between p-4 ${
+                              test.passed === false ? "bg-warning/5" : ""
+                            }`}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={`p-2 rounded-lg ${
+                                test.passed === true ? "bg-success/10" :
+                                test.passed === false ? "bg-warning/10" :
+                                "bg-muted/50"
+                              }`}>
+                                <Icon className={`h-5 w-5 ${
+                                  test.passed === true ? "text-success" :
+                                  test.passed === false ? "text-warning" :
+                                  "text-muted-foreground"
+                                }`} />
+                              </div>
+                              <div>
+                                <span className="font-medium text-foreground block">
+                                  {test.name}
+                                </span>
+                                {test.passed === false && test.id === "display" && (
+                                  <span className="text-xs text-warning">
+                                    Screen issue reported by user
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {test.passed === true && (
+                                <span className="text-sm text-success font-medium">Passed</span>
+                              )}
+                              {test.passed === false && (
+                                <span className="text-sm text-warning font-medium">Issue Detected</span>
+                              )}
+                              {getStatusIcon(test.status, test.passed)}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div className="flex justify-center gap-6 mb-4">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-success" />
-                      <span className="text-foreground font-medium">{passedCount} Passed</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <XCircle className="h-5 w-5 text-destructive" />
-                      <span className="text-foreground font-medium">{failedCount} Failed</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                    {overallScore >= 80 
-                      ? "Your laptop is in excellent condition! All major components are working properly."
-                      : overallScore >= 60
-                      ? "Your laptop is in good condition with some minor issues detected."
-                      : "Some issues were detected. Consider checking the individual test results."}
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-                    <Button variant="outline" onClick={resetTests}>
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button variant="outline" size="lg" onClick={resetTests}>
                       <RotateCcw className="h-4 w-4 mr-2" />
                       Run Again
                     </Button>
-                    <Button asChild>
+                    <Button size="lg" asChild>
                       <Link to="/dashboard">
                         View Individual Tests
                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -405,140 +538,133 @@ const FullSystemTest = () => {
             </AnimatePresence>
 
             {/* Running Test */}
-            {hasStarted && !isComplete && isRunningTest && currentTest && (
+            {hasStarted && !isComplete && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mb-6"
+                className="space-y-4"
               >
                 {/* Progress Bar */}
-                <div className="glass-card rounded-2xl p-4 mb-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">
-                      Test {currentTestIndex + 1} of {tests.length}: {currentTest.name}
-                    </span>
+                <div className="glass-card rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
+                        {currentTestIndex + 1}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        of {tests.length}
+                      </span>
+                    </div>
+                    <span className="font-medium text-foreground">{currentTest.name}</span>
                     <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
                   </div>
                   <Progress value={progress} className="h-2" />
                 </div>
 
-                {/* Embedded Test */}
-                <div className="glass-card rounded-2xl overflow-hidden min-h-[500px]">
-                  <Suspense fallback={
-                    <div className="flex items-center justify-center h-[500px]">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    </div>
-                  }>
-                    {renderTestComponent()}
-                  </Suspense>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Result Popup */}
-            <AnimatePresence>
-              {showResultPopup && currentTest && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
-                >
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.9, opacity: 0 }}
-                    className="glass-card rounded-3xl p-8 max-w-md mx-4 text-center"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                      <currentTest.icon className="h-8 w-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">
-                      {currentTest.name} Complete
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      Did you notice anything unusual during this test?
-                    </p>
-                    <div className="flex gap-4">
-                      <Button 
-                        variant="outline" 
-                        className="flex-1 border-success text-success hover:bg-success/10"
-                        onClick={() => handleResultAnswer(true)}
-                      >
-                        <CheckCircle2 className="h-5 w-5 mr-2" />
-                        No Issues
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
-                        onClick={() => handleResultAnswer(false)}
-                      >
-                        <XCircle className="h-5 w-5 mr-2" />
-                        Yes, Issues
-                      </Button>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Tests List - Only show when started */}
-            {hasStarted && !isComplete && !isRunningTest && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="glass-card rounded-2xl overflow-hidden"
-              >
-                <div className="p-4 border-b border-border">
-                  <h2 className="font-semibold text-foreground">Test Progress</h2>
-                </div>
-                
-                <div className="divide-y divide-border">
-                  {tests.map((test, index) => {
-                    const Icon = test.icon;
-                    const isCurrent = index === currentTestIndex;
-                    
-                    return (
-                      <div
-                        key={test.id}
-                        className={`flex items-center justify-between p-4 transition-colors ${
-                          isCurrent ? "bg-primary/5" : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg ${
-                            test.passed === true ? "bg-success/10" :
-                            test.passed === false ? "bg-destructive/10" :
-                            isCurrent ? "bg-primary/10" : "bg-muted/50"
+                {/* Test Progress List (mini) */}
+                <div className="glass-card rounded-2xl p-4">
+                  <div className="flex flex-wrap gap-3">
+                    {tests.map((test, index) => {
+                      const Icon = test.icon;
+                      const isCurrent = index === currentTestIndex;
+                      const isDone = test.status === "completed" || test.status === "issue";
+                      
+                      return (
+                        <div
+                          key={test.id}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+                            isCurrent ? "bg-primary/10 border border-primary/30" :
+                            isDone ? (test.passed ? "bg-success/10" : "bg-warning/10") :
+                            "bg-muted/50"
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 ${
+                            isCurrent ? "text-primary" :
+                            isDone ? (test.passed ? "text-success" : "text-warning") :
+                            "text-muted-foreground"
+                          }`} />
+                          <span className={`text-xs font-medium ${
+                            isCurrent ? "text-primary" :
+                            isDone ? "text-foreground" :
+                            "text-muted-foreground"
                           }`}>
-                            <Icon className={`h-5 w-5 ${
-                              test.passed === true ? "text-success" :
-                              test.passed === false ? "text-destructive" :
-                              isCurrent ? "text-primary" : "text-muted-foreground"
-                            }`} />
-                          </div>
-                          <span className={`font-medium ${
-                            test.status !== "pending" ? "text-foreground" :
-                            isCurrent ? "text-foreground" : "text-muted-foreground"
-                          }`}>
-                            {test.name}
+                            {test.name.replace(" Test", "")}
                           </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {isCurrent && (
-                            <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded-full">
-                              Current
-                            </span>
+                          {isDone && (
+                            test.passed ? 
+                              <CheckCircle2 className="h-3 w-3 text-success" /> :
+                              <AlertTriangle className="h-3 w-3 text-warning" />
                           )}
-                          {getStatusIcon(test.status, test.passed)}
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {/* Embedded Test */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTest.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="glass-card rounded-2xl overflow-hidden min-h-[500px]"
+                  >
+                    <Suspense fallback={
+                      <div className="flex flex-col items-center justify-center h-[500px] gap-4">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        <span className="text-muted-foreground">Loading {currentTest.name}...</span>
+                      </div>
+                    }>
+                      {renderTestComponent()}
+                    </Suspense>
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
             )}
+
+            {/* Display Test Popup - using Dialog for better UX */}
+            <Dialog open={showDisplayPopup} onOpenChange={() => {}}>
+              <DialogContent className="sm:max-w-md" hideCloseButton>
+                <DialogHeader className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                    <Monitor className="h-8 w-8 text-primary" />
+                  </div>
+                  <DialogTitle className="text-xl">
+                    Did you notice any screen issues?
+                  </DialogTitle>
+                  <DialogDescription className="text-left mt-4">
+                    <span className="font-medium text-foreground block mb-2">Examples:</span>
+                    <ul className="space-y-1 text-muted-foreground">
+                      <li>• Dead pixels or bright spots</li>
+                      <li>• Flickering or blinking</li>
+                      <li>• Color distortion or banding</li>
+                      <li>• Brightness unevenness</li>
+                    </ul>
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="flex gap-3 mt-4">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-12 border-success text-success hover:bg-success/10 hover:border-success"
+                    onClick={() => handleDisplayAnswer(true)}
+                  >
+                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                    No issues found
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-12 border-warning text-warning hover:bg-warning/10 hover:border-warning"
+                    onClick={() => handleDisplayAnswer(false)}
+                  >
+                    <AlertTriangle className="h-5 w-5 mr-2" />
+                    Yes, I noticed an issue
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </main>
