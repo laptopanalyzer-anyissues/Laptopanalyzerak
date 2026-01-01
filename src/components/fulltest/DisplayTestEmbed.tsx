@@ -291,6 +291,7 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showControls, setShowControls] = useState(true);
+  const [isExiting, setIsExiting] = useState(false); // Track when completing to prevent re-render flash
   
   // Test parameters
   const [grayscale, setGrayscale] = useState(50);
@@ -315,12 +316,16 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
 
   const exitFullscreenAndComplete = useCallback(() => {
     console.log("[DisplayTestEmbed] exitFullscreenAndComplete called");
+    // Mark as exiting FIRST to prevent the fullscreen prompt from showing
+    setIsExiting(true);
+    
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
-    // Just call onComplete - don't set isFullscreen(false) as the component will unmount
-    // Setting isFullscreen(false) before unmount causes the "Fullscreen Required" screen to flash
-    onComplete();
+    // Call onComplete after a small delay to ensure state updates propagate
+    setTimeout(() => {
+      onComplete();
+    }, 50);
   }, [onComplete]);
 
   const nextTest = useCallback(() => {
@@ -387,6 +392,16 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   }));
 
   const isLastTest = currentTestIndex === tests.length - 1;
+
+  // If we're exiting, render nothing to prevent flash
+  if (isExiting) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[500px] gap-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <span className="text-muted-foreground">Completing display test...</span>
+      </div>
+    );
+  }
 
   // Fullscreen prompt if not yet in fullscreen
   if (!isFullscreen) {

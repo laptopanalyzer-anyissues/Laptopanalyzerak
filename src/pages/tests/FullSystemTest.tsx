@@ -217,16 +217,16 @@ const FullSystemTest = () => {
     console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id);
     const testId = tests[currentTestIndex]?.id;
     
-    // Stop running the current test
+    // Stop running the current test FIRST
     setIsRunningTest(false);
     
     if (testId === "display") {
-      // Delay showing popup to ensure the DisplayTestEmbed portal unmounts first
-      console.log("[FullSystemTest] Scheduling display popup");
+      // Delay showing popup to ensure the DisplayTestEmbed fully unmounts
+      console.log("[FullSystemTest] Scheduling display popup after delay");
       setTimeout(() => {
         console.log("[FullSystemTest] Now showing display popup");
         setShowDisplayPopup(true);
-      }, 100);
+      }, 200);
     } else {
       // Auto-pass all other tests
       console.log("[FullSystemTest] Auto-passing test, moving to next");
