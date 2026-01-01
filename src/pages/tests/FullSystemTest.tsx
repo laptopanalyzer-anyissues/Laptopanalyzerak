@@ -215,13 +215,18 @@ const FullSystemTest = () => {
   // Called when an embedded test completes
   const handleTestComplete = useCallback(() => {
     console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id);
+    const testId = tests[currentTestIndex]?.id;
+    
+    // Stop running the current test
     setIsRunningTest(false);
     
-    // Only show verification popup for display test
-    const testId = tests[currentTestIndex]?.id;
     if (testId === "display") {
-      console.log("[FullSystemTest] Showing display popup");
-      setShowDisplayPopup(true);
+      // Delay showing popup to ensure the DisplayTestEmbed portal unmounts first
+      console.log("[FullSystemTest] Scheduling display popup");
+      setTimeout(() => {
+        console.log("[FullSystemTest] Now showing display popup");
+        setShowDisplayPopup(true);
+      }, 100);
     } else {
       // Auto-pass all other tests
       console.log("[FullSystemTest] Auto-passing test, moving to next");
