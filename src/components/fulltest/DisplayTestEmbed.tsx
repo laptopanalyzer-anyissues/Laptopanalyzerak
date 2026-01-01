@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -13,6 +14,8 @@ import {
   Type,
   Eye,
   CircleDot,
+  Expand,
+  AlertTriangle,
 } from "lucide-react";
 
 interface Props {
@@ -157,7 +160,7 @@ function ViewingAngleTest() {
   return (
     <div className="w-full h-full bg-black relative">
       <div 
-        className="absolute w-32 h-32 rounded-full"
+        className="absolute w-56 h-56 rounded-full"
         style={{
           top: '5%',
           left: '5%',
@@ -165,7 +168,7 @@ function ViewingAngleTest() {
         }}
       />
       <div 
-        className="absolute w-32 h-32 rounded-full"
+        className="absolute w-56 h-56 rounded-full"
         style={{
           top: '5%',
           right: '5%',
@@ -173,13 +176,13 @@ function ViewingAngleTest() {
         }}
       />
       <div 
-        className="absolute w-40 h-40 rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+        className="absolute w-64 h-64 rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
         style={{
           background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
         }}
       />
       <div 
-        className="absolute w-32 h-32 rounded-full"
+        className="absolute w-56 h-56 rounded-full"
         style={{
           bottom: '5%',
           left: '5%',
@@ -187,7 +190,7 @@ function ViewingAngleTest() {
         }}
       />
       <div 
-        className="absolute w-32 h-32 rounded-full"
+        className="absolute w-56 h-56 rounded-full"
         style={{
           bottom: '5%',
           right: '5%',
@@ -283,9 +286,11 @@ const categories: { id: TestCategory; name: string; icon: React.ElementType }[] 
 ];
 
 const DisplayTestEmbed = ({ onComplete }: Props) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenFailed, setFullscreenFailed] = useState(false);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   
   // Test parameters
   const [grayscale, setGrayscale] = useState(50);
@@ -296,32 +301,23 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   const currentTest = tests[currentTestIndex];
   const testParams: TestParams = { grayscale, gradientSteps, fontSize, invertText };
 
-  // Auto-enter fullscreen on mount
-  useEffect(() => {
-    const enterFullscreen = async () => {
-      try {
-        await document.documentElement.requestFullscreen?.();
-        setIsFullscreen(true);
-      } catch (e) {
-        // Fallback: still show the test even if fullscreen fails
-        setIsFullscreen(true);
-      }
-    };
-    enterFullscreen();
-
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        setIsFullscreen(false);
-      }
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  const enterFullscreen = useCallback(async () => {
+    try {
+      await document.documentElement.requestFullscreen?.();
+      setIsFullscreen(true);
+      setFullscreenFailed(false);
+    } catch {
+      // Even if native fullscreen fails, use pseudo-fullscreen
+      setIsFullscreen(true);
+      setFullscreenFailed(false);
+    }
   }, []);
 
   const exitFullscreenAndComplete = useCallback(() => {
     if (document.fullscreenElement) {
       document.exitFullscreen?.();
     }
+    setIsFullscreen(false);
     onComplete();
   }, [onComplete]);
 
@@ -337,8 +333,23 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
     }
   }, [currentTestIndex]);
 
+  // Auto-enter fullscreen on mount
+  useEffect(() => {
+    enterFullscreen();
+
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        // User pressed Esc to exit browser fullscreen, but stay in pseudo-fullscreen
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, [enterFullscreen, isFullscreen]);
+
   // Keyboard navigation
   useEffect(() => {
+    if (!isFullscreen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case "Escape":
@@ -358,14 +369,14 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
           break;
         case " ":
           e.preventDefault();
-          setSidebarOpen((prev) => !prev);
+          setShowControls((prev) => !prev);
           break;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextTest, prevTest, exitFullscreenAndComplete]);
+  }, [isFullscreen, nextTest, prevTest, exitFullscreenAndComplete]);
 
   // Group tests by category
   const testsByCategory = categories.map((cat) => ({
@@ -375,188 +386,244 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
 
   const isLastTest = currentTestIndex === tests.length - 1;
 
-  // Render fullscreen overlay
-  return (
-    <div className="fixed inset-0 z-[100] bg-black flex flex-col overflow-hidden">
-      {/* Test Display Area */}
-      <div className="flex-1 relative">
-        {/* Test Content */}
-        <div className="absolute inset-0">
-          {currentTest.render(testParams)}
+  // Fullscreen prompt if not yet in fullscreen
+  if (!isFullscreen) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[500px] gap-6 p-8">
+        <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
+          <Expand className="h-10 w-10 text-primary" />
         </div>
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            Fullscreen Required
+          </h3>
+          <p className="text-muted-foreground max-w-md">
+            The display test requires fullscreen mode for accurate pixel and color testing across your entire screen.
+          </p>
+        </div>
+        {fullscreenFailed && (
+          <div className="flex items-center gap-2 text-warning text-sm">
+            <AlertTriangle className="h-4 w-4" />
+            <span>Fullscreen was blocked. Click below to try again.</span>
+          </div>
+        )}
+        <Button size="lg" onClick={enterFullscreen}>
+          <Expand className="h-5 w-5 mr-2" />
+          Enter Fullscreen Test
+        </Button>
+      </div>
+    );
+  }
 
-        {/* Navigation Sidebar */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.div
-              initial={{ x: -280, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -280, opacity: 0 }}
-              transition={{ type: "spring", damping: 25 }}
-              className="absolute top-0 left-0 bottom-0 w-[180px] bg-background/95 backdrop-blur-xl border-r border-border overflow-y-auto z-10"
-            >
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-semibold text-foreground text-sm">Display Tests</h2>
-                  <button
-                    onClick={() => setSidebarOpen(false)}
-                    className="p-1 rounded-lg hover:bg-muted transition-colors"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                  </button>
-                </div>
+  // Render fullscreen test as a portal to escape any container
+  const fullscreenContent = (
+    <div className="fixed inset-0 z-[9999] bg-black overflow-hidden">
+      {/* Test Content */}
+      <div className="w-full h-full">
+        {currentTest.render(testParams)}
+      </div>
 
-                {testsByCategory.map((category) => (
-                  <div key={category.id} className="mb-3">
-                    <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
-                      <category.icon className="h-3 w-3" />
-                      {category.name}
-                    </div>
-                    <div className="space-y-0.5">
-                      {category.tests.map((test) => {
-                        const testIndex = tests.findIndex((t) => t.id === test.id);
-                        return (
-                          <button
-                            key={test.id}
-                            onClick={() => setCurrentTestIndex(testIndex)}
-                            className={`w-full text-left px-2 py-1.5 rounded-md text-xs transition-colors ${
-                              currentTestIndex === testIndex
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-muted text-foreground"
-                            }`}
-                          >
-                            {test.name}
-                          </button>
-                        );
-                      })}
-                    </div>
+      {/* Navigation Sidebar */}
+      <AnimatePresence>
+        {showControls && sidebarOpen && (
+          <motion.div
+            initial={{ x: -320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -320, opacity: 0 }}
+            transition={{ type: "spring", damping: 25 }}
+            className="fixed top-0 left-0 bottom-0 w-72 bg-background/95 backdrop-blur-xl border-r border-border overflow-y-auto"
+          >
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="font-semibold text-foreground">Display Tests</h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+              </div>
+
+              {testsByCategory.map((category) => (
+                <div key={category.id} className="mb-4">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                    <category.icon className="h-3.5 w-3.5" />
+                    {category.name}
                   </div>
-                ))}
+                  <div className="space-y-1">
+                    {category.tests.map((test) => {
+                      const testIndex = tests.findIndex((t) => t.id === test.id);
+                      return (
+                        <button
+                          key={test.id}
+                          onClick={() => setCurrentTestIndex(testIndex)}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                            currentTestIndex === testIndex
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-muted text-foreground"
+                          }`}
+                        >
+                          {test.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
 
-                {/* Parameter Controls */}
-                {currentTest.category === "uniformity" && (
-                  <div className="mt-4 p-3 rounded-xl bg-muted/50">
-                    <label className="text-[10px] font-medium text-muted-foreground mb-2 block">
-                      Gray Level: {grayscale}%
+              {/* Parameter Controls */}
+              {currentTest.category === "uniformity" && (
+                <div className="mt-6 p-4 rounded-xl bg-muted/50">
+                  <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                    Gray Level: {grayscale}%
+                  </label>
+                  <Slider
+                    value={[grayscale]}
+                    onValueChange={([v]) => setGrayscale(v)}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              )}
+
+              {currentTest.category === "gradients" && (
+                <div className="mt-6 p-4 rounded-xl bg-muted/50">
+                  <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                    Steps: {gradientSteps}
+                  </label>
+                  <Slider
+                    value={[gradientSteps]}
+                    onValueChange={([v]) => setGradientSteps(v)}
+                    min={8}
+                    max={256}
+                    step={8}
+                  />
+                </div>
+              )}
+
+              {currentTest.category === "sharpness" && (
+                <div className="mt-6 space-y-4">
+                  <div className="p-4 rounded-xl bg-muted/50">
+                    <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                      Font Size: {fontSize}px
                     </label>
                     <Slider
-                      value={[grayscale]}
-                      onValueChange={([v]) => setGrayscale(v)}
-                      min={0}
-                      max={100}
+                      value={[fontSize]}
+                      onValueChange={([v]) => setFontSize(v)}
+                      min={8}
+                      max={32}
                       step={1}
                     />
                   </div>
-                )}
-
-                {currentTest.category === "gradients" && (
-                  <div className="mt-4 p-3 rounded-xl bg-muted/50">
-                    <label className="text-[10px] font-medium text-muted-foreground mb-2 block">
-                      Steps: {gradientSteps}
-                    </label>
-                    <Slider
-                      value={[gradientSteps]}
-                      onValueChange={([v]) => setGradientSteps(v)}
-                      min={8}
-                      max={256}
-                      step={8}
-                    />
-                  </div>
-                )}
-
-                {currentTest.category === "sharpness" && (
-                  <div className="mt-4 space-y-3">
-                    <div className="p-3 rounded-xl bg-muted/50">
-                      <label className="text-[10px] font-medium text-muted-foreground mb-2 block">
-                        Font Size: {fontSize}px
-                      </label>
-                      <Slider
-                        value={[fontSize]}
-                        onValueChange={([v]) => setFontSize(v)}
-                        min={8}
-                        max={32}
-                        step={1}
-                      />
-                    </div>
-                    <button
-                      onClick={() => setInvertText(!invertText)}
-                      className="w-full text-left px-3 py-2 rounded-xl bg-muted/50 text-xs hover:bg-muted transition-colors"
-                    >
-                      {invertText ? "Switch to Black on White" : "Switch to White on Black"}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Sidebar Toggle (when closed) */}
-        {!sidebarOpen && (
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="absolute top-4 left-4 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors z-10"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+                  <button
+                    onClick={() => setInvertText(!invertText)}
+                    className="w-full px-4 py-2 rounded-lg bg-muted hover:bg-muted/80 text-sm font-medium transition-colors"
+                  >
+                    {invertText ? "White on Black" : "Black on White"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {/* Close button */}
-        <button
-          onClick={exitFullscreenAndComplete}
-          className="absolute top-4 right-4 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors z-10"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
-        {/* Test Counter */}
-        <div className="absolute top-4 right-16 px-3 py-1.5 rounded-lg bg-background/80 backdrop-blur-sm border border-border text-xs font-medium z-10">
-          {currentTestIndex + 1} / {tests.length}
-        </div>
-      </div>
-
-      {/* Bottom Controls */}
-      <div className="p-4 bg-background border-t border-border">
-        <div className="flex items-center justify-between gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={prevTest}
-            disabled={currentTestIndex === 0}
+      {/* Sidebar Toggle (when closed) */}
+      <AnimatePresence>
+        {showControls && !sidebarOpen && (
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            onClick={() => setSidebarOpen(true)}
+            className="fixed top-4 left-4 p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors"
           >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-          
-          <div className="flex-1 text-center">
-            <p className="text-sm font-medium text-foreground">{currentTest.name}</p>
-            <p className="text-xs text-muted-foreground">{currentTest.description}</p>
-          </div>
+            <ChevronRight className="h-5 w-5" />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-          {isLastTest ? (
-            <Button size="sm" onClick={exitFullscreenAndComplete}>
-              <CheckCircle2 className="h-4 w-4 mr-1" />
-              Complete Test
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={nextTest}
+      {/* Top Controls */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 flex items-center gap-2"
+          >
+            <div className="px-4 py-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border">
+              <span className="text-sm text-foreground font-medium">
+                {currentTestIndex + 1} / {tests.length}
+              </span>
+            </div>
+            <button
+              onClick={exitFullscreenAndComplete}
+              className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-destructive hover:text-destructive-foreground transition-colors"
             >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          )}
-        </div>
-        
-        {/* Keyboard shortcuts hint */}
-        <p className="text-[10px] text-muted-foreground text-center mt-2">
-          Space/Tab: toggle menu • ←→: navigate • Esc: exit
-        </p>
-      </div>
+              <X className="h-5 w-5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bottom Info & Navigation */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3"
+          >
+            <button
+              onClick={prevTest}
+              disabled={currentTestIndex === 0}
+              className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            
+            <div className="px-6 py-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border text-center min-w-64">
+              <p className="font-medium text-foreground">{currentTest.name}</p>
+              <p className="text-xs text-muted-foreground mt-1">{currentTest.description}</p>
+            </div>
+            
+            {isLastTest ? (
+              <Button onClick={exitFullscreenAndComplete} size="sm">
+                <CheckCircle2 className="h-4 w-4 mr-1" />
+                Complete
+              </Button>
+            ) : (
+              <button
+                onClick={nextTest}
+                className="p-2 rounded-lg bg-background/80 backdrop-blur-sm border border-border hover:bg-muted transition-colors"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Keyboard Hints */}
+      <AnimatePresence>
+        {showControls && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-background/60 backdrop-blur-sm px-3 py-2 rounded-lg"
+          >
+            <span className="opacity-70">Space: toggle UI • Tab: menu • ←→: navigate • Esc: exit</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
+
+  return createPortal(fullscreenContent, document.body);
 };
 
 export default DisplayTestEmbed;
