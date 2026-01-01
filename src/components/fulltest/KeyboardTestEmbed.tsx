@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Keyboard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   onComplete: () => void;
@@ -37,7 +38,9 @@ const keyMappings: Record<string, string[]> = {
 const KeyboardTestEmbed = ({ onComplete }: Props) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
-  const [autoCompleteTimer, setAutoCompleteTimer] = useState(8);
+  const [idleTimer, setIdleTimer] = useState(0); // Only count idle time (no key presses)
+  const lastActivityRef = useRef(Date.now());
+  const hasCompletedRef = useRef(false);
 
   const getDisplayKey = (key: string): string => {
     // Convert actual key to display key
@@ -52,6 +55,9 @@ const KeyboardTestEmbed = ({ onComplete }: Props) => {
     const displayKey = getDisplayKey(e.key);
     setLastKey(e.key === " " ? "Space" : e.key);
     setPressedKeys((prev) => new Set(prev).add(displayKey));
+    // Reset idle timer on any key press
+    lastActivityRef.current = Date.now();
+    setIdleTimer(0);
   }, []);
 
   useEffect(() => {
@@ -59,20 +65,28 @@ const KeyboardTestEmbed = ({ onComplete }: Props) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Auto-complete timer - tests run automatically
+  // Idle timer - only auto-complete if user hasn't pressed any keys for 15 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setAutoCompleteTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onComplete();
-          return 0;
-        }
-        return prev - 1;
-      });
+      const idleSeconds = Math.floor((Date.now() - lastActivityRef.current) / 1000);
+      setIdleTimer(idleSeconds);
+      
+      // Auto-complete only after 15 seconds of inactivity AND at least 5 keys pressed
+      if (idleSeconds >= 15 && pressedKeys.size >= 5 && !hasCompletedRef.current) {
+        hasCompletedRef.current = true;
+        clearInterval(interval);
+        onComplete();
+      }
     }, 1000);
 
     return () => clearInterval(interval);
+  }, [onComplete, pressedKeys.size]);
+
+  const handleComplete = useCallback(() => {
+    if (!hasCompletedRef.current) {
+      hasCompletedRef.current = true;
+      onComplete();
+    }
   }, [onComplete]);
 
   const totalKeys = keyboardLayout.flat().length;
@@ -87,7 +101,10 @@ const KeyboardTestEmbed = ({ onComplete }: Props) => {
           <span className="font-medium">Press keys on your keyboard</span>
         </div>
         <p className="text-sm text-muted-foreground">
-          {testedKeys} keys tested • Last key: {lastKey || "—"} • Auto-continues in {autoCompleteTimer}s
+          {testedKeys} keys tested • Last key: {lastKey || "—"}
+          {idleTimer > 0 && pressedKeys.size >= 5 && (
+            <span> • Auto-continues in {Math.max(0, 15 - idleTimer)}s</span>
+          )}
         </p>
       </div>
 
@@ -135,6 +152,17 @@ const KeyboardTestEmbed = ({ onComplete }: Props) => {
             })}
           </div>
         ))}
+      </div>
+
+      {/* Complete Button */}
+      <div className="mt-4 flex justify-center">
+        <Button 
+          onClick={handleComplete}
+          size="lg"
+          className="px-8"
+        >
+          Complete Keyboard Test
+        </Button>
       </div>
     </div>
   );
