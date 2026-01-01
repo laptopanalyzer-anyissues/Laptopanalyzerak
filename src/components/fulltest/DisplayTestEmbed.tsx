@@ -318,9 +318,9 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
     if (document.fullscreenElement) {
       document.exitFullscreen?.().catch(() => {});
     }
-    // Call onComplete first before changing state to ensure it's executed
+    // Just call onComplete - don't set isFullscreen(false) as the component will unmount
+    // Setting isFullscreen(false) before unmount causes the "Fullscreen Required" screen to flash
     onComplete();
-    setIsFullscreen(false);
   }, [onComplete]);
 
   const nextTest = useCallback(() => {
