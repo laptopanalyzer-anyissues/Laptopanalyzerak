@@ -324,6 +324,16 @@ export const clearRateLimit = (key: string): void => {
 // ============= Clickjacking Protection =============
 
 /**
+ * Checks if the current context is an allowed iframe (e.g., Lovable preview)
+ */
+export const isAllowedIframe = (): boolean => {
+  const hostname = window.location.hostname;
+  return hostname.includes('lovable.app') || 
+         hostname.includes('localhost') ||
+         hostname === '127.0.0.1';
+};
+
+/**
  * Detects if the page is loaded in an iframe (potential clickjacking)
  */
 export const detectClickjacking = (): boolean => {
@@ -336,10 +346,17 @@ export const detectClickjacking = (): boolean => {
 };
 
 /**
- * Attempts to break out of malicious iframes
+ * Checks if we're in a potentially malicious iframe
+ */
+export const isClickjacked = (): boolean => {
+  return detectClickjacking() && !isAllowedIframe();
+};
+
+/**
+ * Attempts to break out of malicious iframes (only for non-allowed contexts)
  */
 export const preventClickjacking = (): void => {
-  if (detectClickjacking()) {
+  if (isClickjacked()) {
     // Try to redirect top frame to our page
     try {
       if (window.top) {
