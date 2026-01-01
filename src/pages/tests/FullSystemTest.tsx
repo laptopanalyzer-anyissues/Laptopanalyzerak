@@ -32,6 +32,8 @@ import {
   Sparkles,
   Loader2,
   Shield,
+  SkipForward,
+  MinusCircle,
 } from "lucide-react";
 
 // Lazy load test components
@@ -48,8 +50,8 @@ interface TestItem {
   id: string;
   name: string;
   icon: React.ElementType;
-  status: "pending" | "running" | "completed" | "issue";
-  passed: boolean | null;
+  status: "pending" | "running" | "completed" | "issue" | "skipped";
+  passed: boolean | null; // null = not tested, true = passed, false = issue
   weight: number; // Score weight for this test
 }
 
@@ -82,7 +84,7 @@ const testIconMap: Record<string, React.ElementType> = {
 interface StoredTestItem {
   id: string;
   name: string;
-  status: "pending" | "running" | "completed" | "issue";
+  status: "pending" | "running" | "completed" | "issue" | "skipped";
   passed: boolean | null;
   weight: number;
 }
@@ -152,26 +154,26 @@ const FullSystemTest = () => {
     }
   }, [tests, currentTestIndex, hasStarted, isComplete]);
 
-  const completedCount = tests.filter(t => t.status === "completed" || t.status === "issue").length;
+  const completedCount = tests.filter(t => t.status === "completed" || t.status === "issue" || t.status === "skipped").length;
   const progress = (completedCount / tests.length) * 100;
   const passedCount = tests.filter(t => t.passed === true).length;
   const issueCount = tests.filter(t => t.passed === false).length;
+  const skippedCount = tests.filter(t => t.status === "skipped").length;
 
-  // Calculate weighted score
+  // Calculate weighted score - skipped tests are excluded from calculation
   const calculateOverallScore = useCallback(() => {
-    const totalWeight = tests.reduce((sum, t) => sum + t.weight, 0);
     const earnedWeight = tests.reduce((sum, t) => {
       if (t.passed === true) return sum + t.weight;
-      if (t.passed === false) return sum; // Issue reported = 0 points for that test
-      return sum; // Pending tests don't count
+      return sum; // Issue reported or skipped = 0 points
     }, 0);
     
+    // Only count tests that were actually run (not skipped)
     const testedWeight = tests.reduce((sum, t) => {
       if (t.status === "completed" || t.status === "issue") return sum + t.weight;
-      return sum;
+      return sum; // Skipped tests don't affect score
     }, 0);
     
-    if (testedWeight === 0) return 0;
+    if (testedWeight === 0) return 100; // If all skipped, return 100
     return Math.round((earnedWeight / testedWeight) * 100);
   }, [tests]);
 
@@ -240,6 +242,23 @@ const FullSystemTest = () => {
     setShowDisplayPopup(false);
   };
 
+  // Skip the current test
+  const skipCurrentTest = useCallback(() => {
+    setTests(prev => prev.map((t, i) => 
+      i === currentTestIndex 
+        ? { ...t, status: "skipped", passed: null } 
+        : t
+    ));
+    
+    if (currentTestIndex < tests.length - 1) {
+      setCurrentTestIndex(prev => prev + 1);
+      setIsRunningTest(true);
+    } else {
+      setIsComplete(true);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }, [currentTestIndex, tests.length]);
+
   const currentTest = tests[currentTestIndex] || tests[0];
   const scoreData = getScoreLabel(overallScore);
 
@@ -249,6 +268,9 @@ const FullSystemTest = () => {
     }
     if (status === "issue" || passed === false) {
       return <AlertTriangle className="h-5 w-5 text-warning" />;
+    }
+    if (status === "skipped") {
+      return <MinusCircle className="h-5 w-5 text-muted-foreground" />;
     }
     if (status === "running") {
       return <Loader2 className="h-5 w-5 text-primary animate-spin" />;
@@ -445,7 +467,7 @@ const FullSystemTest = () => {
                       {scoreData.label}
                     </div>
 
-                    <div className="flex justify-center gap-8 mb-6">
+                    <div className="flex justify-center gap-6 mb-6 flex-wrap">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-5 w-5 text-success" />
                         <span className="text-foreground font-medium">{passedCount} Passed</span>
@@ -454,6 +476,12 @@ const FullSystemTest = () => {
                         <AlertTriangle className="h-5 w-5 text-warning" />
                         <span className="text-foreground font-medium">{issueCount} Issues</span>
                       </div>
+                      {skippedCount > 0 && (
+                        <div className="flex items-center gap-2">
+                          <MinusCircle className="h-5 w-5 text-muted-foreground" />
+                          <span className="text-muted-foreground font-medium">{skippedCount} Skipped</span>
+                        </div>
+                      )}
                     </div>
                     
                     <p className="text-muted-foreground text-sm max-w-md mx-auto">
@@ -503,6 +531,11 @@ const FullSystemTest = () => {
                                     Screen issue reported by user
                                   </span>
                                 )}
+                                {test.status === "skipped" && (
+                                  <span className="text-xs text-muted-foreground">
+                                    Test was skipped
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
@@ -511,6 +544,9 @@ const FullSystemTest = () => {
                               )}
                               {test.passed === false && (
                                 <span className="text-sm text-warning font-medium">Issue Detected</span>
+                              )}
+                              {test.status === "skipped" && (
+                                <span className="text-sm text-muted-foreground font-medium">Skipped</span>
                               )}
                               {getStatusIcon(test.status, test.passed)}
                             </div>
@@ -544,7 +580,7 @@ const FullSystemTest = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-4"
               >
-                {/* Progress Bar */}
+                {/* Progress Bar with Skip Button */}
                 <div className="glass-card rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -556,7 +592,18 @@ const FullSystemTest = () => {
                       </span>
                     </div>
                     <span className="font-medium text-foreground">{currentTest.name}</span>
-                    <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={skipCurrentTest}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <SkipForward className="h-4 w-4 mr-1" />
+                        Skip
+                      </Button>
+                    </div>
                   </div>
                   <Progress value={progress} className="h-2" />
                 </div>
@@ -568,6 +615,7 @@ const FullSystemTest = () => {
                       const Icon = test.icon;
                       const isCurrent = index === currentTestIndex;
                       const isDone = test.status === "completed" || test.status === "issue";
+                      const isSkipped = test.status === "skipped";
                       
                       return (
                         <div
@@ -575,17 +623,20 @@ const FullSystemTest = () => {
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
                             isCurrent ? "bg-primary/10 border border-primary/30" :
                             isDone ? (test.passed ? "bg-success/10" : "bg-warning/10") :
+                            isSkipped ? "bg-muted/30" :
                             "bg-muted/50"
                           }`}
                         >
                           <Icon className={`h-4 w-4 ${
                             isCurrent ? "text-primary" :
                             isDone ? (test.passed ? "text-success" : "text-warning") :
+                            isSkipped ? "text-muted-foreground/50" :
                             "text-muted-foreground"
                           }`} />
                           <span className={`text-xs font-medium ${
                             isCurrent ? "text-primary" :
                             isDone ? "text-foreground" :
+                            isSkipped ? "text-muted-foreground/50 line-through" :
                             "text-muted-foreground"
                           }`}>
                             {test.name.replace(" Test", "")}
@@ -594,6 +645,9 @@ const FullSystemTest = () => {
                             test.passed ? 
                               <CheckCircle2 className="h-3 w-3 text-success" /> :
                               <AlertTriangle className="h-3 w-3 text-warning" />
+                          )}
+                          {isSkipped && (
+                            <MinusCircle className="h-3 w-3 text-muted-foreground/50" />
                           )}
                         </div>
                       );
