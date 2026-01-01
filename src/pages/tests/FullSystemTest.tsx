@@ -267,6 +267,20 @@ const FullSystemTest = () => {
     }
   }, [currentTestIndex, tests.length]);
 
+  // Go back to previous test
+  const goToPreviousTest = useCallback(() => {
+    if (currentTestIndex > 0) {
+      // Reset the previous test status to pending so it can be re-run
+      setTests(prev => prev.map((t, i) => 
+        i === currentTestIndex - 1 
+          ? { ...t, status: "pending", passed: null } 
+          : t
+      ));
+      setCurrentTestIndex(prev => prev - 1);
+      setIsRunningTest(true);
+    }
+  }, [currentTestIndex]);
+
   const currentTest = tests[currentTestIndex] || tests[0];
   const scoreData = getScoreLabel(overallScore);
 
@@ -288,11 +302,14 @@ const FullSystemTest = () => {
 
   // Render the embedded test component
   const renderTestComponent = () => {
-    const props = { onComplete: handleTestComplete };
+    const props = { 
+      onComplete: handleTestComplete,
+      onBack: currentTestIndex > 0 ? goToPreviousTest : undefined,
+    };
     
     switch (currentTest.id) {
       case "display":
-        return <DisplayTestEmbed {...props} />;
+        return <DisplayTestEmbed onComplete={handleTestComplete} />;
       case "keyboard":
         return <KeyboardTestEmbed {...props} />;
       case "touchpad":

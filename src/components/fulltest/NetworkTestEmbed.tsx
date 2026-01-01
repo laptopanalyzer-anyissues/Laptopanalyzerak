@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Wifi, WifiOff, Activity, CheckCircle2, Loader2 } from "lucide-react";
+import { Wifi, WifiOff, Activity, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-const NetworkTestEmbed = ({ onComplete }: Props) => {
+const NetworkTestEmbed = ({ onComplete, onBack }: Props) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isTesting, setIsTesting] = useState(false);
   const [downloadSpeed, setDownloadSpeed] = useState<number | null>(null);
@@ -120,8 +121,14 @@ const NetworkTestEmbed = ({ onComplete }: Props) => {
         )}
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-6 text-center">
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!isOnline && !hasTestRun}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasTestRun || isOnline ? "Complete Test" : "Connect to network first"}
