@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, CheckCircle2 } from "lucide-react";
+import { Mic, MicOff, CheckCircle2, ArrowLeft } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-const MicrophoneTestEmbed = ({ onComplete }: Props) => {
+const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
   const [isListening, setIsListening] = useState(false);
   const [volume, setVolume] = useState(0);
   const [error, setError] = useState("");
@@ -135,8 +136,14 @@ const MicrophoneTestEmbed = ({ onComplete }: Props) => {
         )}
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-6 text-center">
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!isListening}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {canComplete ? "Complete Test" : "Make some sound first"}

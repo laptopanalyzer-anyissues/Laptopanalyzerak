@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Usb, Plug, Wifi, Check, X, CheckCircle2, Loader2 } from "lucide-react";
+import { Usb, Plug, Wifi, Check, X, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
 interface PortStatus {
@@ -15,7 +16,7 @@ interface PortStatus {
   detail?: string;
 }
 
-const PortsTestEmbed = ({ onComplete }: Props) => {
+const PortsTestEmbed = ({ onComplete, onBack }: Props) => {
   const [ports, setPorts] = useState<PortStatus[]>([
     { id: "wifi", name: "Wi-Fi", icon: Wifi, status: "checking" },
     { id: "charging", name: "Power", icon: Plug, status: "checking" },
@@ -126,8 +127,14 @@ const PortsTestEmbed = ({ onComplete }: Props) => {
         </div>
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-6 text-center">
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!hasChecked}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           Complete Test

@@ -1,14 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Volume2, Square, CheckCircle2 } from "lucide-react";
+import { Volume2, Square, CheckCircle2, ArrowLeft } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-const AudioTestEmbed = ({ onComplete }: Props) => {
+const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const [testedChannels, setTestedChannels] = useState<Set<string>>(new Set());
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -160,8 +161,14 @@ const AudioTestEmbed = ({ onComplete }: Props) => {
         </div>
       )}
 
-      {/* Complete Button */}
-      <div className="mt-6 text-center">
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!canComplete}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {canComplete ? "Complete Test" : "Test at least one speaker"}

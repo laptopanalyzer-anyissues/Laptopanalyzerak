@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Camera, VideoOff, CheckCircle2 } from "lucide-react";
+import { Camera, VideoOff, CheckCircle2, ArrowLeft } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-const CameraTestEmbed = ({ onComplete }: Props) => {
+const CameraTestEmbed = ({ onComplete, onBack }: Props) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
@@ -82,8 +83,14 @@ const CameraTestEmbed = ({ onComplete }: Props) => {
         </div>
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-6 text-center">
+      {/* Action Buttons */}
+      <div className="mt-6 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!hasStarted}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasStarted ? "Complete Test" : "Start camera first"}

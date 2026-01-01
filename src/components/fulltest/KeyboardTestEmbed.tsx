@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Keyboard } from "lucide-react";
+import { CheckCircle2, Keyboard, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
 // Full keyboard layout including all common keys
@@ -35,7 +36,7 @@ const keyMappings: Record<string, string[]> = {
   "→": ["ArrowRight"],
 };
 
-const KeyboardTestEmbed = ({ onComplete }: Props) => {
+const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
   const [idleTimer, setIdleTimer] = useState(0); // Only count idle time (no key presses)
@@ -154,13 +155,24 @@ const KeyboardTestEmbed = ({ onComplete }: Props) => {
         ))}
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-4 flex justify-center">
+      {/* Action Buttons */}
+      <div className="mt-4 flex justify-center gap-3">
+        {onBack && (
+          <Button 
+            onClick={onBack}
+            variant="outline"
+            size="lg"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button 
           onClick={handleComplete}
           size="lg"
           className="px-8"
         >
+          <CheckCircle2 className="h-4 w-4 mr-2" />
           Complete Keyboard Test
         </Button>
       </div>

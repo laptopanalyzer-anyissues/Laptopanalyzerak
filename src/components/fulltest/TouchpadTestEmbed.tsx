@@ -1,13 +1,14 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Mouse, CheckCircle2 } from "lucide-react";
+import { Mouse, CheckCircle2, ArrowLeft } from "lucide-react";
 
 interface Props {
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-const TouchpadTestEmbed = ({ onComplete }: Props) => {
+const TouchpadTestEmbed = ({ onComplete, onBack }: Props) => {
   const [leftClicks, setLeftClicks] = useState(0);
   const [rightClicks, setRightClicks] = useState(0);
   const [scrollEvents, setScrollEvents] = useState(0);
@@ -123,8 +124,14 @@ const TouchpadTestEmbed = ({ onComplete }: Props) => {
         </div>
       </div>
 
-      {/* Complete Button */}
-      <div className="mt-4 text-center">
+      {/* Action Buttons */}
+      <div className="mt-4 flex justify-center gap-3">
+        {onBack && (
+          <Button onClick={onBack} variant="outline">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
         <Button onClick={onComplete} disabled={!hasInteracted}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasInteracted ? "Complete Test" : "Interact with the area first"}
