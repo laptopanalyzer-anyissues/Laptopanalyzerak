@@ -1,10 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RotateCcw, CheckCircle2, Keyboard } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2 } from "lucide-react";
+
+interface KeyPopup {
+  id: number;
+  key: string;
+  x: number;
+  y: number;
+}
 
 // Standard QWERTY keyboard layout
 const keyboardLayout = [
@@ -51,14 +58,33 @@ const KeyboardTest = () => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
   const [lastKeyCode, setLastKeyCode] = useState<string>("");
+  const [keyPopups, setKeyPopups] = useState<KeyPopup[]>([]);
+  const [popupCounter, setPopupCounter] = useState(0);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     e.preventDefault();
     const key = e.key;
+    const displayKey = key === " " ? "Space" : key.length === 1 ? key.toUpperCase() : getKeyDisplay(key);
+    
     setLastKey(key);
     setLastKeyCode(e.code);
     setPressedKeys((prev) => new Set(prev).add(key.toUpperCase()));
-  }, []);
+    
+    // Create floating popup at random position near center
+    const newPopup: KeyPopup = {
+      id: popupCounter,
+      key: displayKey,
+      x: 40 + Math.random() * 20, // 40-60% from left
+      y: 30 + Math.random() * 20, // 30-50% from top
+    };
+    setKeyPopups((prev) => [...prev, newPopup]);
+    setPopupCounter((prev) => prev + 1);
+    
+    // Remove popup after animation
+    setTimeout(() => {
+      setKeyPopups((prev) => prev.filter((p) => p.id !== newPopup.id));
+    }, 800);
+  }, [popupCounter]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -80,7 +106,29 @@ const KeyboardTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Floating Key Popups */}
+      <AnimatePresence>
+        {keyPopups.map((popup) => (
+          <motion.div
+            key={popup.id}
+            initial={{ opacity: 0, scale: 0.5, y: 0 }}
+            animate={{ opacity: 1, scale: 1, y: -20 }}
+            exit={{ opacity: 0, scale: 1.5, y: -60 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="fixed z-50 pointer-events-none"
+            style={{ left: `${popup.x}%`, top: `${popup.y}%` }}
+          >
+            <div className="px-6 py-4 rounded-2xl bg-primary text-primary-foreground font-bold text-3xl shadow-2xl border-2 border-primary-foreground/20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-6 w-6" />
+                {popup.key}
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+      
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
