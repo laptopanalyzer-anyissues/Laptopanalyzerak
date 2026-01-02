@@ -54,11 +54,15 @@ const CameraTestEmbed = ({ onComplete, onBack }: Props) => {
       <div className="flex-1 flex items-center justify-center">
         <div className="relative w-full max-w-md aspect-video bg-muted rounded-xl overflow-hidden">
           {!hasStarted && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Camera className="h-12 w-12 text-muted-foreground mb-4" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <Camera className="h-12 w-12 text-muted-foreground mb-2" />
               <Button onClick={startCamera}>
                 <Camera className="h-4 w-4 mr-2" />
                 Start Camera
+              </Button>
+              <Button variant="ghost" onClick={onComplete} className="text-muted-foreground">
+                <VideoOff className="h-4 w-4 mr-2" />
+                I don't have a camera
               </Button>
             </div>
           )}
