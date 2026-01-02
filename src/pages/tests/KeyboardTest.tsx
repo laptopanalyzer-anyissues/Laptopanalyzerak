@@ -13,7 +13,7 @@ const keyboardLayout = [
   ["Tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[", "]", "\\"],
   ["CapsLock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "Enter"],
   ["Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "Shift"],
-  ["Control", "Meta", "Alt", " ", "Alt", "Meta", "Control"],
+  ["Control", "Meta", "Alt", " ", "Alt", "Meta", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight"],
 ];
 
 const getKeyDisplay = (key: string) => {
@@ -28,6 +28,10 @@ const getKeyDisplay = (key: string) => {
     "Control": "Ctrl",
     "Meta": "⌘",
     "Alt": "Alt",
+    "ArrowLeft": "←",
+    "ArrowUp": "↑",
+    "ArrowDown": "↓",
+    "ArrowRight": "→",
   };
   return displayMap[key] || key;
 };
