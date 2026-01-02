@@ -40,7 +40,7 @@ export function TestCard({
       transition={{ duration: 0.4, delay: index * 0.05 }}
     >
       <Link to={path} className="block group">
-        <div className="test-card h-full relative overflow-hidden">
+        <div className="test-card h-full relative overflow-hidden flex flex-col">
           {/* Gradient accent */}
           <div
             className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
@@ -58,10 +58,10 @@ export function TestCard({
           <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
             {title}
           </h3>
-          <p className="text-sm text-muted-foreground mb-4">{description}</p>
+          <p className="text-sm text-muted-foreground mb-4 flex-1">{description}</p>
 
           {/* Status indicator */}
-          <div className={`flex items-center gap-2 ${statusInfo.color}`}>
+          <div className={`flex items-center gap-2 ${statusInfo.color} mt-auto`}>
             {StatusIcon && <StatusIcon className="h-4 w-4" />}
             <span className="text-xs font-medium">{statusInfo.text}</span>
           </div>
