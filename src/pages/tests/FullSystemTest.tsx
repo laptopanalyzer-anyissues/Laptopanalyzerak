@@ -34,7 +34,10 @@ import {
   Shield,
   SkipForward,
   MinusCircle,
+  RefreshCw,
 } from "lucide-react";
+import { useTestSounds } from "@/hooks/useTestSounds";
+import { useConfetti } from "@/hooks/useConfetti";
 
 // Lazy load test components
 const DisplayTestEmbed = lazy(() => import("@/components/fulltest/DisplayTestEmbed"));
@@ -102,6 +105,9 @@ const FullSystemTest = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [isRunningTest, setIsRunningTest] = useState(false);
   const [showDisplayPopup, setShowDisplayPopup] = useState(false);
+  
+  const { playSuccessSound, playCompleteSound, playSkipSound } = useTestSounds();
+  const { fireConfetti } = useConfetti();
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -197,6 +203,11 @@ const FullSystemTest = () => {
 
   // Move to next test or complete
   const moveToNextTest = useCallback((passed: boolean) => {
+    // Play success sound for passed tests
+    if (passed) {
+      playSuccessSound();
+    }
+    
     setTests(prev => prev.map((t, i) => 
       i === currentTestIndex 
         ? { ...t, status: passed ? "completed" : "issue", passed } 
@@ -209,8 +220,19 @@ const FullSystemTest = () => {
     } else {
       setIsComplete(true);
       localStorage.removeItem(STORAGE_KEY);
+      // Play celebration sound and confetti if score is good
+      setTimeout(() => {
+        playCompleteSound();
+        // Fire confetti if all tests passed or score >= 75
+        const passedTests = tests.filter((t, i) => i < currentTestIndex ? t.passed === true : passed).length + (passed ? 1 : 0);
+        const testedTests = tests.filter((t, i) => i <= currentTestIndex && t.status !== "skipped").length;
+        const score = testedTests > 0 ? (passedTests / testedTests) * 100 : 100;
+        if (score >= 75) {
+          fireConfetti();
+        }
+      }, 300);
     }
-  }, [currentTestIndex, tests.length]);
+  }, [currentTestIndex, tests, playSuccessSound, playCompleteSound, fireConfetti]);
 
   // Called when an embedded test completes
   const handleTestComplete = useCallback(() => {
@@ -252,6 +274,8 @@ const FullSystemTest = () => {
 
   // Skip the current test
   const skipCurrentTest = useCallback(() => {
+    playSkipSound();
+    
     setTests(prev => prev.map((t, i) => 
       i === currentTestIndex 
         ? { ...t, status: "skipped", passed: null } 
@@ -265,7 +289,22 @@ const FullSystemTest = () => {
       setIsComplete(true);
       localStorage.removeItem(STORAGE_KEY);
     }
-  }, [currentTestIndex, tests.length]);
+  }, [currentTestIndex, tests.length, playSkipSound]);
+
+  // Quick re-test - run a single test again
+  const reRunTest = useCallback((testId: string) => {
+    const testIndex = tests.findIndex(t => t.id === testId);
+    if (testIndex === -1) return;
+    
+    setTests(prev => prev.map((t, i) => 
+      i === testIndex 
+        ? { ...t, status: "pending", passed: null } 
+        : t
+    ));
+    setCurrentTestIndex(testIndex);
+    setIsComplete(false);
+    setIsRunningTest(true);
+  }, [tests]);
 
   // Go back to previous test
   const goToPreviousTest = useCallback(() => {
@@ -563,7 +602,7 @@ const FullSystemTest = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                               {test.passed === true && (
                                 <span className="text-sm text-success font-medium">Passed</span>
                               )}
@@ -574,6 +613,14 @@ const FullSystemTest = () => {
                                 <span className="text-sm text-muted-foreground font-medium">Skipped</span>
                               )}
                               {getStatusIcon(test.status, test.passed)}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => reRunTest(test.id)}
+                                className="h-8 px-2"
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         );
