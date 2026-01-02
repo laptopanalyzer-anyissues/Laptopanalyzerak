@@ -1,8 +1,11 @@
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import RunAllTestsCard from "@/components/dashboard/RunAllTestsCard";
 import { TestCard } from "@/components/dashboard/TestCard";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import {
   Monitor,
   Keyboard,
@@ -74,10 +77,47 @@ const tests = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [focusedIndex, setFocusedIndex] = useState(0);
+
+  const handleNavigateToTest = useCallback(() => {
+    navigate(tests[focusedIndex].path);
+  }, [focusedIndex, navigate]);
+
+  const handleNextTest = useCallback(() => {
+    setFocusedIndex((prev) => (prev + 1) % tests.length);
+  }, []);
+
+  const handlePrevTest = useCallback(() => {
+    setFocusedIndex((prev) => (prev - 1 + tests.length) % tests.length);
+  }, []);
+
+  const handleRowUp = useCallback(() => {
+    setFocusedIndex((prev) => {
+      const newIndex = prev - 4;
+      return newIndex >= 0 ? newIndex : prev;
+    });
+  }, []);
+
+  const handleRowDown = useCallback(() => {
+    setFocusedIndex((prev) => {
+      const newIndex = prev + 4;
+      return newIndex < tests.length ? newIndex : prev;
+    });
+  }, []);
+
+  useKeyboardShortcuts({
+    onArrowRight: handleNextTest,
+    onArrowLeft: handlePrevTest,
+    onArrowUp: handleRowUp,
+    onArrowDown: handleRowDown,
+    onEnter: handleNavigateToTest,
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16" role="main" aria-label="Laptop Diagnostics Dashboard">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -91,6 +131,9 @@ const Dashboard = () => {
             <p className="text-muted-foreground">
               Select a test to verify your laptop's hardware components
             </p>
+            <p className="text-xs text-muted-foreground/60 mt-2 hidden md:block">
+              💡 Use arrow keys to navigate, Enter to select
+            </p>
           </motion.div>
 
           {/* Run All Tests Card */}
@@ -101,12 +144,21 @@ const Dashboard = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <h2 className="text-xl font-semibold text-foreground mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4" id="available-tests">
               Available Tests
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+            <div 
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch"
+              role="list"
+              aria-labelledby="available-tests"
+            >
               {tests.map((test, index) => (
-                <TestCard key={index} {...test} index={index} />
+                <TestCard 
+                  key={index} 
+                  {...test} 
+                  index={index} 
+                  isFocused={focusedIndex === index}
+                />
               ))}
             </div>
           </motion.div>

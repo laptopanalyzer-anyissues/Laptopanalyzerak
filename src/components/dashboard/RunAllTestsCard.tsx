@@ -10,18 +10,20 @@ const RunAllTestsCard = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 }}
       className="mb-8"
+      role="region"
+      aria-label="Full System Test"
     >
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-accent p-8 md:p-10">
         {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" aria-hidden="true" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" aria-hidden="true" />
         
         <div className="relative z-10 flex flex-col lg:flex-row items-center gap-8">
           {/* Left content */}
           <div className="flex-1 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-sm font-medium mb-4">
-              <Zap className="h-4 w-4" />
-              Complete Diagnostic
+              <Zap className="h-4 w-4" aria-hidden="true" />
+              <span>Complete Diagnostic</span>
             </div>
             
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
@@ -33,29 +35,29 @@ const RunAllTestsCard = () => {
             </p>
             
             {/* Features */}
-            <div className="flex flex-wrap gap-4 mb-6 justify-center lg:justify-start">
-              <div className="flex items-center gap-2 text-white/90 text-sm">
-                <CheckCircle2 className="h-4 w-4" />
+            <ul className="flex flex-wrap gap-4 mb-6 justify-center lg:justify-start" aria-label="Features">
+              <li className="flex items-center gap-2 text-white/90 text-sm">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 <span>8 Diagnostic Tests</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/90 text-sm">
-                <CheckCircle2 className="h-4 w-4" />
+              </li>
+              <li className="flex items-center gap-2 text-white/90 text-sm">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 <span>Guided Flow</span>
-              </div>
-              <div className="flex items-center gap-2 text-white/90 text-sm">
-                <CheckCircle2 className="h-4 w-4" />
+              </li>
+              <li className="flex items-center gap-2 text-white/90 text-sm">
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 <span>Health Score</span>
-              </div>
-            </div>
+              </li>
+            </ul>
             
             {/* CTA Button */}
             <Button 
               asChild 
               size="xl"
-              className="bg-white text-primary hover:bg-white/90 hover:text-primary shadow-xl hover:shadow-2xl group"
+              className="bg-white text-primary hover:bg-white/90 hover:text-primary shadow-xl hover:shadow-2xl group touch-target tap-highlight"
             >
               <Link to="/test/full" className="flex items-center gap-2">
-                <span className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 group-hover:animate-pulse">
+                <span className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 group-hover:animate-pulse" aria-hidden="true">
                   <Play className="h-4 w-4 text-primary" />
                 </span>
                 <span className="font-semibold">Start Full System Test</span>
@@ -64,13 +66,13 @@ const RunAllTestsCard = () => {
             
             {/* Trust message */}
             <div className="flex items-center gap-2 mt-4 text-white/70 text-xs justify-center lg:justify-start">
-              <Shield className="h-3 w-3" />
+              <Shield className="h-3 w-3" aria-hidden="true" />
               <span>All tests run locally. No data is uploaded or stored.</span>
             </div>
           </div>
           
           {/* Right visual */}
-          <div className="hidden lg:flex items-center justify-center">
+          <div className="hidden lg:flex items-center justify-center" aria-hidden="true">
             <div className="relative">
               {/* Animated rings */}
               <div className="absolute inset-0 flex items-center justify-center">
