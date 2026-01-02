@@ -165,6 +165,7 @@ const FullSystemTest = () => {
   const passedCount = tests.filter(t => t.passed === true).length;
   const issueCount = tests.filter(t => t.passed === false).length;
   const skippedCount = tests.filter(t => t.status === "skipped").length;
+  const testedCount = tests.filter(t => t.status === "completed" || t.status === "issue").length;
 
   // Calculate weighted score - skipped tests are excluded from calculation
   const calculateOverallScore = useCallback(() => {
@@ -179,13 +180,14 @@ const FullSystemTest = () => {
       return sum; // Skipped tests don't affect score
     }, 0);
     
-    if (testedWeight === 0) return 100; // If all skipped, return 100
+    if (testedWeight === 0) return null; // If all skipped, return null (no score)
     return Math.round((earnedWeight / testedWeight) * 100);
   }, [tests]);
 
   const overallScore = calculateOverallScore();
 
-  const getScoreLabel = (score: number) => {
+  const getScoreLabel = (score: number | null) => {
+    if (score === null) return { label: "No Tests Run", color: "text-muted-foreground", bg: "bg-muted/50", borderColor: "border-muted" };
     if (score >= 90) return { label: "Excellent", color: "text-success", bg: "bg-success/20", borderColor: "border-success" };
     if (score >= 75) return { label: "Good", color: "text-primary", bg: "bg-primary/20", borderColor: "border-primary" };
     if (score >= 50) return { label: "Fair", color: "text-warning", bg: "bg-warning/20", borderColor: "border-warning" };
@@ -514,16 +516,18 @@ const FullSystemTest = () => {
                           strokeWidth="8"
                           fill="none"
                           strokeDasharray={440}
-                          strokeDashoffset={440 - (440 * overallScore) / 100}
+                          strokeDashoffset={overallScore !== null ? 440 - (440 * overallScore) / 100 : 440}
                           strokeLinecap="round"
                           className={scoreData.color}
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
                         <span className={`text-5xl font-bold ${scoreData.color}`}>
-                          {overallScore}
+                          {overallScore !== null ? overallScore : "—"}
                         </span>
-                        <span className="text-muted-foreground text-sm">out of 100</span>
+                        <span className="text-muted-foreground text-sm">
+                          {overallScore !== null ? "out of 100" : "no data"}
+                        </span>
                       </div>
                     </div>
                     
@@ -549,7 +553,9 @@ const FullSystemTest = () => {
                     </div>
                     
                     <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                      {overallScore >= 90 
+                      {overallScore === null
+                        ? "You skipped all tests. Run at least one test to get a health score."
+                        : overallScore >= 90 
                         ? "Your laptop is in excellent condition! All major components are working properly."
                         : overallScore >= 75
                         ? "Your laptop is in good condition with minor issues detected."
