@@ -23,7 +23,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 text-success" />
-              <span>100% Private — All tests run locally</span>
+              <span>100 Percent Private</span>
             </div>
           </div>
 
