@@ -84,15 +84,10 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
           </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-12 pt-6 border-t border-border/50 flex justify-center items-center">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} LaptopCheck. Free and open for everyone.
           </p>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <span>Made with</span>
-            <Heart className="h-4 w-4 text-destructive fill-destructive" />
-            <span>for laptop users everywhere</span>
-          </div>
         </div>
       </div>
     </footer>
