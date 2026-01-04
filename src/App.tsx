@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,56 +6,85 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
-import DisplayTest from "./pages/tests/DisplayTest";
-import KeyboardTest from "./pages/tests/KeyboardTest";
-import CameraTest from "./pages/tests/CameraTest";
-import MicrophoneTest from "./pages/tests/MicrophoneTest";
-import AudioTest from "./pages/tests/AudioTest";
-import NetworkTest from "./pages/tests/NetworkTest";
-import TouchpadTest from "./pages/tests/TouchpadTest";
-import PortsTest from "./pages/tests/PortsTest";
-import FullSystemTest from "./pages/tests/FullSystemTest";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import NotFound from "./pages/NotFound";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { PageLoader } from "@/components/ui/page-loader";
 
-const queryClient = new QueryClient();
+// Lazy load all pages for better initial bundle size and high-traffic performance
+const Index = lazy(() => import("./pages/Index"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DisplayTest = lazy(() => import("./pages/tests/DisplayTest"));
+const KeyboardTest = lazy(() => import("./pages/tests/KeyboardTest"));
+const CameraTest = lazy(() => import("./pages/tests/CameraTest"));
+const MicrophoneTest = lazy(() => import("./pages/tests/MicrophoneTest"));
+const AudioTest = lazy(() => import("./pages/tests/AudioTest"));
+const NetworkTest = lazy(() => import("./pages/tests/NetworkTest"));
+const TouchpadTest = lazy(() => import("./pages/tests/TouchpadTest"));
+const PortsTest = lazy(() => import("./pages/tests/PortsTest"));
+const FullSystemTest = lazy(() => import("./pages/tests/FullSystemTest"));
+const Blog = lazy(() => import("./pages/Blog"));
+const BlogPost = lazy(() => import("./pages/BlogPost"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Optimized QueryClient configuration for high-traffic scenarios
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache data for 5 minutes to reduce redundant requests
+      staleTime: 5 * 60 * 1000,
+      // Keep unused data in cache for 10 minutes
+      gcTime: 10 * 60 * 1000,
+      // Retry failed requests 2 times with exponential backoff
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      // Don't refetch on window focus in production (reduces unnecessary load)
+      refetchOnWindowFocus: import.meta.env.DEV,
+      // Don't refetch on reconnect unless data is stale
+      refetchOnReconnect: "always",
+    },
+    mutations: {
+      // Retry mutations once on failure
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <SecurityProvider 
-        enableClickjackingProtection={true}
-        enableCSRFProtection={true}
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/test/display" element={<DisplayTest />} />
-              <Route path="/test/keyboard" element={<KeyboardTest />} />
-              <Route path="/test/camera" element={<CameraTest />} />
-              <Route path="/test/microphone" element={<MicrophoneTest />} />
-              <Route path="/test/audio" element={<AudioTest />} />
-              <Route path="/test/network" element={<NetworkTest />} />
-              <Route path="/test/touchpad" element={<TouchpadTest />} />
-              <Route path="/test/ports" element={<PortsTest />} />
-              <Route path="/test/full" element={<FullSystemTest />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </SecurityProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <SecurityProvider 
+          enableClickjackingProtection={true}
+          enableCSRFProtection={true}
+        >
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/test/display" element={<DisplayTest />} />
+                  <Route path="/test/keyboard" element={<KeyboardTest />} />
+                  <Route path="/test/camera" element={<CameraTest />} />
+                  <Route path="/test/microphone" element={<MicrophoneTest />} />
+                  <Route path="/test/audio" element={<AudioTest />} />
+                  <Route path="/test/network" element={<NetworkTest />} />
+                  <Route path="/test/touchpad" element={<TouchpadTest />} />
+                  <Route path="/test/ports" element={<PortsTest />} />
+                  <Route path="/test/full" element={<FullSystemTest />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+          </TooltipProvider>
+        </SecurityProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
