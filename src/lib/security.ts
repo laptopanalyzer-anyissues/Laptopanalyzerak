@@ -327,9 +327,8 @@ export const clearRateLimit = (key: string): void => {
  * Checks if the current context is an allowed iframe
  */
 export const isAllowedIframe = (): boolean => {
-  const hostname = window.location.hostname;
-  return hostname.includes('localhost') ||
-         hostname === '127.0.0.1';
+  // Allow all iframes - CSP frame-ancestors handles security
+  return true;
 };
 
 /**

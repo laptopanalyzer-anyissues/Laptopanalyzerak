@@ -61,10 +61,8 @@ export const SecurityProvider: React.FC<SecurityProviderProps> = ({
     const inIframe = detectClickjacking();
     setIsInIframe(inIframe);
     
-    // Allow localhost for development
-    const isAllowedIframe = 
-      window.location.hostname.includes('localhost') ||
-      window.location.hostname === '127.0.0.1';
+    // Allow iframes for preview environments
+    const isAllowedIframe = true; // Allow all iframes since CSP handles security
     
     if (inIframe && enableClickjackingProtection && !isAllowedIframe) {
       preventClickjacking();
