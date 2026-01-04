@@ -324,14 +324,11 @@ export const clearRateLimit = (key: string): void => {
 // ============= Clickjacking Protection =============
 
 /**
- * Checks if the current context is an allowed iframe (e.g., Lovable preview)
+ * Checks if the current context is an allowed iframe
  */
 export const isAllowedIframe = (): boolean => {
   const hostname = window.location.hostname;
-  return hostname.includes('lovable.app') || 
-         hostname.includes('lovable.dev') ||
-         hostname.includes('lovableproject.com') ||
-         hostname.includes('localhost') ||
+  return hostname.includes('localhost') ||
          hostname === '127.0.0.1';
 };
 
