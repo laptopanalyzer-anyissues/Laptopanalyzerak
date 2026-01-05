@@ -356,11 +356,26 @@ const PortsTest = () => {
     updateWireless("bluetooth", "testing");
 
     try {
+      // Check if Bluetooth adapter is available first
+      const bluetoothAvailable = await (navigator as any).bluetooth?.getAvailability?.();
+      
+      if (bluetoothAvailable === false) {
+        updateWireless("bluetooth", "not-connected", "No Bluetooth hardware");
+        toast({ title: "Bluetooth not available", description: "No Bluetooth adapter detected on this device", variant: "destructive" });
+        return;
+      }
+
+      // Show info toast about the browser picker
+      toast({ 
+        title: "Select a Bluetooth device", 
+        description: "Choose a device from the browser's Bluetooth picker. Make sure your device is in pairing mode and visible." 
+      });
+
       // This triggers the browser's Bluetooth device picker
-      // If the system has no Bluetooth, it will show an error
+      // The picker will scan and show available devices
       const device = await (navigator as any).bluetooth.requestDevice({
         acceptAllDevices: true,
-        optionalServices: []
+        optionalServices: ['battery_service', 'device_information', 'generic_access']
       });
       
       if (device) {
@@ -368,21 +383,31 @@ const PortsTest = () => {
         if (!detectedDevices.includes(device.name || "Bluetooth Device")) {
           setDetectedDevices(prev => [...prev, device.name || "Bluetooth Device"]);
         }
-        toast({ title: "Bluetooth detected", description: device.name || "Device found" });
+        toast({ title: "Bluetooth detected", description: `Connected to: ${device.name || "Unknown device"}` });
       }
     } catch (e: any) {
+      console.log("Bluetooth error:", e.name, e.message);
+      
       // User cancelled or no Bluetooth adapter found
       if (e.name === "NotFoundError") {
         // User cancelled the picker or no devices available
-        updateWireless("bluetooth", "not-connected", "No devices found");
-        toast({ title: "No Bluetooth devices found", description: "Make sure Bluetooth is enabled", variant: "destructive" });
-      } else if (e.message?.includes("adapter") || e.message?.includes("Bluetooth")) {
-        // No Bluetooth hardware
+        updateWireless("bluetooth", "not-connected", "Cancelled or no devices");
+        toast({ 
+          title: "No device selected", 
+          description: "You cancelled or no devices were found. Ensure devices are in pairing mode and try again.", 
+          variant: "destructive" 
+        });
+      } else if (e.name === "SecurityError") {
+        updateWireless("bluetooth", "needs-permission", "Permission denied");
+        toast({ title: "Bluetooth permission denied", description: "Please allow Bluetooth access in your browser settings", variant: "destructive" });
+      } else if (e.message?.includes("adapter") || e.message?.includes("Bluetooth") || e.message?.includes("User denied")) {
+        // No Bluetooth hardware or user denied
         updateWireless("bluetooth", "not-connected", "No Bluetooth hardware");
         toast({ title: "Bluetooth not available", description: "No Bluetooth adapter detected", variant: "destructive" });
       } else {
         // Permission denied or other error
         updateWireless("bluetooth", "needs-permission", "Click to retry");
+        toast({ title: "Bluetooth error", description: e.message || "Try again", variant: "destructive" });
       }
     }
   }, [updateWireless, detectedDevices]);
