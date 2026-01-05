@@ -39,6 +39,7 @@ const keyMappings: Record<string, string[]> = {
 const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
+  const [justPressed, setJustPressed] = useState<string | null>(null);
   const [idleTimer, setIdleTimer] = useState(0); // Only count idle time (no key presses)
   const lastActivityRef = useRef(Date.now());
   const hasCompletedRef = useRef(false);
@@ -56,6 +57,11 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
     const displayKey = getDisplayKey(e.key);
     setLastKey(e.key === " " ? "Space" : e.key);
     setPressedKeys((prev) => new Set(prev).add(displayKey));
+    
+    // Trigger animation for this specific key
+    setJustPressed(displayKey);
+    setTimeout(() => setJustPressed(null), 600);
+    
     // Reset idle timer on any key press
     lastActivityRef.current = Date.now();
     setIdleTimer(0);
@@ -130,23 +136,45 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
           <div key={rowIndex} className="flex justify-center gap-1">
             {row.map((key, keyIndex) => {
               const pressed = pressedKeys.has(key);
+              const isJustPressed = justPressed === key;
               const isWide = ["Backspace", "Tab", "Caps", "Enter", "Shift", "Space", "Ctrl", "Alt"].includes(key);
               const isExtraWide = key === "Space";
               
               return (
                 <motion.div
                   key={`${key}-${keyIndex}`}
-                  animate={pressed ? { scale: [1, 0.95, 1] } : {}}
+                  initial={false}
+                  animate={
+                    isJustPressed
+                      ? {
+                          scale: [1, 1.15, 1],
+                          boxShadow: [
+                            "0 0 0 0 rgba(34, 197, 94, 0)",
+                            "0 0 20px 8px rgba(34, 197, 94, 0.6)",
+                            "0 0 0 0 rgba(34, 197, 94, 0)"
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={{ duration: 0.5, ease: "easeOut" }}
                   className={`
                     ${isExtraWide ? "w-32" : isWide ? "w-14" : "w-8"} 
-                    h-8 flex items-center justify-center rounded-md font-medium text-xs transition-all duration-200
+                    h-8 flex items-center justify-center rounded-md font-medium text-xs transition-colors duration-200
                     ${pressed
-                      ? "bg-success text-success-foreground shadow-md"
+                      ? "bg-success text-success-foreground"
                       : "bg-muted text-foreground"
                     }
                   `}
                 >
-                  {pressed && <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />}
+                  {pressed && (
+                    <motion.span
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    >
+                      <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                    </motion.span>
+                  )}
                   {key === "Space" ? "Space" : key}
                 </motion.div>
               );
