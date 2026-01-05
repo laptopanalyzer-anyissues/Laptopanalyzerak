@@ -529,9 +529,14 @@ const PortsTest = () => {
               </p>
               <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
                 <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-muted-foreground">
-                  A browser dialog will appear next. You can select any device or cancel - either will confirm your Bluetooth is working.
-                </p>
+                <div className="text-xs text-muted-foreground space-y-2">
+                  <p>
+                    <strong>How it works:</strong> A browser picker will appear showing nearby Bluetooth devices.
+                  </p>
+                  <p>
+                    <strong>To confirm Bluetooth works:</strong> Select any device from the list and click "Pair". Devices may show as "Unknown" - this is normal until paired.
+                  </p>
+                </div>
               </div>
             </DialogDescription>
           </DialogHeader>
