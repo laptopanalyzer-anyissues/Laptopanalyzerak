@@ -1,14 +1,14 @@
 import { forwardRef } from "react";
 import { Link } from "react-router-dom";
-import { Laptop, Shield, Heart } from "lucide-react";
+import { Laptop, Shield } from "lucide-react";
 
 export const Footer = forwardRef<HTMLElement>((_, ref) => {
   return (
     <footer ref={ref} className="border-t border-border/50 bg-muted/30">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
                 <Laptop className="h-5 w-5 text-primary-foreground" />
@@ -38,21 +38,27 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                 All Tests
               </Link>
               <Link
-                to="/#how-it-works"
+                to="/blog"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 How It Works
               </Link>
               <Link
-                to="/#privacy"
+                to="/about"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                Privacy
+                About Us
+              </Link>
+              <Link
+                to="/contact"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact
               </Link>
             </nav>
           </div>
 
-          {/* Tests */}
+          {/* Popular Tests */}
           <div>
             <h4 className="font-semibold text-foreground mb-4">Popular Tests</h4>
             <nav className="flex flex-col gap-2">
@@ -82,12 +88,44 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
               </Link>
             </nav>
           </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="font-semibold text-foreground mb-4">Legal</h4>
+            <nav className="flex flex-col gap-2">
+              <Link
+                to="/privacy-policy"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms-of-service"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>
+            </nav>
+          </div>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-border/50 flex justify-center items-center">
+        <div className="mt-12 pt-6 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} LaptopCheck. Free and open for everyone.
           </p>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <Link to="/privacy-policy" className="hover:text-foreground transition-colors">
+              Privacy
+            </Link>
+            <span>•</span>
+            <Link to="/terms-of-service" className="hover:text-foreground transition-colors">
+              Terms
+            </Link>
+            <span>•</span>
+            <Link to="/contact" className="hover:text-foreground transition-colors">
+              Contact
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
