@@ -1,17 +1,18 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Volume2, Square, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Volume2, Square, CheckCircle2, ArrowLeft, XCircle, ThumbsUp, ThumbsDown } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
 interface Props {
-  onComplete: () => void;
+  onComplete: (passed: boolean) => void;
   onBack?: () => void;
 }
 
 const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const [testedChannels, setTestedChannels] = useState<Set<string>>(new Set());
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -79,8 +80,67 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
 
   const canComplete = testedChannels.size >= 1;
 
+  const handleCompleteClick = () => {
+    stopAll();
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmResponse = (allWorking: boolean) => {
+    setShowConfirmDialog(false);
+    onComplete(allWorking);
+  };
+
   return (
-    <div className="flex flex-col h-full min-h-[500px] p-6">
+    <div className="flex flex-col h-full min-h-[500px] p-6 relative">
+      {/* Confirmation Dialog */}
+      <AnimatePresence>
+        {showConfirmDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-sm rounded-2xl"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-full max-w-md mx-4 p-6 text-center"
+            >
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-4">
+                <Volume2 className="h-7 w-7 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold text-foreground mb-2">
+                Speaker Test Complete
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Did all speakers work correctly? Could you hear audio from left, right, and both channels?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => handleConfirmResponse(false)}
+                  className="gap-2 border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <ThumbsDown className="h-4 w-4" />
+                  No, Issues Found
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={() => handleConfirmResponse(true)}
+                  className="gap-2"
+                >
+                  <ThumbsUp className="h-4 w-4" />
+                  Yes, All Working
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="text-center mb-6">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-2">
           <Volume2 className="h-4 w-4" />
@@ -171,7 +231,7 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!canComplete}>
+        <Button onClick={handleCompleteClick} disabled={!canComplete}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {canComplete ? "Complete Test" : "Test at least one speaker"}
         </Button>

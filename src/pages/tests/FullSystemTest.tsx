@@ -236,9 +236,9 @@ const FullSystemTest = () => {
     }
   }, [currentTestIndex, tests, playSuccessSound, playCompleteSound, fireConfetti]);
 
-  // Called when an embedded test completes
-  const handleTestComplete = useCallback(() => {
-    console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id);
+  // Called when an embedded test completes (with optional passed result)
+  const handleTestComplete = useCallback((passed?: boolean) => {
+    console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id, "passed:", passed);
     const testId = tests[currentTestIndex]?.id;
     
     // Stop running the current test FIRST
@@ -251,6 +251,10 @@ const FullSystemTest = () => {
         console.log("[FullSystemTest] Now showing display popup");
         setShowDisplayPopup(true);
       }, 200);
+    } else if (passed !== undefined) {
+      // If passed result is provided (e.g., from audio test), use it
+      console.log("[FullSystemTest] Using provided passed result:", passed);
+      moveToNextTest(passed);
     } else {
       // Auto-pass all other tests
       console.log("[FullSystemTest] Auto-passing test, moving to next");
@@ -360,7 +364,7 @@ const FullSystemTest = () => {
       case "microphone":
         return <MicrophoneTestEmbed {...props} />;
       case "audio":
-        return <AudioTestEmbed {...props} />;
+        return <AudioTestEmbed onComplete={(passed) => handleTestComplete(passed)} onBack={props.onBack} />;
       case "network":
         return <NetworkTestEmbed {...props} />;
       case "ports":

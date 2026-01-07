@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Volume2, VolumeX, Play, Square, Music } from "lucide-react";
+import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
 const AudioTest = () => {
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const [testedChannels, setTestedChannels] = useState<Set<string>>(new Set());
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [testResult, setTestResult] = useState<boolean | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const oscillatorRef = useRef<OscillatorNode | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
@@ -76,6 +79,7 @@ const AudioTest = () => {
 
     audio.play();
     setIsPlaying(channel);
+    setTestedChannels(prev => new Set(prev).add(channel));
 
     audio.onended = () => {
       setIsPlaying(null);
@@ -111,11 +115,72 @@ const AudioTest = () => {
     { label: "Very High (1760 Hz)", value: 1760 },
   ];
 
+  const canComplete = testedChannels.size >= 1;
+
+  const handleCompleteClick = () => {
+    stopAll();
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmResponse = (allWorking: boolean) => {
+    setShowConfirmDialog(false);
+    setTestResult(allWorking);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
+          {/* Confirmation Dialog */}
+          <AnimatePresence>
+            {showConfirmDialog && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="w-full max-w-md mx-4 p-8 rounded-2xl bg-card border border-border shadow-2xl text-center"
+                >
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <Volume2 className="h-8 w-8 text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">
+                    Speaker Test Complete
+                  </h2>
+                  <p className="text-muted-foreground mb-6">
+                    Did all speakers work correctly? Could you hear audio from left, right, and both channels?
+                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => handleConfirmResponse(false)}
+                      className="gap-2 border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <ThumbsDown className="h-4 w-4" />
+                      No, Issues Found
+                    </Button>
+                    <Button
+                      size="lg"
+                      onClick={() => handleConfirmResponse(true)}
+                      className="gap-2"
+                    >
+                      <ThumbsUp className="h-4 w-4" />
+                      Yes, All Working
+                    </Button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -145,12 +210,35 @@ const AudioTest = () => {
             </p>
           </motion.div>
 
+          {/* Test Result Banner */}
+          {testResult !== null && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mb-8 p-4 rounded-xl flex items-center justify-center gap-3 ${
+                testResult ? "bg-success/10 border border-success/20" : "bg-warning/10 border border-warning/20"
+              }`}
+            >
+              {testResult ? (
+                <>
+                  <CheckCircle2 className="h-5 w-5 text-success" />
+                  <span className="font-medium text-success">All speakers are working correctly!</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="h-5 w-5 text-warning" />
+                  <span className="font-medium text-warning">Issues detected with speakers</span>
+                </>
+              )}
+            </motion.div>
+          )}
+
           {/* Start Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-12 flex justify-center"
+            className="mb-12 flex justify-center gap-4"
           >
             <Button
               size="lg"
@@ -160,6 +248,17 @@ const AudioTest = () => {
               <Volume2 className="h-5 w-5" />
               Start Audio Test
             </Button>
+            {canComplete && (
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleCompleteClick}
+                className="h-14 px-8 text-lg font-semibold gap-3"
+              >
+                <CheckCircle2 className="h-5 w-5" />
+                Complete Test
+              </Button>
+            )}
           </motion.div>
 
           {/* Stereo Test */}
@@ -180,6 +279,8 @@ const AudioTest = () => {
                 className={`p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                   isPlaying === "left"
                     ? "bg-primary/10 border-primary"
+                    : testedChannels.has("left")
+                    ? "bg-success/10 border-success"
                     : "bg-card border-border hover:border-primary/50"
                 }`}
                 onClick={() => (isPlaying === "left" ? stopAll() : playMusicWithPan("left"))}
@@ -194,6 +295,7 @@ const AudioTest = () => {
                   <p className="text-sm text-muted-foreground">
                     {isPlaying === "left" ? "♪ Playing music..." : "Click to test"}
                   </p>
+                  {testedChannels.has("left") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mx-auto mt-2" />}
                 </div>
               </motion.div>
 
@@ -203,6 +305,8 @@ const AudioTest = () => {
                 className={`p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                   isPlaying === "both"
                     ? "bg-primary/10 border-primary"
+                    : testedChannels.has("both")
+                    ? "bg-success/10 border-success"
                     : "bg-card border-border hover:border-primary/50"
                 }`}
                 onClick={() => (isPlaying === "both" ? stopAll() : playMusicWithPan("both"))}
@@ -220,6 +324,7 @@ const AudioTest = () => {
                   <p className="text-sm text-muted-foreground">
                     {isPlaying === "both" ? "♪ Playing music..." : "Click to test"}
                   </p>
+                  {testedChannels.has("both") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mx-auto mt-2" />}
                 </div>
               </motion.div>
 
@@ -229,6 +334,8 @@ const AudioTest = () => {
                 className={`p-8 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
                   isPlaying === "right"
                     ? "bg-primary/10 border-primary"
+                    : testedChannels.has("right")
+                    ? "bg-success/10 border-success"
                     : "bg-card border-border hover:border-primary/50"
                 }`}
                 onClick={() => (isPlaying === "right" ? stopAll() : playMusicWithPan("right"))}
@@ -243,6 +350,7 @@ const AudioTest = () => {
                   <p className="text-sm text-muted-foreground">
                     {isPlaying === "right" ? "♪ Playing music..." : "Click to test"}
                   </p>
+                  {testedChannels.has("right") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mx-auto mt-2" />}
                 </div>
               </motion.div>
             </div>
