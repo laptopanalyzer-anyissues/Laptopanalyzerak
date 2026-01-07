@@ -20,7 +20,7 @@ import {
   Mic,
   Plug,
   Wifi,
-  Bluetooth,
+  
   Signal,
   Check,
   X,
@@ -82,12 +82,10 @@ const PortsTest = () => {
   const [wirelessTests, setWirelessTests] = useState<WirelessTest[]>([
     { id: "wifi-status", name: "Wi-Fi Status", icon: Wifi, description: "Network connection", status: "not-tested" },
     { id: "wifi-strength", name: "Signal Strength", icon: Signal, description: "Connection quality", status: "not-tested" },
-    { id: "bluetooth", name: "Bluetooth", icon: Bluetooth, description: "Click to check Bluetooth", status: "needs-permission" },
   ]);
 
   const [isScanning, setIsScanning] = useState(false);
   const [detectedDevices, setDetectedDevices] = useState<string[]>([]);
-  const [showBluetoothDialog, setShowBluetoothDialog] = useState(false);
   const [showUSBDialog, setShowUSBDialog] = useState(false);
   const [permissions, setPermissions] = useState({
     usb: false,
@@ -340,112 +338,6 @@ const PortsTest = () => {
     }
   }, [updateWireless]);
 
-  // Show Bluetooth confirmation dialog first
-  const handleBluetoothClick = useCallback(() => {
-    if (!('bluetooth' in navigator)) {
-      updateWireless("bluetooth", "not-connected", "Not supported in browser");
-      toast({ title: "Bluetooth not supported", description: "Try using Chrome or Edge", variant: "destructive" });
-      return;
-    }
-    setShowBluetoothDialog(true);
-  }, [updateWireless]);
-
-  // Request Bluetooth permission and detect (called after dialog confirmation)
-  const requestBluetoothPermission = useCallback(async () => {
-    setShowBluetoothDialog(false);
-    updateWireless("bluetooth", "testing");
-
-    try {
-      // Check if Bluetooth adapter is available first
-      const bluetoothAvailable = await (navigator as any).bluetooth?.getAvailability?.();
-      
-      if (bluetoothAvailable === false) {
-        updateWireless("bluetooth", "not-connected", "No Bluetooth hardware");
-        toast({ title: "Bluetooth not available", description: "No Bluetooth adapter detected on this device", variant: "destructive" });
-        return;
-      }
-
-      // Show info toast about the browser picker
-      toast({ 
-        title: "Select a Bluetooth device", 
-        description: "Select any device and click 'Pair' to verify Bluetooth works. Device names will appear after connecting." 
-      });
-
-      // This triggers the browser's Bluetooth device picker
-      const device = await (navigator as any).bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ['generic_access', 'device_information', 'battery_service']
-      });
-      
-      if (device) {
-        let deviceName = device.name;
-        
-        // Try to connect and read the actual device name via GATT
-        if (!deviceName || deviceName === "") {
-          try {
-            toast({ title: "Connecting...", description: "Reading device information..." });
-            
-            const server = await device.gatt?.connect();
-            if (server) {
-              try {
-                // Try to read device name from Generic Access service
-                const genericAccess = await server.getPrimaryService('generic_access');
-                const deviceNameChar = await genericAccess.getCharacteristic('gap.device_name');
-                const value = await deviceNameChar.readValue();
-                const decoder = new TextDecoder('utf-8');
-                deviceName = decoder.decode(value);
-              } catch (gattError) {
-                // Generic Access not available, try Device Information
-                try {
-                  const deviceInfo = await server.getPrimaryService('device_information');
-                  const modelChar = await deviceInfo.getCharacteristic('model_number_string');
-                  const value = await modelChar.readValue();
-                  const decoder = new TextDecoder('utf-8');
-                  deviceName = decoder.decode(value);
-                } catch {
-                  // Could not read name, use MAC address
-                  deviceName = device.id ? `Device (${device.id.slice(-8)})` : "Bluetooth Device";
-                }
-              }
-              // Disconnect after reading
-              server.disconnect();
-            }
-          } catch (connectError) {
-            console.log("Could not connect to read name:", connectError);
-            deviceName = device.id ? `Device (${device.id.slice(-8)})` : "Bluetooth Device";
-          }
-        }
-
-        updateWireless("bluetooth", "connected", deviceName || "Bluetooth working");
-        if (!detectedDevices.includes(deviceName || "Bluetooth Device")) {
-          setDetectedDevices(prev => [...prev, deviceName || "Bluetooth Device"]);
-        }
-        toast({ title: "Bluetooth verified!", description: `Connected to: ${deviceName}` });
-      }
-    } catch (e: any) {
-      console.log("Bluetooth error:", e.name, e.message);
-      
-      if (e.name === "NotFoundError") {
-        // User cancelled - but if picker showed devices, Bluetooth hardware works!
-        // We mark it as working since seeing the picker with devices confirms hardware
-        updateWireless("bluetooth", "connected", "Hardware verified (cancelled)");
-        toast({ 
-          title: "Bluetooth hardware verified", 
-          description: "The picker showed devices, confirming your Bluetooth is working. You can retry to pair a specific device." 
-        });
-      } else if (e.name === "SecurityError") {
-        updateWireless("bluetooth", "needs-permission", "Permission denied");
-        toast({ title: "Bluetooth permission denied", description: "Please allow Bluetooth access in your browser settings", variant: "destructive" });
-      } else if (e.message?.includes("adapter") || e.message?.includes("Bluetooth") || e.message?.includes("User denied")) {
-        updateWireless("bluetooth", "not-connected", "No Bluetooth hardware");
-        toast({ title: "Bluetooth not available", description: "No Bluetooth adapter detected", variant: "destructive" });
-      } else {
-        updateWireless("bluetooth", "needs-permission", "Click to retry");
-        toast({ title: "Bluetooth error", description: e.message || "Try again", variant: "destructive" });
-      }
-    }
-  }, [updateWireless, detectedDevices]);
-
   // Handle port click for permission request or rescan
   const handlePortClick = useCallback((port: PortItem) => {
     switch (port.permissionType) {
@@ -461,10 +353,9 @@ const PortsTest = () => {
     }
   }, [handleUSBClick, requestAudioPermission, requestDisplayPermission]);
 
-  // Run all wireless tests (only Wi-Fi auto-runs, Bluetooth needs permission)
+  // Run all wireless tests
   const runWirelessTests = useCallback(() => {
     detectWifi();
-    // Bluetooth is not auto-run, it requires user permission click
   }, [detectWifi]);
 
   // Listen for device changes
@@ -546,48 +437,6 @@ const PortsTest = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-
-      {/* Bluetooth Permission Dialog */}
-      <Dialog open={showBluetoothDialog} onOpenChange={setShowBluetoothDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/20">
-                <Bluetooth className="h-5 w-5 text-primary" />
-              </div>
-              Bluetooth Detection
-            </DialogTitle>
-            <DialogDescription className="text-left space-y-3 pt-2">
-              <p>
-                To verify your Bluetooth hardware, we need to request access through your browser.
-              </p>
-              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
-                <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-muted-foreground space-y-2">
-                  <p>
-                    <strong>How it works:</strong> A browser picker will appear showing nearby Bluetooth devices.
-                  </p>
-                  <p>
-                    <strong>To confirm Bluetooth works:</strong> Select any device from the list and click "Pair". Devices may show as "Unknown" - this is normal until paired.
-                  </p>
-                </div>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex-row gap-2 sm:justify-end">
-            <Button
-              variant="outline"
-              onClick={() => setShowBluetoothDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={requestBluetoothPermission}>
-              <Bluetooth className="h-4 w-4 mr-2" />
-              Verify Bluetooth
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* USB Permission Dialog */}
       <Dialog open={showUSBDialog} onOpenChange={setShowUSBDialog}>
@@ -848,8 +697,6 @@ const PortsTest = () => {
                 <CardContent className="space-y-3">
                   {wirelessTests.map((test, index) => {
                     const StatusIcon = statusConfig[test.status].icon;
-                    const isBluetooth = test.id === "bluetooth";
-                    const isClickable = isBluetooth && (test.status === "needs-permission" || test.status === "not-connected");
                     
                     return (
                       <motion.div
@@ -857,15 +704,11 @@ const PortsTest = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 + index * 0.05 }}
-                        onClick={isClickable ? handleBluetoothClick : undefined}
                         className={cn(
                           "flex items-center gap-3 p-4 rounded-lg transition-all",
                           test.status === "connected" 
                             ? "bg-success/10 border border-success/20" 
-                            : test.status === "needs-permission"
-                            ? "bg-warning/5 border border-warning/20"
-                            : "bg-muted/30",
-                          isClickable && "cursor-pointer hover:bg-warning/10"
+                            : "bg-muted/30"
                         )}
                       >
                         <div className={cn(
@@ -875,8 +718,7 @@ const PortsTest = () => {
                         )}>
                           <test.icon className={cn(
                             "h-5 w-5",
-                            test.status === "connected" ? "text-success" : 
-                            test.status === "needs-permission" ? "text-warning" : "text-foreground"
+                            test.status === "connected" ? "text-success" : "text-foreground"
                           )} />
                         </div>
                         
@@ -887,23 +729,16 @@ const PortsTest = () => {
                           </div>
                         </div>
 
-                        {test.status === "needs-permission" ? (
-                          <Button size="sm" variant="outline" className="gap-1.5 text-warning border-warning/30 hover:bg-warning/10">
-                            <Unlock className="h-3.5 w-3.5" />
-                            Grant Access
-                          </Button>
-                        ) : (
-                          <div className={cn(
-                            "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                            statusConfig[test.status].color
-                          )}>
-                            <StatusIcon className={cn(
-                              "h-3.5 w-3.5",
-                              test.status === "testing" && "animate-spin"
-                            )} />
-                            {statusConfig[test.status].label}
-                          </div>
-                        )}
+                        <div className={cn(
+                          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
+                          statusConfig[test.status].color
+                        )}>
+                          <StatusIcon className={cn(
+                            "h-3.5 w-3.5",
+                            test.status === "testing" && "animate-spin"
+                          )} />
+                          {statusConfig[test.status].label}
+                        </div>
                       </motion.div>
                     );
                   })}
