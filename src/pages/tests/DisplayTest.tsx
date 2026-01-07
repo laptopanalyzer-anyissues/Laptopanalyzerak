@@ -291,16 +291,6 @@ function ViewingAngleTest() {
           background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0.3) 50%, transparent 70%)',
         }}
       />
-      
-      {/* Info box */}
-      <div className="absolute bottom-8 right-8 max-w-sm p-4 bg-white rounded-lg shadow-lg">
-        <h3 className="text-primary font-semibold text-lg mb-2">Viewing Angle</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Test the monitor's viewing angle stability. When you increase the viewing angle, 
-          the size and shape of the circles displayed should remain almost the same. 
-          Slight changes may appear. Less is better.
-        </p>
-      </div>
     </div>
   );
 }
