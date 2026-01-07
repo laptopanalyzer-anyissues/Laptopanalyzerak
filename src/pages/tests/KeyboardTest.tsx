@@ -46,7 +46,7 @@ const getKeyWidth = (key: string) => {
     "Control": "w-16",
     "Meta": "w-14",
     "Alt": "w-14",
-    " ": "flex-1",
+    " ": "w-64",
   };
   return widths[key] || "w-12";
 };
