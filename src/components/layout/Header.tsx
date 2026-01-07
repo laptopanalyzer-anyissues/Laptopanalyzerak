@@ -9,7 +9,8 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "Tests", path: "/dashboard" },
   { name: "How It Works", path: "/blog" },
-  { name: "Privacy", path: "/#privacy", isAnchor: true },
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
 ];
 
 export const Header = forwardRef<HTMLElement>((_, ref) => {
@@ -22,18 +23,8 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const handleNavClick = (link: typeof navLinks[0], e: React.MouseEvent) => {
-    if (link.isAnchor) {
-      e.preventDefault();
-      if (location.pathname !== "/") {
-        navigate("/");
-        setTimeout(() => {
-          document.getElementById("privacy")?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      } else {
-        document.getElementById("privacy")?.scrollIntoView({ behavior: "smooth" });
-      }
-    }
+  const handleNavClick = (_link: typeof navLinks[0], _e: React.MouseEvent) => {
+    // Navigation is handled by React Router
   };
 
   return (
@@ -62,9 +53,8 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
               <Link
                 key={link.path}
                 to={link.path}
-                onClick={(e) => handleNavClick(link, e)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path || (link.isAnchor && location.pathname === "/" && location.hash === "#privacy")
+                  location.pathname === link.path
                     ? "text-primary bg-primary/10"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
@@ -126,12 +116,9 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  onClick={(e) => {
-                    handleNavClick(link, e);
-                    setMobileMenuOpen(false);
-                  }}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path || (link.isAnchor && location.pathname === "/" && location.hash === "#privacy")
+                    location.pathname === link.path
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
