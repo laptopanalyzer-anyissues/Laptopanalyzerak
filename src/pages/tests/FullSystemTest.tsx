@@ -493,8 +493,8 @@ const FullSystemTest = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="space-y-6"
                 >
-                  {/* All Tests Passed Celebration Banner */}
-                  {passedCount === testedCount && testedCount > 0 && (
+                  {/* All Tests Passed Celebration Banner - only show when ALL tests ran and passed */}
+                  {passedCount === tests.length && skippedCount === 0 && (
                     <motion.div
                       initial={{ opacity: 0, y: -20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -511,7 +511,7 @@ const FullSystemTest = () => {
                         </motion.div>
                         <div className="text-center">
                           <h3 className="text-xl font-bold text-success">Perfect Score!</h3>
-                          <p className="text-sm text-success/80">All {testedCount} tests passed successfully</p>
+                          <p className="text-sm text-success/80">All {tests.length} tests passed successfully</p>
                         </div>
                         <motion.div
                           animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
