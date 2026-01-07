@@ -213,13 +213,16 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
                 <span> • Auto-continues in {Math.max(0, 15 - idleTimer)}s</span>
               )}
             </p>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleChangeKeyboard}
-              className="inline-flex items-center gap-1 mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="mt-2 gap-1.5"
             >
-              <Settings2 className="h-3 w-3" />
+              <Settings2 className="h-3.5 w-3.5" />
               {keyboardType === "mac" ? "Mac Keyboard" : "Windows Keyboard"}
-            </button>
+              <span className="text-muted-foreground">• Change</span>
+            </Button>
           </div>
 
           {/* Progress Bar */}
