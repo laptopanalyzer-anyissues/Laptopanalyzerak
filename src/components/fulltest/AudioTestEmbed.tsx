@@ -69,12 +69,12 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
 
     audio.onended = () => setIsPlaying(null);
     
-    // Auto stop after 5 seconds
+    // Auto stop after 30 seconds
     setTimeout(() => {
       if (audioElementRef.current) {
         stopAll();
       }
-    }, 5000);
+    }, 30000);
   };
 
   const canComplete = testedChannels.size >= 1;
