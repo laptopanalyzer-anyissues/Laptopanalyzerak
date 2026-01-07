@@ -11,19 +11,15 @@ interface Props {
 
 const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [pendingChannel, setPendingChannel] = useState<"left" | "right" | "both" | null>(null);
   const [testedChannels, setTestedChannels] = useState<Set<string>>(new Set());
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const pannerRef = useRef<StereoPannerNode | null>(null);
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     return () => {
       stopAll();
-      if (countdownRef.current) clearInterval(countdownRef.current);
     };
   }, []);
 
@@ -41,37 +37,13 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-      countdownRef.current = null;
-    }
     pannerRef.current = null;
     setIsPlaying(null);
-    setCountdown(null);
-    setPendingChannel(null);
-  };
-
-  const startCountdown = (channel: "left" | "right" | "both") => {
-    stopAll();
-    setPendingChannel(channel);
-    setCountdown(3);
-    
-    countdownRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          if (countdownRef.current) clearInterval(countdownRef.current);
-          playMusicWithPan(channel);
-          return null;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   };
 
   const playMusicWithPan = (channel: "left" | "right" | "both") => {
-    setPendingChannel(null);
-    setCountdown(null);
-
+    stopAll();
+    
     const audioContext = new AudioContext();
     audioContextRef.current = audioContext;
 
@@ -131,16 +103,13 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
               ? "bg-success/10 border-success"
               : "bg-card border-border hover:border-primary/50"
           }`}
-          onClick={() => (isPlaying === "left" || pendingChannel === "left" ? stopAll() : startCountdown("left"))}
+          onClick={() => (isPlaying === "left" ? stopAll() : playMusicWithPan("left"))}
         >
-          <div className={`p-3 rounded-full mb-3 ${isPlaying === "left" || pendingChannel === "left" ? "bg-primary animate-pulse" : "bg-muted"}`}>
-            <Volume2 className={`h-6 w-6 ${isPlaying === "left" || pendingChannel === "left" ? "text-primary-foreground" : "text-muted-foreground"}`} />
+          <div className={`p-3 rounded-full mb-3 ${isPlaying === "left" ? "bg-primary animate-pulse" : "bg-muted"}`}>
+            <Volume2 className={`h-6 w-6 ${isPlaying === "left" ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </div>
           <span className="font-medium text-foreground text-sm">Left</span>
-          {pendingChannel === "left" && countdown !== null && (
-            <span className="text-primary text-sm mt-2">Starting in {countdown}s...</span>
-          )}
-          {testedChannels.has("left") && !isPlaying && !pendingChannel && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
+          {testedChannels.has("left") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
         </motion.div>
 
         {/* Both Speakers */}
@@ -153,19 +122,16 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
               ? "bg-success/10 border-success"
               : "bg-card border-border hover:border-primary/50"
           }`}
-          onClick={() => (isPlaying === "both" || pendingChannel === "both" ? stopAll() : startCountdown("both"))}
+          onClick={() => (isPlaying === "both" ? stopAll() : playMusicWithPan("both"))}
         >
-          <div className={`p-3 rounded-full mb-3 ${isPlaying === "both" || pendingChannel === "both" ? "bg-primary animate-pulse" : "bg-muted"}`}>
+          <div className={`p-3 rounded-full mb-3 ${isPlaying === "both" ? "bg-primary animate-pulse" : "bg-muted"}`}>
             <div className="flex gap-0.5">
-              <Volume2 className={`h-5 w-5 ${isPlaying === "both" || pendingChannel === "both" ? "text-primary-foreground" : "text-muted-foreground"}`} />
-              <Volume2 className={`h-5 w-5 ${isPlaying === "both" || pendingChannel === "both" ? "text-primary-foreground" : "text-muted-foreground"}`} />
+              <Volume2 className={`h-5 w-5 ${isPlaying === "both" ? "text-primary-foreground" : "text-muted-foreground"}`} />
+              <Volume2 className={`h-5 w-5 ${isPlaying === "both" ? "text-primary-foreground" : "text-muted-foreground"}`} />
             </div>
           </div>
           <span className="font-medium text-foreground text-sm">Both</span>
-          {pendingChannel === "both" && countdown !== null && (
-            <span className="text-primary text-sm mt-2">Starting in {countdown}s...</span>
-          )}
-          {testedChannels.has("both") && !isPlaying && !pendingChannel && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
+          {testedChannels.has("both") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
         </motion.div>
 
         {/* Right Speaker */}
@@ -178,16 +144,13 @@ const AudioTestEmbed = ({ onComplete, onBack }: Props) => {
               ? "bg-success/10 border-success"
               : "bg-card border-border hover:border-primary/50"
           }`}
-          onClick={() => (isPlaying === "right" || pendingChannel === "right" ? stopAll() : startCountdown("right"))}
+          onClick={() => (isPlaying === "right" ? stopAll() : playMusicWithPan("right"))}
         >
-          <div className={`p-3 rounded-full mb-3 ${isPlaying === "right" || pendingChannel === "right" ? "bg-primary animate-pulse" : "bg-muted"}`}>
-            <Volume2 className={`h-6 w-6 ${isPlaying === "right" || pendingChannel === "right" ? "text-primary-foreground" : "text-muted-foreground"}`} />
+          <div className={`p-3 rounded-full mb-3 ${isPlaying === "right" ? "bg-primary animate-pulse" : "bg-muted"}`}>
+            <Volume2 className={`h-6 w-6 ${isPlaying === "right" ? "text-primary-foreground" : "text-muted-foreground"}`} />
           </div>
           <span className="font-medium text-foreground text-sm">Right</span>
-          {pendingChannel === "right" && countdown !== null && (
-            <span className="text-primary text-sm mt-2">Starting in {countdown}s...</span>
-          )}
-          {testedChannels.has("right") && !isPlaying && !pendingChannel && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
+          {testedChannels.has("right") && !isPlaying && <CheckCircle2 className="h-4 w-4 text-success mt-2" />}
         </motion.div>
       </div>
 
