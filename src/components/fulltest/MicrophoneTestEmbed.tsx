@@ -70,8 +70,8 @@ const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
   const canComplete = peakVolume > 10; // Detected some sound
 
   return (
-    <div className="flex flex-col h-full min-h-[500px] p-6">
-      <div className="text-center mb-6">
+    <div className="flex flex-col items-center justify-center h-full min-h-[400px] p-6">
+      <div className="text-center mb-4">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary mb-2">
           <Mic className="h-4 w-4" />
           <span className="font-medium">Microphone Test</span>
@@ -82,13 +82,13 @@ const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
       </div>
 
       {/* Mic Visualization */}
-      <div className="flex-1 flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center flex-1 w-full max-w-sm">
         {!isListening && !error && (
           <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-6">
-              <Mic className="h-12 w-12 text-muted-foreground" />
+            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mb-4 mx-auto">
+              <Mic className="h-10 w-10 text-muted-foreground" />
             </div>
-            <Button onClick={startListening}>
+            <Button onClick={startListening} size="lg">
               <Mic className="h-4 w-4 mr-2" />
               Start Microphone
             </Button>
@@ -97,30 +97,30 @@ const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
 
         {error && (
           <div className="text-center">
-            <MicOff className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <MicOff className="h-10 w-10 text-destructive mx-auto mb-3" />
             <p className="text-destructive text-sm">{error}</p>
           </div>
         )}
 
         {isListening && (
-          <div className="w-full max-w-sm">
+          <div className="w-full">
             {/* Visual Volume Indicator */}
             <motion.div
-              className="w-32 h-32 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-6"
+              className="w-28 h-28 mx-auto rounded-full bg-primary/20 flex items-center justify-center mb-4"
               animate={{ scale: 1 + (volume / 200) }}
             >
-              <div className="w-20 h-20 rounded-full bg-primary/40 flex items-center justify-center">
-                <Mic className="h-8 w-8 text-primary" />
+              <div className="w-16 h-16 rounded-full bg-primary/40 flex items-center justify-center">
+                <Mic className="h-7 w-7 text-primary" />
               </div>
             </motion.div>
 
             {/* Volume Bar */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mb-3">
+              <div className="flex items-center justify-between mb-1.5">
                 <span className="text-sm text-muted-foreground">Volume Level</span>
                 <span className="text-sm font-medium">{volume}%</span>
               </div>
-              <div className="h-4 bg-muted rounded-full overflow-hidden">
+              <div className="h-3 bg-muted rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-gradient-to-r from-primary to-accent"
                   animate={{ width: `${volume}%` }}
@@ -137,14 +137,14 @@ const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="mt-6 flex justify-center gap-3">
+      <div className="mt-4 flex justify-center gap-3">
         {onBack && (
-          <Button onClick={onBack} variant="outline">
+          <Button onClick={onBack} variant="outline" size="lg">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!isListening}>
+        <Button onClick={onComplete} disabled={!isListening} size="lg">
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {canComplete ? "Complete Test" : "Make some sound first"}
         </Button>
