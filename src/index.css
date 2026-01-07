@@ -136,9 +136,30 @@
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   }
 
+  /* Enhanced focus states for interactive test elements */
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  a:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background transition-shadow duration-200;
+  }
+
+  /* High contrast focus for test interface elements */
+  .test-focusable:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-4 ring-offset-background shadow-lg;
+  }
+
   /* Skip to main content link for screen readers */
   .skip-link {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg;
+  }
+
+  /* Keyboard navigation indicator */
+  .keyboard-nav-hint {
+    @apply hidden;
+  }
+  
+  body:has(:focus-visible) .keyboard-nav-hint {
+    @apply block;
   }
 }
 

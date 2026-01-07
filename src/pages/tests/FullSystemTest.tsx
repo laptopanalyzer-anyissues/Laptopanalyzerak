@@ -493,10 +493,40 @@ const FullSystemTest = () => {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="space-y-6"
                 >
+                  {/* All Tests Passed Celebration Banner */}
+                  {passedCount === testedCount && testedCount > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-success/20 via-primary/20 to-accent/20 border border-success/30 p-6"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-success/5 to-transparent animate-pulse" />
+                      <div className="relative flex items-center justify-center gap-3">
+                        <motion.div
+                          animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+                          transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                        >
+                          <Sparkles className="h-8 w-8 text-success" />
+                        </motion.div>
+                        <div className="text-center">
+                          <h3 className="text-xl font-bold text-success">Perfect Score!</h3>
+                          <p className="text-sm text-success/80">All {testedCount} tests passed successfully</p>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
+                          transition={{ duration: 1, repeat: Infinity, repeatDelay: 2 }}
+                        >
+                          <Sparkles className="h-8 w-8 text-success" />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+
                   {/* Score Card */}
                   <div className="glass-card rounded-3xl p-8 text-center">
                     <div className="flex items-center justify-center mb-4">
-                      <Trophy className="h-8 w-8 text-warning mr-3" />
+                      <Trophy className={`h-8 w-8 mr-3 ${overallScore === 100 ? "text-success animate-bounce" : "text-warning"}`} />
                       <span className="text-lg font-medium text-foreground">Laptop Health Score</span>
                     </div>
                     
@@ -571,21 +601,44 @@ const FullSystemTest = () => {
                   
                   {/* Summary Breakdown */}
                   <div className="glass-card rounded-2xl overflow-hidden">
-                    <div className="p-4 border-b border-border">
+                    <div className="p-4 border-b border-border flex items-center justify-between">
                       <h2 className="font-semibold text-foreground">Test Summary</h2>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1.5">
+                          <CheckCircle2 className="h-4 w-4 text-success" />
+                          <span className="text-success font-medium">{passedCount}</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <AlertTriangle className="h-4 w-4 text-warning" />
+                          <span className="text-warning font-medium">{issueCount}</span>
+                        </span>
+                        {skippedCount > 0 && (
+                          <span className="flex items-center gap-1.5">
+                            <MinusCircle className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-muted-foreground font-medium">{skippedCount}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="divide-y divide-border">
-                      {tests.map((test) => {
+                      {tests.map((test, index) => {
                         const Icon = test.icon;
                         return (
-                          <div
+                          <motion.div
                             key={test.id}
-                            className={`flex items-center justify-between p-4 ${
-                              test.passed === false ? "bg-warning/5" : ""
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className={`flex items-center justify-between p-4 transition-colors ${
+                              test.passed === false ? "bg-warning/5" : 
+                              test.passed === true ? "hover:bg-success/5" : ""
                             }`}
                           >
                             <div className="flex items-center gap-4">
-                              <div className={`p-2 rounded-lg ${
+                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+                                {index + 1}
+                              </div>
+                              <div className={`p-2 rounded-lg transition-colors ${
                                 test.passed === true ? "bg-success/10" :
                                 test.passed === false ? "bg-warning/10" :
                                 "bg-muted/50"
@@ -605,6 +658,11 @@ const FullSystemTest = () => {
                                     Screen issue reported by user
                                   </span>
                                 )}
+                                {test.passed === false && test.id === "audio" && (
+                                  <span className="text-xs text-warning">
+                                    Speaker issue reported by user
+                                  </span>
+                                )}
                                 {test.status === "skipped" && (
                                   <span className="text-xs text-muted-foreground">
                                     Test was skipped
@@ -614,25 +672,34 @@ const FullSystemTest = () => {
                             </div>
                             <div className="flex items-center gap-3">
                               {test.passed === true && (
-                                <span className="text-sm text-success font-medium">Passed</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-success/10 text-xs text-success font-medium">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Passed
+                                </span>
                               )}
                               {test.passed === false && (
-                                <span className="text-sm text-warning font-medium">Issue Detected</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-warning/10 text-xs text-warning font-medium">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Issue
+                                </span>
                               )}
                               {test.status === "skipped" && (
-                                <span className="text-sm text-muted-foreground font-medium">Skipped</span>
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-muted text-xs text-muted-foreground font-medium">
+                                  <MinusCircle className="h-3 w-3" />
+                                  Skipped
+                                </span>
                               )}
-                              {getStatusIcon(test.status, test.passed)}
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => reRunTest(test.id)}
-                                className="h-8 px-2"
+                                className="h-8 px-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                                title={`Re-run ${test.name}`}
                               >
                                 <RefreshCw className="h-4 w-4" />
                               </Button>
                             </div>
-                          </div>
+                          </motion.div>
                         );
                       })}
                     </div>
@@ -665,29 +732,50 @@ const FullSystemTest = () => {
                 {/* Progress Bar with Skip Button */}
                 <div className="glass-card rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                        {currentTestIndex + 1}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        of {tests.length}
-                      </span>
-                    </div>
-                    <span className="font-medium text-foreground">{currentTest.name}</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium text-foreground">{Math.round(progress)}%</span>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
+                        <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                          {currentTestIndex + 1}
+                        </span>
+                        <span className="text-sm font-medium text-primary">
+                          of {tests.length}
+                        </span>
+                      </div>
+                      <span className="font-semibold text-foreground">{currentTest.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-muted-foreground">{Math.round(progress)}% complete</span>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={skipCurrentTest}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       >
                         <SkipForward className="h-4 w-4 mr-1" />
                         Skip
                       </Button>
                     </div>
                   </div>
-                  <Progress value={progress} className="h-2" />
+                  <div className="relative">
+                    <Progress value={progress} className="h-2" />
+                    {/* Step indicators */}
+                    <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-0">
+                      {tests.map((_, index) => {
+                        const stepProgress = ((index + 1) / tests.length) * 100;
+                        const isCompleted = progress >= stepProgress;
+                        const isCurrent = index === currentTestIndex;
+                        return (
+                          <div
+                            key={index}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                              isCurrent ? "bg-primary ring-2 ring-primary/30 ring-offset-1 ring-offset-background scale-150" :
+                              isCompleted ? "bg-primary" : "bg-muted-foreground/30"
+                            }`}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Test Progress List (mini) */}
