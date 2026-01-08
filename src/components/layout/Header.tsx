@@ -43,7 +43,7 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
               <Laptop className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
-              LaptopCheck
+              LaptopAnalyzer
             </span>
           </Link>
 

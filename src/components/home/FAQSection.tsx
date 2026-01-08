@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 const faqs = [
   {
     question: "Is this tool completely free?",
-    answer: "Yes! LaptopCheck is 100% free to use. All diagnostic tests run directly in your browser with no hidden costs, subscriptions, or premium features."
+    answer: "Yes! LaptopAnalyzer is 100% free to use. All diagnostic tests run directly in your browser with no hidden costs, subscriptions, or premium features."
   },
   {
     question: "Is my data safe? Do you store any information?",
@@ -38,7 +38,7 @@ const faqs = [
   },
   {
     question: "Do I need to install anything?",
-    answer: "No installation required! LaptopCheck runs entirely in your web browser. Just visit the site and start testing immediately."
+    answer: "No installation required! LaptopAnalyzer runs entirely in your web browser. Just visit the site and start testing immediately."
   },
 ];
 
@@ -61,7 +61,7 @@ export const FAQSection = () => {
             Frequently Asked Questions
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Got questions? We've got answers. Find solutions to common issues and learn more about how LaptopCheck works.
+            Got questions? We've got answers. Find solutions to common issues and learn more about how LaptopAnalyzer works.
           </p>
         </motion.div>
 

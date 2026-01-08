@@ -32,7 +32,7 @@ const TermsOfService = () => {
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Agreement to Terms</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  Welcome to LaptopCheck. By accessing or using our website and diagnostic tools, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service. These terms apply to all visitors, users, and others who access or use our service.
+                  Welcome to LaptopAnalyzer. By accessing or using our website and diagnostic tools, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service. These terms apply to all visitors, users, and others who access or use our service.
                 </p>
               </section>
 
@@ -42,7 +42,7 @@ const TermsOfService = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Description of Service</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  LaptopCheck provides free, browser-based diagnostic tools to help users test and verify the functionality of their laptop hardware components. Our service includes tests for:
+                  LaptopAnalyzer provides free, browser-based diagnostic tools to help users test and verify the functionality of their laptop hardware components. Our service includes tests for:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
@@ -82,7 +82,7 @@ const TermsOfService = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Use License</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Permission is granted to temporarily access and use LaptopCheck for personal, non-commercial diagnostic purposes. This license does not include:
+                  Permission is granted to temporarily access and use LaptopAnalyzer for personal, non-commercial diagnostic purposes. This license does not include:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
@@ -107,7 +107,7 @@ const TermsOfService = () => {
                   </li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed mt-4">
-                  This license shall automatically terminate if you violate any of these restrictions and may be terminated by LaptopCheck at any time.
+                  This license shall automatically terminate if you violate any of these restrictions and may be terminated by LaptopAnalyzer at any time.
                 </p>
               </section>
 
@@ -117,7 +117,7 @@ const TermsOfService = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Disclaimer</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  <strong className="text-foreground">LaptopCheck is provided "as is" without warranties of any kind.</strong> We make no warranties, expressed or implied, and hereby disclaim all other warranties including:
+                  <strong className="text-foreground">LaptopAnalyzer is provided "as is" without warranties of any kind.</strong> We make no warranties, expressed or implied, and hereby disclaim all other warranties including:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
@@ -144,28 +144,28 @@ const TermsOfService = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Limitations of Liability</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  In no event shall LaptopCheck or its operators be liable for any damages (including, without limitation, damages for loss of data, profit, or due to business interruption) arising out of the use or inability to use our diagnostic tools, even if we have been notified of the possibility of such damage. Because some jurisdictions do not allow limitations on implied warranties or liability for incidental or consequential damages, these limitations may not apply to you.
+                  In no event shall LaptopAnalyzer or its operators be liable for any damages (including, without limitation, damages for loss of data, profit, or due to business interruption) arising out of the use or inability to use our diagnostic tools, even if we have been notified of the possibility of such damage. Because some jurisdictions do not allow limitations on implied warranties or liability for incidental or consequential damages, these limitations may not apply to you.
                 </p>
               </section>
 
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Accuracy of Materials</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  The materials appearing on LaptopCheck's website could include technical, typographical, or photographic errors. We do not warrant that any of the materials are accurate, complete, or current. We may make changes to the materials at any time without notice. However, we do not make any commitment to update the materials.
+                  The materials appearing on LaptopAnalyzer's website could include technical, typographical, or photographic errors. We do not warrant that any of the materials are accurate, complete, or current. We may make changes to the materials at any time without notice. However, we do not make any commitment to update the materials.
                 </p>
               </section>
 
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Links to Third-Party Sites</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  LaptopCheck has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by LaptopCheck. Use of any such linked website is at the user's own risk.
+                  LaptopAnalyzer has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by LaptopAnalyzer. Use of any such linked website is at the user's own risk.
                 </p>
               </section>
 
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Prohibited Uses</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  You may not use LaptopCheck:
+                  You may not use LaptopAnalyzer:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
@@ -205,7 +205,7 @@ const TermsOfService = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Modifications</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  LaptopCheck may revise these Terms of Service at any time without notice. By using this website, you are agreeing to be bound by the then-current version of these Terms of Service. We encourage you to periodically review these terms to stay informed of any updates.
+                  LaptopAnalyzer may revise these Terms of Service at any time without notice. By using this website, you are agreeing to be bound by the then-current version of these Terms of Service. We encourage you to periodically review these terms to stay informed of any updates.
                 </p>
               </section>
 
@@ -222,7 +222,7 @@ const TermsOfService = () => {
                   If you have any questions about these Terms of Service, please contact us at:
                 </p>
                 <p className="text-foreground font-medium mt-2">
-                  legal@laptopcheck.org
+                  legal@laptopanalyzer.com
                 </p>
               </section>
             </div>

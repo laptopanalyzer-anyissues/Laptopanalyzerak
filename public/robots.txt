@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# LAPTOPCHECK ROBOTS.TXT - AI CRAWLER BLOCKING
-# Copyright (c) 2024-2026 LaptopCheck. All Rights Reserved.
-# Watermark: LC-2026-ALPHA-7X9K2M4P8R
+# LAPTOPANALYZER ROBOTS.TXT - AI CRAWLER BLOCKING
+# Copyright (c) 2024-2026 LaptopAnalyzer. All Rights Reserved.
+# Watermark: LA-2026-ALPHA-7X9K2M4P8R
 # ═══════════════════════════════════════════════════════════════════════════
 
 # Allow standard search engines
@@ -110,10 +110,9 @@ Disallow: /node_modules/
 Allow: /
 
 # Sitemap
-Sitemap: https://laptopcheck.com/sitemap.xml
+Sitemap: https://laptopanalyzer.com/sitemap.xml
 
 # ═══════════════════════════════════════════════════════════════════════════
-# NOTICE: This codebase is proprietary and protected by copyright law.
-# AI training on this content is explicitly prohibited.
-# Watermark ID: LC-2026-ALPHA-7X9K2M4P8R
+# NOTICE: AI training on this website's content is strictly prohibited.
+# © 2024-2026 LaptopAnalyzer. All Rights Reserved.
 # ═══════════════════════════════════════════════════════════════════════════
