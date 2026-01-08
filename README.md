@@ -1,4 +1,4 @@
-# LaptopCheck
+# LaptopAnalyzer
 
 Free online laptop hardware diagnostic tool. Test your display, keyboard, camera, speakers, microphone, network, and more - all from your browser.
 
@@ -8,29 +8,19 @@ Free online laptop hardware diagnostic tool. Test your display, keyboard, camera
 - **Keyboard Test** - Verify all keys are working
 - **Camera Test** - Test your webcam
 - **Microphone Test** - Check audio input with waveform visualization
-- **Speaker Test** - Stereo audio test
-- **Network Test** - Speed test and connectivity check
-- **Touchpad Test** - Gesture and click testing
-- **Port Test** - USB and connectivity verification
+- **Audio Test** - Test speakers with stereo sound
+- **Network Test** - Measure internet speed
+- **Touchpad Test** - Test touchpad gestures
+- **Ports Test** - Detect connected USB and Bluetooth devices
 
-## Tech Stack
+## Privacy
 
-- React
-- TypeScript
-- Vite
-- Tailwind CSS
-- shadcn/ui
+All tests run locally in your browser. No data is collected or transmitted.
 
-## Development
+## Website
 
-```sh
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
+Visit [laptopanalyzer.com](https://laptopanalyzer.com) to start testing.
 
 ## License
 
-MIT
+Copyright © 2024-2026 LaptopAnalyzer. All Rights Reserved.

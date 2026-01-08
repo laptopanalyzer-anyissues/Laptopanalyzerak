@@ -14,7 +14,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                 <Laptop className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="text-lg font-bold text-foreground">
-                LaptopCheck
+                LaptopAnalyzer
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs mb-4">
@@ -111,7 +111,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
 
         <div className="mt-12 pt-6 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} LaptopCheck. Free and open for everyone.
+            © {new Date().getFullYear()} LaptopAnalyzer. Free and open for everyone.
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <Link to="/privacy-policy" className="hover:text-foreground transition-colors">

@@ -35,7 +35,7 @@ const PrivacyPolicy = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Our Commitment to Privacy</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed">
-                  At LaptopCheck, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we handle data when you use our laptop diagnostic tool. We believe in complete transparency and want you to feel confident using our service.
+                  At LaptopAnalyzer, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we handle data when you use our laptop diagnostic tool. We believe in complete transparency and want you to feel confident using our service.
                 </p>
               </section>
 
@@ -45,7 +45,7 @@ const PrivacyPolicy = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Information We Collect</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  <strong className="text-foreground">We do not collect any personal information.</strong> LaptopCheck is designed with privacy as a core principle:
+                  <strong className="text-foreground">We do not collect any personal information.</strong> LaptopAnalyzer is designed with privacy as a core principle:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
@@ -133,7 +133,7 @@ const PrivacyPolicy = () => {
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Children's Privacy</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  LaptopCheck is a general-purpose diagnostic tool and does not target children under 13. Since we do not collect personal information from any users, we do not knowingly collect data from children. If you are a parent or guardian and believe your child has provided personal information to us, please contact us immediately.
+                  LaptopAnalyzer is a general-purpose diagnostic tool and does not target children under 13. Since we do not collect personal information from any users, we do not knowingly collect data from children. If you are a parent or guardian and believe your child has provided personal information to us, please contact us immediately.
                 </p>
               </section>
 
@@ -161,7 +161,7 @@ const PrivacyPolicy = () => {
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
                 <h2 className="text-xl font-semibold text-foreground mb-4">Changes to This Policy</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date. We encourage you to review this policy periodically. Your continued use of LaptopCheck after any changes indicates your acceptance of the updated policy.
+                  We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated revision date. We encourage you to review this policy periodically. Your continued use of LaptopAnalyzer after any changes indicates your acceptance of the updated policy.
                 </p>
               </section>
 
@@ -174,7 +174,7 @@ const PrivacyPolicy = () => {
                   If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
                 </p>
                 <p className="text-foreground font-medium mt-2">
-                  privacy@laptopcheck.org
+                  privacy@laptopanalyzer.com
                 </p>
               </section>
             </div>

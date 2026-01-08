@@ -23,7 +23,7 @@ const contactReasons = [
   {
     icon: HelpCircle,
     title: "General Inquiry",
-    description: "Questions about LaptopCheck or how to use our tools",
+    description: "Questions about LaptopAnalyzer or how to use our tools",
   },
   {
     icon: Bug,
@@ -197,7 +197,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <h3 className="font-medium text-foreground">Email</h3>
-                      <p className="text-muted-foreground">support@laptopcheck.org</p>
+                      <p className="text-muted-foreground">support@laptopanalyzer.com</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">

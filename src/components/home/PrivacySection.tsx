@@ -43,7 +43,7 @@ export function PrivacySection() {
               Your Privacy Comes First
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              LaptopCheck is built with privacy at its core. No data collection,
+              LaptopAnalyzer is built with privacy at its core. No data collection,
               no servers, no compromises.
             </p>
           </div>

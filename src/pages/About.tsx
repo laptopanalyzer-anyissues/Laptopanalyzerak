@@ -71,13 +71,13 @@ const About = () => {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
               <Laptop className="h-4 w-4" />
-              About LaptopCheck
+              About LaptopAnalyzer
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
               Empowering Users to Understand Their Hardware
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              LaptopCheck is a free, browser-based diagnostic platform that helps you verify every component of your laptop works correctly—without compromising your privacy.
+              LaptopAnalyzer is a free, browser-based diagnostic platform that helps you verify every component of your laptop works correctly—without compromising your privacy.
             </p>
           </motion.div>
 
@@ -96,7 +96,7 @@ const About = () => {
                 <h2 className="text-2xl font-bold text-foreground">Our Mission</h2>
               </div>
               <p className="text-muted-foreground leading-relaxed text-lg">
-                We believe everyone deserves access to professional-grade hardware diagnostics. Whether you are buying a used laptop, troubleshooting an issue, or simply curious about your device's health, LaptopCheck provides the tools you need—completely free and without any data collection.
+                We believe everyone deserves access to professional-grade hardware diagnostics. Whether you are buying a used laptop, troubleshooting an issue, or simply curious about your device's health, LaptopAnalyzer provides the tools you need—completely free and without any data collection.
               </p>
             </div>
           </motion.section>
@@ -171,7 +171,7 @@ const About = () => {
             className="mb-20"
           >
             <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
-              How LaptopCheck Works
+              How LaptopAnalyzer Works
             </h2>
             <div className="max-w-3xl mx-auto space-y-4">
               {[
@@ -208,7 +208,7 @@ const About = () => {
           >
             <div className="max-w-4xl mx-auto p-8 rounded-2xl bg-card border border-border">
               <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
-                Why Choose LaptopCheck?
+                Why Choose LaptopAnalyzer?
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
