@@ -1,0 +1,28 @@
+{
+  "name": "LaptopAnalyzer",
+  "short_name": "LaptopAnalyzer",
+  "description": "Free Online Laptop Hardware Diagnostic Tool - Test your laptop's display, keyboard, camera, speakers, microphone, and network.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
