@@ -73,9 +73,9 @@ const KeyboardTest = () => {
   const testedKeys = pressedKeys.size;
   const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
 
-  // Check for test completion (95% threshold since some keys may be impossible to test in browsers)
+  // Check for test completion (only when all keys are tested)
   useEffect(() => {
-    if (progress >= 95 && !testCompleted) {
+    if (progress === 100 && !testCompleted) {
       setTestCompleted(true);
       fireConfetti();
     }
