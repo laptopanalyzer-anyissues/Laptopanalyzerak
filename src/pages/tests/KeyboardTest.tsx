@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RotateCcw, CheckCircle2, Settings2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2, Settings2, PartyPopper } from "lucide-react";
+import { useConfetti } from "@/hooks/useConfetti";
 import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
 import {
   KeyboardType,
@@ -22,6 +23,8 @@ const KeyboardTest = () => {
   const [lastKey, setLastKey] = useState<string>("");
   const [lastKeyCode, setLastKeyCode] = useState<string>("");
   const [justPressed, setJustPressed] = useState<string | null>(null);
+  const [testCompleted, setTestCompleted] = useState(false);
+  const { fireConfetti } = useConfetti();
 
   // Check for stored keyboard type on mount
   useEffect(() => {
@@ -70,10 +73,19 @@ const KeyboardTest = () => {
   const testedKeys = pressedKeys.size;
   const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
 
+  // Check for test completion
+  useEffect(() => {
+    if (progress === 100 && !testCompleted) {
+      setTestCompleted(true);
+      fireConfetti();
+    }
+  }, [progress, testCompleted, fireConfetti]);
+
   const resetTest = () => {
     setPressedKeys(new Set());
     setLastKey("");
     setLastKeyCode("");
+    setTestCompleted(false);
   };
 
   const isKeyPressed = (key: string) => {
@@ -224,6 +236,34 @@ const KeyboardTest = () => {
                   ))}
                 </div>
               </motion.div>
+
+              {/* Congratulations Message */}
+              {testCompleted && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+                  className="mt-6 p-6 rounded-2xl bg-success/10 border border-success/30 text-center"
+                >
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/20 mb-4"
+                  >
+                    <PartyPopper className="h-8 w-8 text-success" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold text-success mb-2">
+                    🎉 Congratulations!
+                  </h3>
+                  <p className="text-foreground font-medium mb-1">
+                    Your keyboard is working perfectly!
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    All {totalKeys} keys have been tested and are functioning correctly.
+                  </p>
+                </motion.div>
+              )}
 
               {/* Tips */}
               <motion.div
