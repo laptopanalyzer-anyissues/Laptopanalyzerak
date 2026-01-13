@@ -47,8 +47,8 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
           >
-            Check Every Part of Your Laptop{" "}
-            <span className="gradient-text">All in One Place</span>
+            Free Laptop Checker Online{" "}
+            <span className="gradient-text">Check Your Laptop Now</span>
           </motion.h1>
 
           {/* Subheading */}
@@ -58,8 +58,8 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            Test your display, keyboard, camera, speakers, and more. Perfect for
-            verifying new or used laptops work perfectly.
+            #1 laptop checking tool for display, keyboard, camera, speakers & mic. 
+            Perfect laptop checker for testing used laptops before buying.
           </motion.p>
 
           {/* CTA Button */}

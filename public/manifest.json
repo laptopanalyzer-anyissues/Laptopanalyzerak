@@ -1,7 +1,7 @@
 {
-  "name": "LaptopAnalyzer",
-  "short_name": "LaptopAnalyzer",
-  "description": "Free Online Laptop Hardware Diagnostic Tool - Test your laptop's display, keyboard, camera, speakers, microphone, and network.",
+  "name": "Laptop Checker Online - Free Laptop Checking Tool",
+  "short_name": "Laptop Checker",
+  "description": "Best free laptop checker online! Check your laptop's display, keyboard, webcam, speakers & mic instantly. #1 laptop checking tool for testing used laptops - no download needed.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1117",
