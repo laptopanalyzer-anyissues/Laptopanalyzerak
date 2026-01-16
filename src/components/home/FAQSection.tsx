@@ -21,6 +21,10 @@ const faqs = [
     answer: "Your browser needs permission to access these devices. When prompted, click 'Allow' to grant access. If you previously denied permission, check your browser settings to enable it."
   },
   {
+    question: "Why isn't the fn key or F11 working on my Mac keyboard test?",
+    answer: "The fn key is a hardware-level modifier that browsers cannot detect — it's intercepted by your keyboard firmware before reaching the browser. For F11 (and sometimes F12), macOS intercepts these keys for Mission Control features like 'Show Desktop'. To test F11, press fn + F11 together, or go to System Preferences → Keyboard and enable 'Use F1, F2, etc. keys as standard function keys'."
+  },
+  {
     question: "What should I do if I find dead pixels?",
     answer: "If your laptop is under warranty, contact the manufacturer as dead pixels may be covered. Some stuck pixels can be fixed using pixel-fixing videos that rapidly flash colors, but dead pixels typically require screen replacement."
   },
