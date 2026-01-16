@@ -56,10 +56,13 @@ const KeyboardTest = () => {
     
     setLastKey(key);
     setLastKeyCode(e.code);
-    setPressedKeys((prev) => new Set(prev).add(key.toUpperCase()));
+    
+    // Normalize key for comparison - keep F-keys as-is, uppercase letters
+    const normalizedKey = key.startsWith("F") && key.length <= 3 ? key : key.toUpperCase();
+    setPressedKeys((prev) => new Set(prev).add(normalizedKey));
     
     // Trigger animation for this specific key
-    setJustPressed(key.toUpperCase());
+    setJustPressed(normalizedKey);
     setTimeout(() => setJustPressed(null), 600);
   }, []);
 
@@ -89,7 +92,9 @@ const KeyboardTest = () => {
   };
 
   const isKeyPressed = (key: string) => {
-    return pressedKeys.has(key.toUpperCase()) || pressedKeys.has(key);
+    // Check both original key and normalized versions for F-keys
+    const normalizedKey = key.startsWith("F") && key.length <= 3 ? key : key.toUpperCase();
+    return pressedKeys.has(normalizedKey) || pressedKeys.has(key) || pressedKeys.has(key.toUpperCase());
   };
 
   return (
