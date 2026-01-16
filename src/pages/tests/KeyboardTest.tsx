@@ -55,6 +55,9 @@ const KeyboardTest = () => {
     e.preventDefault();
     const key = e.key;
     
+    // Debug logging for F-keys
+    console.log('Key pressed:', { key, code: e.code, keyCode: e.keyCode });
+    
     setLastKey(key);
     setLastKeyCode(e.code);
     
@@ -289,10 +292,15 @@ const KeyboardTest = () => {
                   <li>• Press each key firmly to test if it registers</li>
                   <li>• Green keys indicate they've been successfully tested</li>
                   <li>• If a key doesn't light up, try pressing it multiple times</li>
-                  <li>• Check function keys (F1-F12) — they may require Fn key on some laptops</li>
-                  <li>• <span className="text-amber-500">⚠️ The fn key cannot be tested</span> — it's a hardware-level modifier that browsers cannot detect</li>
                   {keyboardType === "mac" && (
-                    <li>• Mac keyboards use ⌘ Command and ⌥ Option instead of Windows key and Alt</li>
+                    <>
+                      <li>• <span className="text-amber-500 font-medium">⚠️ F11/F12 keys</span> — macOS may intercept these for Mission Control. Press <strong>fn + F11/F12</strong> or enable "Use F1, F2, etc. keys as standard function keys" in System Preferences</li>
+                      <li>• <span className="text-amber-500 font-medium">⚠️ fn key cannot be tested</span> — it's a hardware-level modifier that browsers cannot detect</li>
+                      <li>• Mac keyboards use ⌘ Command and ⌥ Option instead of Windows key and Alt</li>
+                    </>
+                  )}
+                  {keyboardType === "windows" && (
+                    <li>• Some function keys (F1-F12) may require pressing Fn key on laptops</li>
                   )}
                 </ul>
               </motion.div>
