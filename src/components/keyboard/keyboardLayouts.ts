@@ -1,14 +1,17 @@
 // Mac Keyboard Layout
 // Note: The "fn" key cannot be detected by browsers - it's a hardware-level modifier
-// We replace it with "Globe" key (which some Macs report) or remove it from required keys
+// We still show it but mark it as untestable in the UI
 export const macKeyboardLayout = [
   ["Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"],
   ["`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "Backspace"],
   ["Tab", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "[", "]", "\\"],
   ["CapsLock", "A", "S", "D", "F", "G", "H", "J", "K", "L", ";", "'", "Enter"],
   ["Shift", "Z", "X", "C", "V", "B", "N", "M", ",", ".", "/", "Shift"],
-  ["Control", "Alt", "Meta", " ", "Meta", "Alt", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight"],
+  ["fn", "Control", "Alt", "Meta", " ", "Meta", "Alt", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight"],
 ];
+
+// Keys that cannot be detected by browsers (hardware-level)
+export const untestableKeys = ["fn"];
 
 // Windows Keyboard Layout
 export const windowsKeyboardLayout = [
@@ -32,6 +35,7 @@ export const macKeyDisplay: Record<string, string> = {
   "Control": "⌃ Control",
   "Meta": "⌘",
   "Alt": "⌥ Option",
+  "fn": "fn ⚠️",
   "ArrowLeft": "←",
   "ArrowUp": "↑",
   "ArrowDown": "↓",
@@ -66,6 +70,7 @@ export const macKeyWidths: Record<string, string> = {
   "Control": "w-16",
   "Meta": "w-14",
   "Alt": "w-18",
+  "fn": "w-12",
   " ": "w-64",
 };
 
