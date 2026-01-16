@@ -12,6 +12,7 @@ import {
   getKeyboardLayout,
   getKeyDisplay,
   getKeyWidth,
+  untestableKeys,
 } from "@/components/keyboard/keyboardLayouts";
 
 const KEYBOARD_TYPE_KEY = "laptop-keyboard-type";
@@ -72,8 +73,10 @@ const KeyboardTest = () => {
   }, [handleKeyDown]);
 
   const keyboardLayout = keyboardType ? getKeyboardLayout(keyboardType) : [];
-  const totalKeys = keyboardLayout.flat().length;
-  const testedKeys = pressedKeys.size;
+  // Exclude untestable keys from total count
+  const testableKeys = keyboardLayout.flat().filter(key => !untestableKeys.includes(key));
+  const totalKeys = testableKeys.length;
+  const testedKeys = [...pressedKeys].filter(key => !untestableKeys.includes(key) && !untestableKeys.includes(key.toLowerCase())).length;
   const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
 
   // Check for test completion (only when all keys are tested)
@@ -198,8 +201,9 @@ const KeyboardTest = () => {
                   {keyboardLayout.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex gap-1.5 mb-1.5 justify-center">
                       {row.map((key, keyIndex) => {
-                        const pressed = isKeyPressed(key);
-                        const isJustPressed = justPressed === key.toUpperCase() || justPressed === key;
+                        const isUntestable = untestableKeys.includes(key);
+                        const pressed = !isUntestable && isKeyPressed(key);
+                        const isJustPressed = !isUntestable && (justPressed === key.toUpperCase() || justPressed === key);
                         
                         return (
                           <motion.div
@@ -219,12 +223,15 @@ const KeyboardTest = () => {
                             }
                             transition={{ duration: 0.5, ease: "easeOut" }}
                             className={`${getKeyWidth(key, keyboardType)} h-12 flex items-center justify-center rounded-lg font-medium text-sm transition-colors duration-200 ${
-                              pressed
-                                ? "bg-success text-success-foreground"
-                                : "bg-muted text-foreground hover:bg-muted/80"
+                              isUntestable
+                                ? "bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30"
+                                : pressed
+                                  ? "bg-success text-success-foreground"
+                                  : "bg-muted text-foreground hover:bg-muted/80"
                             }`}
+                            title={isUntestable ? "This key cannot be detected by browsers" : undefined}
                           >
-                            {pressed && (
+                            {pressed && !isUntestable && (
                               <motion.span
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
@@ -283,6 +290,7 @@ const KeyboardTest = () => {
                   <li>• Green keys indicate they've been successfully tested</li>
                   <li>• If a key doesn't light up, try pressing it multiple times</li>
                   <li>• Check function keys (F1-F12) — they may require Fn key on some laptops</li>
+                  <li>• <span className="text-amber-500">⚠️ The fn key cannot be tested</span> — it's a hardware-level modifier that browsers cannot detect</li>
                   {keyboardType === "mac" && (
                     <li>• Mac keyboards use ⌘ Command and ⌥ Option instead of Windows key and Alt</li>
                   )}

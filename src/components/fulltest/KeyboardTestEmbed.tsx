@@ -7,6 +7,7 @@ import {
   getKeyboardLayout,
   getKeyDisplay,
   getKeyWidth,
+  untestableKeys,
 } from "@/components/keyboard/keyboardLayouts";
 
 interface Props {
@@ -121,11 +122,14 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
   }, [onComplete]);
 
   const keyboardLayout = keyboardType ? getKeyboardLayout(keyboardType) : [];
-  const totalKeys = keyboardLayout.flat().length;
-  const testedKeys = pressedKeys.size;
+  // Exclude untestable keys from total count
+  const testableKeys = keyboardLayout.flat().filter(key => !untestableKeys.includes(key));
+  const totalKeys = testableKeys.length;
+  const testedKeys = [...pressedKeys].filter(key => !untestableKeys.includes(key) && !untestableKeys.includes(key.toLowerCase())).length;
   const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
 
   const isKeyPressed = (key: string) => {
+    if (untestableKeys.includes(key)) return false;
     return pressedKeys.has(key.toUpperCase()) || pressedKeys.has(key);
   };
 
@@ -245,8 +249,9 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
             {keyboardLayout.map((row, rowIndex) => (
               <div key={rowIndex} className="flex justify-center gap-1">
                 {row.map((key, keyIndex) => {
-                  const pressed = isKeyPressed(key);
-                  const isJustPressed = justPressed === key.toUpperCase() || justPressed === key;
+                  const isUntestable = untestableKeys.includes(key);
+                  const pressed = !isUntestable && isKeyPressed(key);
+                  const isJustPressed = !isUntestable && (justPressed === key.toUpperCase() || justPressed === key);
                   const keyWidth = getKeyWidth(key, keyboardType);
                   // Convert Tailwind width classes to inline-friendly sizes for embed
                   const widthMap: Record<string, string> = {
@@ -281,13 +286,16 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
                       className={`
                         ${embedWidth}
                         h-8 flex items-center justify-center rounded-md font-medium text-xs transition-colors duration-200
-                        ${pressed
-                          ? "bg-success text-success-foreground"
-                          : "bg-muted text-foreground"
+                        ${isUntestable
+                          ? "bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30"
+                          : pressed
+                            ? "bg-success text-success-foreground"
+                            : "bg-muted text-foreground"
                         }
                       `}
+                      title={isUntestable ? "This key cannot be detected by browsers" : undefined}
                     >
-                      {pressed && (
+                      {pressed && !isUntestable && (
                         <motion.span
                           initial={{ scale: 0, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
