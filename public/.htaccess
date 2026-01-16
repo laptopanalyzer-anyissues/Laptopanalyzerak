@@ -1,0 +1,26 @@
+# Apache SPA Fallback for React Router
+# Ensures all virtual routes serve index.html with 200 OK status
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Don't rewrite files or directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  
+  # Rewrite everything else to index.html
+  RewriteRule ^(.*)$ /index.html [L,QSA]
+</IfModule>
+
+# Ensure proper MIME types
+<IfModule mod_mime.c>
+  AddType text/html .html
+  AddType application/javascript .js
+  AddType text/css .css
+</IfModule>
+
+# Allow all search engine bots
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "index, follow"
+</IfModule>
