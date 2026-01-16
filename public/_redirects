@@ -1,0 +1,4 @@
+# Netlify/Lovable SPA fallback - serves index.html for all routes
+# This ensures client-side routing works and returns 200 OK for all paths
+
+/*    /index.html   200
