@@ -35,7 +35,7 @@ export const macKeyDisplay: Record<string, string> = {
   "Control": "⌃ Control",
   "Meta": "⌘",
   "Alt": "⌥ Option",
-  "fn": "fn ⚠️",
+  "fn": "fn",
   "ArrowLeft": "←",
   "ArrowUp": "↑",
   "ArrowDown": "↓",
