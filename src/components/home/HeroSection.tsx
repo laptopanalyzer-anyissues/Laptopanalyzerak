@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight, 
@@ -10,7 +11,13 @@ import {
   Cpu,
   Monitor,
   Keyboard,
-  Play
+  Play,
+  Mic,
+  Speaker,
+  Camera,
+  Wifi,
+  Usb,
+  MousePointer2
 } from "lucide-react";
 
 const floatingIcons = [
@@ -19,7 +26,31 @@ const floatingIcons = [
   { Icon: Keyboard, delay: 0.4, x: -60, y: 60 },
 ];
 
+// All 8 test icons that will cycle in the laptop display
+const testIcons = [
+  { Icon: Monitor, label: "Display" },
+  { Icon: Keyboard, label: "Keyboard" },
+  { Icon: Speaker, label: "Audio" },
+  { Icon: Mic, label: "Microphone" },
+  { Icon: Camera, label: "Camera" },
+  { Icon: Wifi, label: "Network" },
+  { Icon: Usb, label: "Ports" },
+  { Icon: MousePointer2, label: "Touchpad" },
+];
+
 export function HeroSection() {
+  const [currentIconIndex, setCurrentIconIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIconIndex((prev) => (prev + 1) % testIcons.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const CurrentIcon = testIcons[currentIconIndex].Icon;
+  const currentLabel = testIcons[currentIconIndex].label;
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background Effects */}
@@ -101,11 +132,37 @@ export function HeroSection() {
 
             {/* Main Laptop Icon */}
             <div className="relative p-8 rounded-3xl bg-gradient-to-br from-card to-muted border border-border shadow-2xl animate-glow">
-              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center">
-                <Laptop className="h-24 w-24 text-primary" />
+              <div className="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex flex-col items-center justify-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentIconIndex}
+                    initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -20, scale: 0.8 }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                    className="flex flex-col items-center gap-3"
+                  >
+                    <CurrentIcon className="h-20 w-20 text-primary" />
+                    <span className="text-sm font-medium text-primary/80">{currentLabel}</span>
+                  </motion.div>
+                </AnimatePresence>
               </div>
               <div className="mt-4 flex justify-center">
                 <div className="h-1 w-24 rounded-full bg-muted-foreground/20" />
+              </div>
+              
+              {/* Progress dots */}
+              <div className="mt-3 flex justify-center gap-1.5">
+                {testIcons.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                      index === currentIconIndex 
+                        ? "bg-primary w-4" 
+                        : "bg-muted-foreground/30"
+                    }`}
+                  />
+                ))}
               </div>
             </div>
           </motion.div>
