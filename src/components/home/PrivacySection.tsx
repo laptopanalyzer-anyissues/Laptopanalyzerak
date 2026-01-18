@@ -24,6 +24,30 @@ const privacyFeatures = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
 export function PrivacySection() {
   return (
     <section id="privacy" className="py-24">
@@ -36,32 +60,83 @@ export function PrivacySection() {
           className="max-w-4xl mx-auto"
         >
           <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-success/10 mb-6">
+            {/* Animated Shield Icon */}
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 200, 
+                damping: 15,
+                delay: 0.1 
+              }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-success/10 mb-6 relative"
+            >
+              <motion.div
+                animate={{ 
+                  boxShadow: [
+                    "0 0 0 0 rgba(34, 197, 94, 0.4)",
+                    "0 0 0 20px rgba(34, 197, 94, 0)",
+                  ]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity,
+                  ease: "easeOut"
+                }}
+                className="absolute inset-0 rounded-2xl"
+              />
               <Shield className="h-8 w-8 text-success" />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+            >
               Your Privacy Comes First
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-lg text-muted-foreground max-w-2xl mx-auto"
+            >
               LaptopAnalyzer is built with privacy at its core. No data collection,
               no servers, no compromises.
-            </p>
+            </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             {privacyFeatures.map((feature, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex gap-4 p-6 rounded-2xl bg-card border border-border"
+                variants={cardVariants}
+                whileHover={{ 
+                  scale: 1.02, 
+                  y: -5,
+                  transition: { duration: 0.2 }
+                }}
+                className="flex gap-4 p-6 rounded-2xl bg-card border border-border hover:border-success/30 hover:shadow-lg hover:shadow-success/5 transition-colors duration-300 cursor-default"
               >
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                  <motion.div 
+                    whileHover={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 0.4 }}
+                    className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center"
+                  >
                     <feature.icon className="h-6 w-6 text-success" />
-                  </div>
+                  </motion.div>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-1">
@@ -73,7 +148,7 @@ export function PrivacySection() {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>
