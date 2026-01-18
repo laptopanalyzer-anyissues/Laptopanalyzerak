@@ -174,7 +174,7 @@ const PrivacyPolicy = () => {
                   If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
                 </p>
                 <p className="text-foreground font-medium mt-2">
-                  privacy@laptopanalyzer.com
+                  support@laptopanalyzer.com
                 </p>
               </section>
             </div>
