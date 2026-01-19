@@ -217,7 +217,7 @@ const PortsTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!hasChecked}>
+        <Button onClick={() => onComplete()} disabled={!hasChecked}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           Complete Test
         </Button>

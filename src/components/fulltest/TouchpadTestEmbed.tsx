@@ -132,7 +132,7 @@ const TouchpadTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!hasInteracted}>
+        <Button onClick={() => onComplete()} disabled={!hasInteracted}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasInteracted ? "Complete Test" : "Interact with the area first"}
         </Button>

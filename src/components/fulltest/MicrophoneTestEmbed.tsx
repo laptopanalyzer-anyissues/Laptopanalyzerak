@@ -144,7 +144,7 @@ const MicrophoneTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!isListening} size="lg">
+        <Button onClick={() => onComplete()} disabled={!isListening} size="lg">
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {canComplete ? "Complete Test" : "Make some sound first"}
         </Button>

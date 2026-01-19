@@ -107,7 +107,7 @@ const KeyboardTestEmbed = ({ onComplete, onBack }: Props) => {
       if (idleSeconds >= 15 && pressedKeys.size >= 5 && !hasCompletedRef.current) {
         hasCompletedRef.current = true;
         clearInterval(interval);
-        onComplete();
+        handleComplete();
       }
     }, 1000);
 
