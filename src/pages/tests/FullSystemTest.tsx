@@ -167,21 +167,22 @@ const FullSystemTest = () => {
   const skippedCount = tests.filter(t => t.status === "skipped").length;
   const testedCount = tests.filter(t => t.status === "completed" || t.status === "issue").length;
 
-  // Calculate weighted score - skipped tests are excluded from calculation
+  // Calculate weighted score - skipped tests count as 0 points (penalized)
   const calculateOverallScore = useCallback(() => {
+    // Total possible weight from ALL tests
+    const totalWeight = tests.reduce((sum, t) => sum + t.weight, 0);
+    
+    // Only passed tests earn points
     const earnedWeight = tests.reduce((sum, t) => {
       if (t.passed === true) return sum + t.weight;
       return sum; // Issue reported or skipped = 0 points
     }, 0);
     
-    // Only count tests that were actually run (not skipped)
-    const testedWeight = tests.reduce((sum, t) => {
-      if (t.status === "completed" || t.status === "issue") return sum + t.weight;
-      return sum; // Skipped tests don't affect score
-    }, 0);
+    // Check if any tests were actually run (not all pending)
+    const hasRunAnyTest = tests.some(t => t.status === "completed" || t.status === "issue" || t.status === "skipped");
     
-    if (testedWeight === 0) return null; // If all skipped, return null (no score)
-    return Math.round((earnedWeight / testedWeight) * 100);
+    if (!hasRunAnyTest || totalWeight === 0) return null; // No tests run yet
+    return Math.round((earnedWeight / totalWeight) * 100);
   }, [tests]);
 
   const overallScore = calculateOverallScore();
