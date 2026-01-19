@@ -105,6 +105,7 @@ const FullSystemTest = () => {
   const [isComplete, setIsComplete] = useState(false);
   const [isRunningTest, setIsRunningTest] = useState(false);
   const [showDisplayPopup, setShowDisplayPopup] = useState(false);
+  const [showSkipWarning, setShowSkipWarning] = useState(false);
   
   const { playSuccessSound, playCompleteSound, playSkipSound } = useTestSounds();
   const { fireConfetti } = useConfetti();
@@ -279,8 +280,14 @@ const FullSystemTest = () => {
     setShowDisplayPopup(false);
   };
 
-  // Skip the current test
-  const skipCurrentTest = useCallback(() => {
+  // Show skip confirmation dialog
+  const handleSkipClick = useCallback(() => {
+    setShowSkipWarning(true);
+  }, []);
+
+  // Skip the current test after confirmation
+  const confirmSkipTest = useCallback(() => {
+    setShowSkipWarning(false);
     playSkipSound();
     
     setTests(prev => prev.map((t, i) => 
@@ -760,7 +767,7 @@ const FullSystemTest = () => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={skipCurrentTest}
+                        onClick={handleSkipClick}
                         className="text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       >
                         <SkipForward className="h-4 w-4 mr-1" />
@@ -899,6 +906,46 @@ const FullSystemTest = () => {
                   >
                     <AlertTriangle className="h-5 w-5 mr-2" />
                     Yes, I noticed an issue
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Skip Warning Dialog */}
+            <Dialog open={showSkipWarning} onOpenChange={setShowSkipWarning}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center mx-auto mb-4">
+                    <AlertTriangle className="h-8 w-8 text-warning" />
+                  </div>
+                  <DialogTitle className="text-xl">
+                    Skip this test?
+                  </DialogTitle>
+                  <DialogDescription className="mt-4 text-center">
+                    <span className="block mb-3">
+                      Skipping tests will <span className="font-semibold text-warning">lower your overall health score</span>.
+                    </span>
+                    <span className="text-muted-foreground text-sm">
+                      Skipped tests count as 0 points toward your final score. For an accurate assessment, we recommend completing all tests.
+                    </span>
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="flex gap-3 mt-4">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1 h-12"
+                    onClick={() => setShowSkipWarning(false)}
+                  >
+                    Continue Test
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="flex-1 h-12 text-muted-foreground hover:text-foreground"
+                    onClick={confirmSkipTest}
+                  >
+                    <SkipForward className="h-4 w-4 mr-2" />
+                    Skip Anyway
                   </Button>
                 </div>
               </DialogContent>
