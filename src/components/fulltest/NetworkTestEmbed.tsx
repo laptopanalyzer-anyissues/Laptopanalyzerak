@@ -129,7 +129,7 @@ const NetworkTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!isOnline && !hasTestRun}>
+        <Button onClick={() => onComplete()} disabled={!isOnline && !hasTestRun}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasTestRun || isOnline ? "Complete Test" : "Connect to network first"}
         </Button>

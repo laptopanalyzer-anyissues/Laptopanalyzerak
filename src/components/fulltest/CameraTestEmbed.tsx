@@ -60,7 +60,7 @@ const CameraTestEmbed = ({ onComplete, onBack }: Props) => {
                 <Camera className="h-4 w-4 mr-2" />
                 Start Camera
               </Button>
-              <Button variant="ghost" onClick={onComplete} className="text-muted-foreground">
+              <Button variant="ghost" onClick={() => onComplete()} className="text-muted-foreground">
                 <VideoOff className="h-4 w-4 mr-2" />
                 I don't have a camera
               </Button>
@@ -95,7 +95,7 @@ const CameraTestEmbed = ({ onComplete, onBack }: Props) => {
             Back
           </Button>
         )}
-        <Button onClick={onComplete} disabled={!hasStarted}>
+        <Button onClick={() => onComplete()} disabled={!hasStarted}>
           <CheckCircle2 className="h-4 w-4 mr-2" />
           {hasStarted ? "Complete Test" : "Start camera first"}
         </Button>
