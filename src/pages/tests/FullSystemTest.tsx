@@ -326,7 +326,8 @@ const FullSystemTest = () => {
     }
   }, [currentTestIndex]);
 
-  const currentTest = tests[currentTestIndex] || tests[0];
+  // Safely get current test with fallback
+  const currentTest = tests[currentTestIndex] ?? tests[0] ?? initialTests[0];
   const scoreData = getScoreLabel(overallScore);
 
   const getStatusIcon = (status: TestItem["status"], passed: boolean | null) => {
@@ -347,6 +348,16 @@ const FullSystemTest = () => {
 
   // Render the embedded test component
   const renderTestComponent = () => {
+    // Guard against undefined currentTest
+    if (!currentTest || !currentTest.id) {
+      return (
+        <div className="flex flex-col items-center justify-center h-[500px] gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-muted-foreground">Preparing test...</span>
+        </div>
+      );
+    }
+    
     const props = { 
       onComplete: handleTestComplete,
       onBack: currentTestIndex > 0 ? goToPreviousTest : undefined,
@@ -741,7 +752,7 @@ const FullSystemTest = () => {
                           of {tests.length}
                         </span>
                       </div>
-                      <span className="font-semibold text-foreground">{currentTest.name}</span>
+                      <span className="font-semibold text-foreground">{currentTest?.name ?? "Loading..."}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-medium text-muted-foreground">{Math.round(progress)}% complete</span>
@@ -827,23 +838,25 @@ const FullSystemTest = () => {
 
                 {/* Embedded Test */}
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentTest.id}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="glass-card rounded-2xl overflow-hidden min-h-[500px]"
-                  >
-                    <Suspense fallback={
-                      <div className="flex flex-col items-center justify-center h-[500px] gap-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                        <span className="text-muted-foreground">Loading {currentTest.name}...</span>
-                      </div>
-                    }>
-                      {renderTestComponent()}
-                    </Suspense>
-                  </motion.div>
+                  {currentTest && currentTest.id && (
+                    <motion.div
+                      key={currentTest.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="glass-card rounded-2xl overflow-hidden min-h-[500px]"
+                    >
+                      <Suspense fallback={
+                        <div className="flex flex-col items-center justify-center h-[500px] gap-4">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                          <span className="text-muted-foreground">Loading {currentTest?.name ?? "test"}...</span>
+                        </div>
+                      }>
+                        {renderTestComponent()}
+                      </Suspense>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </motion.div>
             )}
