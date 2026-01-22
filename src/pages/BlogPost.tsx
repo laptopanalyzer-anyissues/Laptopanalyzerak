@@ -115,9 +115,42 @@ export default function BlogPostPage() {
       if (line.trim() === "") {
         return <div key={index} className="h-4" />;
       }
+      
+      // Parse inline links [text](url)
+      const renderLineWithLinks = (text: string) => {
+        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+        const parts: React.ReactNode[] = [];
+        let lastIndex = 0;
+        let match;
+        
+        while ((match = linkRegex.exec(text)) !== null) {
+          if (match.index > lastIndex) {
+            parts.push(text.slice(lastIndex, match.index));
+          }
+          const linkText = match[1];
+          const linkUrl = match[2];
+          parts.push(
+            <Link 
+              key={match.index} 
+              to={linkUrl} 
+              className="text-primary hover:underline font-medium"
+            >
+              {linkText}
+            </Link>
+          );
+          lastIndex = match.index + match[0].length;
+        }
+        
+        if (lastIndex < text.length) {
+          parts.push(text.slice(lastIndex));
+        }
+        
+        return parts.length > 0 ? parts : text;
+      };
+      
       return (
         <p key={index} className="text-muted-foreground leading-relaxed mb-4">
-          {line}
+          {renderLineWithLinks(line)}
         </p>
       );
     });
