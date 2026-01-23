@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/ui/page-loader";
+import { CookieConsent } from "@/components/CookieConsent";
 
 // Lazy load all pages for better initial bundle size and high-traffic performance
 const Index = lazy(() => import("./pages/Index"));
@@ -87,6 +88,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
+              <CookieConsent />
             </BrowserRouter>
           </TooltipProvider>
         </SecurityProvider>
