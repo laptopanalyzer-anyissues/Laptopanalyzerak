@@ -270,13 +270,17 @@ export default function BlogPostPage() {
             className="mt-12 p-8 bg-muted/50 rounded-2xl border border-border text-center"
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              Ready to Test Your Laptop?
+              {slug === "online-keyboard-test" ? "Ready to Test Your Keyboard?" : "Ready to Test Your Laptop?"}
             </h3>
             <p className="text-muted-foreground mb-4">
-              Run comprehensive hardware diagnostics right in your browser.
+              {slug === "online-keyboard-test" 
+                ? "Check if all your keyboard keys are working properly." 
+                : "Run comprehensive hardware diagnostics right in your browser."}
             </p>
             <Button variant="hero" asChild>
-              <Link to="/dashboard">Start Testing Now</Link>
+              <Link to={slug === "online-keyboard-test" ? "/test/keyboard" : "/dashboard"}>
+                {slug === "online-keyboard-test" ? "Test Your Keyboard" : "Start Testing Now"}
+              </Link>
             </Button>
           </motion.div>
         </article>
