@@ -11,6 +11,7 @@ const navLinks = [
   { name: "How It Works", path: "/blog" },
   { name: "About", path: "/about" },
   { name: "Contact", path: "/contact" },
+  { name: "Privacy Policy", path: "/privacy-policy" },
 ];
 
 export const Header = forwardRef<HTMLElement>((_, ref) => {
