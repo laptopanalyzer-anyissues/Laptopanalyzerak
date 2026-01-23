@@ -96,20 +96,24 @@ const PrivacyPolicy = () => {
                   <h2 className="text-xl font-semibold text-foreground m-0">Cookies and Tracking</h2>
                 </div>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  <strong className="text-foreground">We do not use cookies for tracking purposes.</strong> We may use essential cookies only for:
+                  We use cookies to enhance your experience on our website. Here's how we use them:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
-                    <span>Remembering your theme preference (light/dark mode)</span>
+                    <span><strong className="text-foreground">Essential Cookies:</strong> For remembering your theme preference (light/dark mode) and basic website functionality.</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
-                    <span>Basic functionality required for the website to operate</span>
+                    <span><strong className="text-foreground">Analytics Cookies:</strong> We use Google Analytics to understand how visitors interact with our website. This helps us improve our services.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span><strong className="text-foreground">Advertising Cookies:</strong> We use Google AdSense, which uses cookies to track users and show them personalized ads based on their browsing history. These cookies help us provide free access to our diagnostic tools.</span>
                   </li>
                 </ul>
                 <p className="text-muted-foreground leading-relaxed mt-4">
-                  We do not use analytics cookies, advertising cookies, or any third-party tracking scripts. Your browsing behavior on our site is not monitored or recorded.
+                  You can manage your cookie preferences through the cookie consent banner that appears when you first visit our site. You can also adjust your browser settings to block or delete cookies, though this may affect some functionality.
                 </p>
               </section>
 
