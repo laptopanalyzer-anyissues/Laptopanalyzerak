@@ -118,11 +118,19 @@ const PrivacyPolicy = () => {
               </section>
 
               <section className="mb-8 p-6 rounded-xl bg-card border border-border">
-                <h2 className="text-xl font-semibold text-foreground mb-4">Third-Party Services</h2>
+                <h2 className="text-xl font-semibold text-foreground mb-4">Third-Party Services & Advertising</h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
-                  Our website may include:
+                  Our website uses the following third-party services:
                 </p>
                 <ul className="space-y-2 text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span><strong className="text-foreground">Google AdSense:</strong> We display advertisements through Google AdSense. Google and its advertising partners use cookies to serve ads based on your prior visits to our website and other websites on the internet. You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Ads Settings</a>. See <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">How Google Uses Information</a>.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    <span><strong className="text-foreground">Google Analytics:</strong> We use Google Analytics to understand how visitors interact with our website. This service may collect information about your device, browser, and browsing behavior. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google's Privacy Policy</a>.</span>
+                  </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-1">•</span>
                     <span><strong className="text-foreground">Cloudflare:</strong> We use Cloudflare for content delivery and security. Cloudflare may collect limited technical data (IP address, browser type) for security purposes. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Cloudflare's Privacy Policy</a>.</span>
