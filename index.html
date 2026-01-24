@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <!-- Google tag (gtag.js) -->
+    <!-- Google tag (gtag.js) - Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GCSM48EDHV"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -10,6 +10,9 @@
       gtag('config', 'G-GCSM48EDHV');
     </script>
     
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3065774138622922" crossorigin="anonymous"></script>
+    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
@@ -17,12 +20,13 @@
     <!-- Content Security Policy - Protects against XSS, clickjacking, data injection -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com;
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.googleadservices.com https://adservice.google.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       font-src 'self' https://fonts.gstatic.com data:;
-      img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com;
+      img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://www.google.com https://googleads.g.doubleclick.net;
       media-src 'self' blob: data:;
-      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://speed.cloudflare.com https://*.cloudflare.com https://www.google-analytics.com https://analytics.google.com;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://speed.cloudflare.com https://*.cloudflare.com https://www.google-analytics.com https://analytics.google.com https://pagead2.googlesyndication.com https://www.google.com https://googleads.g.doubleclick.net;
+      frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com;
       frame-ancestors *;
       form-action 'self';
       base-uri 'self';
