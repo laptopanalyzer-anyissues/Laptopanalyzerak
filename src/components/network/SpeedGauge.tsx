@@ -114,22 +114,7 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
           }}
         />
         
-        {/* Glow effect for active phases */}
-        {phase !== "idle" && phase !== "complete" && (
-          <motion.circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={colors.primary}
-            strokeWidth={strokeWidth + 8}
-            strokeLinecap="round"
-            strokeDasharray={`${arcLength} ${circumference}`}
-            style={{ strokeDashoffset: valueDashOffset }}
-            opacity={0.15}
-            className="blur-sm"
-          />
-        )}
+        {/* Removed problematic blur glow - using drop-shadow on main arc instead */}
         
         <defs>
           <linearGradient id={`gaugeGradient-${phase}`} x1="0%" y1="0%" x2="100%" y2="0%">
