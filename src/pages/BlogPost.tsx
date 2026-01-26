@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, ArrowLeft, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { sanitizeURL } from "@/lib/security";
 
 interface BlogPost {
   id: string;
@@ -129,15 +130,42 @@ export default function BlogPostPage() {
           }
           const linkText = match[1];
           const linkUrl = match[2];
-          parts.push(
-            <Link 
-              key={match.index} 
-              to={linkUrl} 
-              className="text-primary hover:underline font-medium"
-            >
-              {linkText}
-            </Link>
-          );
+          
+          // Sanitize URL to prevent javascript: and data: URI injection
+          const sanitizedUrl = sanitizeURL(linkUrl);
+          
+          // Check if it's an internal path (starts with /)
+          const isInternalPath = linkUrl.startsWith('/') && !linkUrl.startsWith('//');
+          
+          if (sanitizedUrl) {
+            // Valid external URL (http/https)
+            parts.push(
+              <a 
+                key={match.index} 
+                href={sanitizedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-medium"
+              >
+                {linkText}
+              </a>
+            );
+          } else if (isInternalPath) {
+            // Internal path - safe to use with Link
+            parts.push(
+              <Link 
+                key={match.index} 
+                to={linkUrl} 
+                className="text-primary hover:underline font-medium"
+              >
+                {linkText}
+              </Link>
+            );
+          } else {
+            // Invalid URL - render as plain text for security
+            parts.push(text.slice(match.index, match.index + match[0].length));
+          }
+          
           lastIndex = match.index + match[0].length;
         }
         
