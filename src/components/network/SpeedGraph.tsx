@@ -9,8 +9,17 @@ interface SpeedGraphProps {
 }
 
 export const SpeedGraph = forwardRef<HTMLDivElement, SpeedGraphProps>(({ data, maxDataPoints = 50, color, label }, ref) => {
-  const displayData = data.slice(-maxDataPoints);
-  const maxValue = Math.max(...displayData, 1) * 1.1; // Add 10% headroom
+  // Pad data with zeros at the start to always fill the graph from left
+  const paddedData = useMemo(() => {
+    if (data.length >= maxDataPoints) {
+      return data.slice(-maxDataPoints);
+    }
+    // Pad with zeros at the beginning so new data appears from the right
+    const padding = new Array(maxDataPoints - data.length).fill(0);
+    return [...padding, ...data];
+  }, [data, maxDataPoints]);
+
+  const maxValue = Math.max(...paddedData.filter(v => v > 0), 1) * 1.1; // Add 10% headroom
   const graphHeight = 80;
   const graphWidth = 100;
 
@@ -18,24 +27,23 @@ export const SpeedGraph = forwardRef<HTMLDivElement, SpeedGraphProps>(({ data, m
   const currentValueSpring = useSpring(0, { stiffness: 100, damping: 20 });
   
   useEffect(() => {
-    if (displayData.length > 0) {
-      currentValueSpring.set(displayData[displayData.length - 1]);
+    if (data.length > 0) {
+      currentValueSpring.set(data[data.length - 1]);
     }
-  }, [displayData, currentValueSpring]);
+  }, [data, currentValueSpring]);
 
   const displayCurrentValue = useTransform(currentValueSpring, v => v.toFixed(1));
 
   // Memoize path calculations for performance
   const { linePath, areaPath, currentPoint } = useMemo(() => {
-    if (displayData.length < 2) {
+    if (paddedData.length < 2) {
       return { linePath: "", areaPath: "", currentPoint: null };
     }
     
     const stepX = graphWidth / (maxDataPoints - 1);
-    const startIndex = maxDataPoints - displayData.length;
     
-    const points = displayData.map((value, index) => {
-      const x = (startIndex + index) * stepX;
+    const points = paddedData.map((value, index) => {
+      const x = index * stepX;
       const y = graphHeight - (value / maxValue) * graphHeight;
       return { x, y };
     });
@@ -58,7 +66,7 @@ export const SpeedGraph = forwardRef<HTMLDivElement, SpeedGraphProps>(({ data, m
       areaPath, 
       currentPoint: lastPoint 
     };
-  }, [displayData, maxDataPoints, maxValue, graphHeight, graphWidth]);
+  }, [paddedData, maxDataPoints, maxValue, graphHeight, graphWidth]);
 
   return (
     <div ref={ref} className="w-full">
@@ -105,13 +113,13 @@ export const SpeedGraph = forwardRef<HTMLDivElement, SpeedGraphProps>(({ data, m
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
           />
           
           {/* Animated current point indicator */}
-          {currentPoint && (
+          {currentPoint && data.length > 0 && (
             <>
               {/* Outer glow */}
               <motion.circle
