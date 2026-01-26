@@ -18,6 +18,7 @@
     
     <!-- Security Headers -->
     <!-- Content Security Policy - Protects against XSS, clickjacking, data injection -->
+    <!-- Note: 'unsafe-inline' and 'unsafe-eval' are required for Google Analytics, AdSense, and React/Vite -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
       script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://www.googleadservices.com https://adservice.google.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net;
@@ -27,7 +28,7 @@
       media-src 'self' blob: data:;
       connect-src 'self' https://*.supabase.co wss://*.supabase.co https://speed.cloudflare.com https://*.cloudflare.com https://www.google-analytics.com https://analytics.google.com https://pagead2.googlesyndication.com https://www.google.com https://googleads.g.doubleclick.net;
       frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com;
-      frame-ancestors *;
+      frame-ancestors 'self';
       form-action 'self';
       base-uri 'self';
       object-src 'none';
