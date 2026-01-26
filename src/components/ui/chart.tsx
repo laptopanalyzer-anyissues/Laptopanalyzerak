@@ -58,6 +58,39 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Validates and sanitizes a color value to prevent CSS injection.
+ * Only allows valid CSS color formats: hex, rgb, rgba, hsl, hsla, and named colors.
+ */
+const sanitizeColor = (color: string | undefined): string | null => {
+  if (!color || typeof color !== 'string') return null;
+  
+  // Trim and normalize
+  const trimmed = color.trim();
+  
+  // Valid CSS color patterns
+  const patterns = [
+    // Hex colors: #RGB, #RRGGBB, #RGBA, #RRGGBBAA
+    /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
+    // RGB/RGBA: rgb(r, g, b) or rgba(r, g, b, a)
+    /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+))?\s*\)$/,
+    // HSL/HSLA: hsl(h, s%, l%) or hsla(h, s%, l%, a)
+    /^hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*(,\s*(0|1|0?\.\d+))?\s*\)$/,
+    // CSS variable reference (must start with var(--)
+    /^var\(--[a-zA-Z0-9-]+\)$/,
+    // Named colors (common ones)
+    /^(transparent|currentColor|inherit|initial|unset)$/i,
+  ];
+  
+  // Check if color matches any valid pattern
+  if (patterns.some(pattern => pattern.test(trimmed))) {
+    return trimmed;
+  }
+  
+  // Reject anything that doesn't match
+  return null;
+};
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -71,12 +104,16 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${CSS.escape(id)}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    const rawColor = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+    const color = sanitizeColor(rawColor);
+    // Escape the key to prevent injection via config keys
+    const safeKey = key.replace(/[^a-zA-Z0-9-_]/g, '');
+    return color ? `  --color-${safeKey}: ${color};` : null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `,
