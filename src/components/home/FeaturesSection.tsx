@@ -91,23 +91,23 @@ const itemVariants = {
 
 export function FeaturesSection() {
   return (
-    <section id="how-it-works" className="py-24 bg-muted/30">
+    <section id="how-it-works" className="py-24 bg-muted/30" aria-labelledby="features-heading">
       <div className="container mx-auto px-4">
-        <motion.div
+        <motion.header
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Comprehensive Testing Suite
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Every tool you need to verify your laptop's hardware is working
             perfectly. All tests run directly in your browser.
           </p>
-        </motion.div>
+        </motion.header>
 
         <motion.div
           variants={containerVariants}
@@ -115,13 +115,16 @@ export function FeaturesSection() {
           whileInView="visible"
           viewport={{ once: true }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          role="list"
+          aria-label="Available laptop tests"
         >
           {features.map((feature, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <Link to={feature.path} className="block h-full">
+            <motion.article key={index} variants={itemVariants} role="listitem">
+              <Link to={feature.path} className="block h-full" aria-label={`${feature.title}: ${feature.description}`}>
                 <div className="test-card h-full group">
                   <div
                     className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    aria-hidden="true"
                   >
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
@@ -133,7 +136,7 @@ export function FeaturesSection() {
                   </p>
                 </div>
               </Link>
-            </motion.div>
+            </motion.article>
           ))}
         </motion.div>
       </div>

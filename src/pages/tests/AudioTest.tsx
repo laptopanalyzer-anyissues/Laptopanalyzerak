@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
@@ -129,6 +130,22 @@ const AudioTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Speaker Test Online - Test Left & Right Audio Free 2026"
+        description="Free speaker test online! Check left and right speaker audio, test laptop speakers, headphones & earbuds. Stereo audio test with music and frequency tones."
+        keywords="speaker test, speaker test online, audio test, stereo test, left right speaker test, laptop speaker test, headphone test, sound test, audio output test, speaker checker"
+        canonicalPath="/test/audio"
+        structuredData={structuredData.howTo(
+          "How to Test Your Speakers Online",
+          "Use our free speaker test to verify left and right audio channels work correctly.",
+          [
+            { name: "Start audio test", text: "Click Start Audio Test to play through both speakers" },
+            { name: "Test left speaker", text: "Click Left Speaker to verify left channel" },
+            { name: "Test right speaker", text: "Click Right Speaker to verify right channel" },
+            { name: "Try frequency tones", text: "Test different frequencies to check speaker range" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

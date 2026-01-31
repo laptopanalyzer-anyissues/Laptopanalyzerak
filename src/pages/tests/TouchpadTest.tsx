@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { ArrowLeft, Mouse, RotateCcw, CheckCircle2 } from "lucide-react";
 
 const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
@@ -49,6 +50,22 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
 
   return (
     <div ref={ref} className="min-h-screen bg-background">
+      <SEOHead
+        title="Touchpad Test Online - Test Mouse & Trackpad Free 2026"
+        description="Free touchpad test online! Check cursor tracking, left/right click, and scroll on your laptop trackpad or mouse. Test touchpad gestures and responsiveness."
+        keywords="touchpad test, trackpad test, mouse test, cursor test, laptop touchpad test, click test, scroll test, mouse tester, trackpad checker, touchpad gestures test"
+        canonicalPath="/test/touchpad"
+        structuredData={structuredData.howTo(
+          "How to Test Your Touchpad or Mouse",
+          "Use our free touchpad tester to verify cursor tracking and clicks work correctly.",
+          [
+            { name: "Move cursor in tracking area", text: "Test smooth cursor movement" },
+            { name: "Test left click", text: "Click to verify left mouse button" },
+            { name: "Test right click", text: "Right-click to verify right button" },
+            { name: "Test scroll", text: "Scroll up and down to verify scroll function" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

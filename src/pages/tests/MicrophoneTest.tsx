@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { ArrowLeft, Mic, MicOff, Play, Square, Volume2 } from "lucide-react";
 
 const MicrophoneTest = () => {
@@ -136,6 +137,22 @@ const MicrophoneTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Microphone Test Online - Test Your Mic Free 2026"
+        description="Free microphone test online! Check if your mic works with real-time audio visualization. Test laptop microphone, USB mic, headset mic for Zoom, Discord & gaming."
+        keywords="microphone test, mic test, mic test online, microphone test online, test my mic, test microphone, laptop mic test, usb microphone test, headset mic test, audio input test"
+        canonicalPath="/test/microphone"
+        structuredData={structuredData.howTo(
+          "How to Test Your Microphone Online",
+          "Use our free mic tester to verify your microphone works for calls and recording.",
+          [
+            { name: "Allow microphone access", text: "Click Start Microphone and grant permission" },
+            { name: "Speak into your mic", text: "Watch the volume meter respond to your voice" },
+            { name: "Record a sample", text: "Record and playback to hear audio quality" },
+            { name: "Check detected device", text: "Verify the correct microphone is selected" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

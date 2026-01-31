@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw, CheckCircle2, Settings2, PartyPopper } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import {
   KeyboardType,
   getKeyboardLayout,
@@ -105,6 +106,22 @@ const KeyboardTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Online Keyboard Tester - Test All Keys Free 2026"
+        description="Free keyboard tester online! Check if all your keyboard keys work with our interactive key tester. Test mechanical keyboards, laptop keyboards, function keys & numpad instantly."
+        keywords="keyboard tester, keyboard test, online keyboard tester, key tester, keyboard tester online, test keyboard keys, mechanical keyboard tester, laptop keyboard test, function key test, numpad test"
+        canonicalPath="/test/keyboard"
+        structuredData={structuredData.howTo(
+          "How to Test Your Keyboard Online",
+          "Use our free online keyboard tester to verify all keys work correctly on your keyboard.",
+          [
+            { name: "Open the keyboard test", text: "Navigate to the keyboard tester page" },
+            { name: "Select keyboard type", text: "Choose between Mac or Windows keyboard layout" },
+            { name: "Press each key", text: "Press every key on your keyboard - tested keys turn green" },
+            { name: "Check progress", text: "Monitor your progress until 100% of keys are tested" },
+          ]
+        )}
+      />
       <Header />
       
       {/* Keyboard Type Selection Modal */}

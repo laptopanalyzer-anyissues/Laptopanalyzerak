@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { SEOHead } from "@/components/SEOHead";
 
 const features = [
   { icon: Monitor, label: "Display Test" },
@@ -59,8 +60,14 @@ const values = [
 const About = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="About LaptopAnalyzer - Free Laptop Diagnostic Tool"
+        description="Learn about LaptopAnalyzer, the free browser-based laptop diagnostic tool. Test your laptop hardware with complete privacy - no downloads, no data collection."
+        keywords="about laptopanalyzer, laptop diagnostic tool, free hardware test, laptop testing website, about us"
+        canonicalPath="/about"
+      />
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16" role="main" aria-label="About LaptopAnalyzer">
         <div className="container mx-auto px-4">
           {/* Hero Section */}
           <motion.div

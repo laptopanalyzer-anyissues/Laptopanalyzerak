@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import {
   ArrowLeft,
   Expand,
@@ -385,6 +386,22 @@ const DisplayTest = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
+      <SEOHead
+        title="Dead Pixel Test & Screen Test Online Free 2026"
+        description="Free dead pixel test online! Check your screen for dead pixels, stuck pixels, color accuracy & uniformity. Best display test for LCD, OLED, laptop & monitor screens."
+        keywords="dead pixel test, screen test, dead pixel checker, stuck pixel test, monitor test, display test, lcd test, oled test, screen uniformity test, color accuracy test, pixel test online"
+        canonicalPath="/test/display"
+        structuredData={structuredData.howTo(
+          "How to Test Your Screen for Dead Pixels",
+          "Use our free dead pixel test to check your display for defective pixels and color issues.",
+          [
+            { name: "Open fullscreen mode", text: "Click any color test to enter fullscreen" },
+            { name: "Check each color", text: "Look for pixels that don't match the background color" },
+            { name: "Test gradients", text: "Check for color banding in gradient tests" },
+            { name: "Verify uniformity", text: "Ensure brightness is even across the screen" },
+          ]
+        )}
+      />
       <Header />
 
       {/* Fullscreen Test Mode */}

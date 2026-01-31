@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw } from "lucide-react";
 
 const CameraTest = () => {
@@ -90,6 +91,22 @@ const CameraTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Webcam Test Online - Test Your Camera Free 2026"
+        description="Free webcam test online! Check if your laptop camera works with live preview. Test webcam quality, take snapshots, verify video for Zoom, Teams & Google Meet."
+        keywords="webcam test, camera test, webcam test online, test webcam, laptop camera test, webcam checker, camera test online, zoom camera test, video call test, webcam quality test"
+        canonicalPath="/test/camera"
+        structuredData={structuredData.howTo(
+          "How to Test Your Webcam Online",
+          "Use our free webcam tester to verify your camera works for video calls.",
+          [
+            { name: "Allow camera access", text: "Click Start Camera and grant permission" },
+            { name: "Check live preview", text: "Verify video quality and lighting" },
+            { name: "Take a snapshot", text: "Capture a photo to verify image quality" },
+            { name: "Check camera info", text: "View detected resolution and device name" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
