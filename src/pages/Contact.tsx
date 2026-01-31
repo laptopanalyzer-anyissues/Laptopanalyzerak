@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { SEOHead } from "@/components/SEOHead";
 
 const contactReasons = [
   {
@@ -77,6 +78,12 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Contact Us - LaptopAnalyzer Support"
+        description="Contact LaptopAnalyzer for support, bug reports, feature requests, or general inquiries. We're here to help with your laptop testing needs."
+        keywords="contact laptopanalyzer, laptop test support, bug report, feature request, help"
+        canonicalPath="/contact"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

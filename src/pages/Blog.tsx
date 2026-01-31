@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SEOHead } from "@/components/SEOHead";
 
 interface BlogPost {
   id: string;
@@ -92,6 +93,12 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Laptop Testing Guides & Tips | LaptopAnalyzer Blog"
+        description="Learn how to test your laptop hardware with our expert guides. Tips for dead pixel detection, keyboard testing, webcam checks, and more laptop diagnostic tutorials."
+        keywords="laptop testing guide, how to test laptop, dead pixel guide, keyboard testing tips, laptop hardware guide, laptop diagnostic tutorial"
+        canonicalPath="/blog"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

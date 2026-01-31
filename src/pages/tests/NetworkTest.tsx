@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SpeedGauge } from "@/components/network/SpeedGauge";
 import { SpeedGraph } from "@/components/network/SpeedGraph";
 import { SpeedTestResults } from "@/components/network/SpeedTestResults";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { 
   ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
   Gauge, Timer, Server, Globe, Zap 
@@ -393,6 +394,22 @@ const NetworkTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Internet Speed Test - Check Download & Upload Free 2026"
+        description="Free internet speed test! Measure download speed, upload speed & ping latency. Accurate 15-second test using Cloudflare's global network. Test WiFi & network speed."
+        keywords="speed test, internet speed test, wifi speed test, network speed test, download speed test, upload speed test, ping test, bandwidth test, connection speed test, internet test"
+        canonicalPath="/test/network"
+        structuredData={structuredData.howTo(
+          "How to Test Your Internet Speed",
+          "Use our free speed test to measure your download, upload, and ping.",
+          [
+            { name: "Click Start Test", text: "Begin the 15-second speed measurement" },
+            { name: "Wait for download test", text: "Measure your download speed in Mbps" },
+            { name: "Wait for upload test", text: "Measure your upload speed in Mbps" },
+            { name: "View results", text: "See download, upload, ping, and jitter results" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">

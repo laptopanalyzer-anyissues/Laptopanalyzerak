@@ -48,9 +48,9 @@ const faqs = [
 
 export const FAQSection = () => {
   return (
-    <section className="py-20 bg-muted/30" id="faq">
+    <section className="py-20 bg-muted/30" id="faq" aria-labelledby="faq-heading">
       <div className="container mx-auto px-4">
-        <motion.div
+        <motion.header
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -58,16 +58,16 @@ export const FAQSection = () => {
           className="text-center mb-12"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
-            <HelpCircle className="h-4 w-4" />
-            FAQ
+            <HelpCircle className="h-4 w-4" aria-hidden="true" />
+            <span>FAQ</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 id="faq-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Frequently Asked Questions
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Got questions? We've got answers. Find solutions to common issues and learn more about how LaptopAnalyzer works.
           </p>
-        </motion.div>
+        </motion.header>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

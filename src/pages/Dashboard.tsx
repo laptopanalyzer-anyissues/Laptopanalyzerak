@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import RunAllTestsCard from "@/components/dashboard/RunAllTestsCard";
 import { TestCard } from "@/components/dashboard/TestCard";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { SEOHead } from "@/components/SEOHead";
 import {
   Monitor,
   Keyboard,
@@ -116,6 +117,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Laptop Diagnostic Tests - Free Hardware Checker 2026"
+        description="Run free laptop diagnostic tests! Check display, keyboard, webcam, mic, speakers, network, touchpad & USB ports. Complete hardware testing suite for laptops."
+        keywords="laptop diagnostic, laptop test, hardware test, laptop checker, pc health check, computer diagnostic, laptop diagnostics free, hardware diagnostic tool"
+        canonicalPath="/dashboard"
+      />
       <Header />
       <main className="pt-24 pb-16" role="main" aria-label="Laptop Diagnostics Dashboard">
         <div className="container mx-auto px-4">

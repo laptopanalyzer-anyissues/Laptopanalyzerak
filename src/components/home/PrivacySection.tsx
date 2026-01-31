@@ -50,7 +50,7 @@ const cardVariants = {
 
 export function PrivacySection() {
   return (
-    <section id="privacy" className="py-24">
+    <section id="privacy" className="py-24" aria-labelledby="privacy-heading">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export function PrivacySection() {
           transition={{ duration: 0.5 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="text-center mb-12">
+          <header className="text-center mb-12">
             {/* Animated Shield Icon */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
@@ -86,11 +86,12 @@ export function PrivacySection() {
                   ease: "easeOut"
                 }}
                 className="absolute inset-0 rounded-2xl"
-              />
-              <Shield className="h-8 w-8 text-success" />
-            </motion.div>
+                />
+                <Shield className="h-8 w-8 text-success" aria-hidden="true" />
+              </motion.div>
 
             <motion.h2
+              id="privacy-heading"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -109,7 +110,7 @@ export function PrivacySection() {
               LaptopAnalyzer is built with privacy at its core. No data collection,
               no servers, no compromises.
             </motion.p>
-          </div>
+          </header>
 
           <motion.div
             variants={containerVariants}
@@ -117,10 +118,13 @@ export function PrivacySection() {
             whileInView="visible"
             viewport={{ once: true }}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            role="list"
+            aria-label="Privacy features"
           >
             {privacyFeatures.map((feature, index) => (
-              <motion.div
+              <motion.article
                 key={index}
+                role="listitem"
                 variants={cardVariants}
                 whileHover={{ 
                   scale: 1.02, 
@@ -135,7 +139,7 @@ export function PrivacySection() {
                     transition={{ duration: 0.4 }}
                     className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center"
                   >
-                    <feature.icon className="h-6 w-6 text-success" />
+                    <feature.icon className="h-6 w-6 text-success" aria-hidden="true" />
                   </motion.div>
                 </div>
                 <div>
@@ -146,7 +150,7 @@ export function PrivacySection() {
                     {feature.description}
                   </p>
                 </div>
-              </motion.div>
+              </motion.article>
             ))}
           </motion.div>
         </motion.div>

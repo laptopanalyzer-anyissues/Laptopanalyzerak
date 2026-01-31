@@ -8,6 +8,7 @@ import { Calendar, ArrowLeft, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 
 interface BlogPost {
   id: string;
@@ -226,6 +227,22 @@ export default function BlogPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title={post.title}
+        description={post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`}
+        canonicalPath={`/blog/${post.slug}`}
+        ogType="article"
+        publishedTime={post.published_at || undefined}
+        ogImage={post.cover_image || undefined}
+        structuredData={structuredData.article(
+          post.title,
+          post.excerpt || "",
+          `/blog/${post.slug}`,
+          post.published_at || new Date().toISOString(),
+          undefined,
+          post.cover_image || undefined
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <article className="container mx-auto px-4 max-w-3xl">

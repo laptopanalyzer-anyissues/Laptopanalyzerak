@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -436,6 +437,22 @@ const PortsTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="USB & Port Test Online - Check Laptop Ports Free 2026"
+        description="Free USB port test online! Check USB devices, external displays, audio ports, and charging. Verify laptop ports work before buying used laptops."
+        keywords="usb test, port test, usb port test, laptop port checker, external display test, audio port test, charging test, usb device detection, port connectivity test"
+        canonicalPath="/test/ports"
+        structuredData={structuredData.howTo(
+          "How to Test Your Laptop Ports",
+          "Use our free port tester to verify USB, display, and audio ports work correctly.",
+          [
+            { name: "Grant permissions", text: "Click each port type to allow detection" },
+            { name: "Connect USB devices", text: "Plug in USB devices to verify detection" },
+            { name: "Check audio ports", text: "Connect headphones or speakers" },
+            { name: "Test charging", text: "Verify power adapter is detected" },
+          ]
+        )}
+      />
       <Header />
 
       {/* USB Permission Dialog */}
