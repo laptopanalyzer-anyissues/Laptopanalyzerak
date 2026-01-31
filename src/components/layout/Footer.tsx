@@ -105,6 +105,36 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
               >
                 Terms of Service
               </Link>
+              <Link
+                to="/disclaimer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Disclaimer
+              </Link>
+              <Link
+                to="/dmca"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                DMCA & Copyright
+              </Link>
+              <Link
+                to="/accessibility"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Accessibility
+              </Link>
+              <Link
+                to="/affiliate-disclosure"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Affiliate Disclosure
+              </Link>
+              <Link
+                to="/editorial-policy"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Editorial Policy
+              </Link>
             </nav>
           </div>
         </div>

@@ -88,12 +88,42 @@
     <loc>https://laptopanalyzer.com/privacy-policy</loc>
     <lastmod>2026-01-31</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://laptopanalyzer.com/terms-of-service</loc>
     <lastmod>2026-01-31</lastmod>
     <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://laptopanalyzer.com/disclaimer</loc>
+    <lastmod>2026-01-31</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://laptopanalyzer.com/dmca</loc>
+    <lastmod>2026-01-31</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://laptopanalyzer.com/accessibility</loc>
+    <lastmod>2026-01-31</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://laptopanalyzer.com/affiliate-disclosure</loc>
+    <lastmod>2026-01-31</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://laptopanalyzer.com/editorial-policy</loc>
+    <lastmod>2026-01-31</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>
