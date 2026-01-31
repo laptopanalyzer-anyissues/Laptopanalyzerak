@@ -32,6 +32,7 @@ interface Category {
 export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  // Fetch categories and posts in parallel for faster loading
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["blog-categories"],
     queryFn: async () => {
@@ -42,12 +43,13 @@ export default function Blog() {
       if (error) throw error;
       return data as Category[];
     },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
-  const { data: posts, isLoading: postsLoading } = useQuery({
-    queryKey: ["blog-posts", selectedCategory],
+  const { data: allPosts, isLoading: postsLoading } = useQuery({
+    queryKey: ["blog-posts-all"],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("blog_posts")
         .select(`
           id,
@@ -56,6 +58,7 @@ export default function Blog() {
           excerpt,
           cover_image,
           published_at,
+          category_id,
           blog_categories (
             name,
             slug
@@ -64,19 +67,19 @@ export default function Blog() {
         .eq("published", true)
         .order("published_at", { ascending: false });
 
-      if (selectedCategory) {
-        const category = categories?.find((c) => c.slug === selectedCategory);
-        if (category) {
-          query = query.eq("category_id", category.id);
-        }
-      }
-
-      const { data, error } = await query;
       if (error) throw error;
-      return data as BlogPost[];
+      return data as (BlogPost & { category_id: string | null })[];
     },
-    enabled: !categoriesLoading,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+
+  // Filter posts client-side for instant category switching
+  const posts = selectedCategory && categories
+    ? allPosts?.filter((post) => {
+        const category = categories.find((c) => c.slug === selectedCategory);
+        return category ? post.category_id === category.id : true;
+      })
+    : allPosts;
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
