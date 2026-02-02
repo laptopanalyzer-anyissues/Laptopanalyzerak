@@ -328,9 +328,6 @@ export default function BlogPostPage() {
               transition={{ delay: 0.25 }}
               className="mt-12"
             >
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Frequently Asked Questions (FAQs)
-              </h2>
               <Accordion type="single" collapsible className="space-y-4">
                 {parseFAQs(post.content).map((faq, index) => (
                   <AccordionItem
