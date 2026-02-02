@@ -9,6 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface BlogPost {
   id: string;
@@ -62,9 +68,88 @@ export default function BlogPostPage() {
     });
   };
 
+  // Parse FAQ blocks from content
+  const parseFAQs = (content: string) => {
+    const faqRegex = /:::faq\n(.+?)\n([\s\S]*?):::/g;
+    const faqs: { question: string; answer: string }[] = [];
+    let match;
+    while ((match = faqRegex.exec(content)) !== null) {
+      faqs.push({
+        question: match[1].trim(),
+        answer: match[2].trim(),
+      });
+    }
+    return faqs;
+  };
+
+  // Remove FAQ blocks from main content
+  const getMainContent = (content: string) => {
+    return content.replace(/:::faq\n[\s\S]*?:::/g, '').trim();
+  };
+
+  // Parse inline links [text](url)
+  const renderLineWithLinks = (text: string) => {
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = linkRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      const linkText = match[1];
+      const linkUrl = match[2];
+      
+      // Sanitize URL to prevent javascript: and data: URI injection
+      const sanitizedUrl = sanitizeURL(linkUrl);
+      
+      // Check if it's an internal path (starts with /)
+      const isInternalPath = linkUrl.startsWith('/') && !linkUrl.startsWith('//');
+      
+      if (sanitizedUrl) {
+        // Valid external URL (http/https)
+        parts.push(
+          <a 
+            key={match.index} 
+            href={sanitizedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline font-medium"
+          >
+            {linkText}
+          </a>
+        );
+      } else if (isInternalPath) {
+        // Internal path - safe to use with Link
+        parts.push(
+          <Link 
+            key={match.index} 
+            to={linkUrl} 
+            className="text-primary hover:underline font-medium"
+          >
+            {linkText}
+          </Link>
+        );
+      } else {
+        // Invalid URL - render as plain text for security
+        parts.push(text.slice(match.index, match.index + match[0].length));
+      }
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : text;
+  };
+
   // Simple markdown to HTML converter for headings and paragraphs
   const renderContent = (content: string) => {
-    const lines = content.split("\n");
+    const mainContent = getMainContent(content);
+    const lines = mainContent.split("\n");
     return lines.map((line, index) => {
       if (line.startsWith("### ")) {
         return (
@@ -87,95 +172,23 @@ export default function BlogPostPage() {
           </h1>
         );
       }
-      if (line.startsWith("- **")) {
-        const match = line.match(/- \*\*(.+?)\*\* - (.+)/);
-        if (match) {
-          return (
-            <li key={index} className="text-muted-foreground mb-2 ml-4">
-              <strong className="text-foreground">{match[1]}</strong> - {match[2]}
-            </li>
-          );
-        }
-      }
       if (line.startsWith("- ")) {
         return (
           <li key={index} className="text-muted-foreground mb-2 ml-4">
-            {line.replace("- ", "")}
+            {renderLineWithLinks(line.replace("- ", ""))}
           </li>
         );
       }
-      if (line.match(/^\d+\. \*\*/)) {
-        const match = line.match(/^\d+\. \*\*(.+?)\*\* - (.+)/);
-        if (match) {
-          return (
-            <li key={index} className="text-muted-foreground mb-2 ml-4 list-decimal">
-              <strong className="text-foreground">{match[1]}</strong> - {match[2]}
-            </li>
-          );
-        }
+      if (line.match(/^\d+\. /)) {
+        return (
+          <li key={index} className="text-muted-foreground mb-2 ml-4 list-decimal">
+            {renderLineWithLinks(line.replace(/^\d+\. /, ""))}
+          </li>
+        );
       }
-      if (line.trim() === "") {
+      if (line.trim() === "" || line.trim() === "---") {
         return <div key={index} className="h-4" />;
       }
-      
-      // Parse inline links [text](url)
-      const renderLineWithLinks = (text: string) => {
-        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-        const parts: React.ReactNode[] = [];
-        let lastIndex = 0;
-        let match;
-        
-        while ((match = linkRegex.exec(text)) !== null) {
-          if (match.index > lastIndex) {
-            parts.push(text.slice(lastIndex, match.index));
-          }
-          const linkText = match[1];
-          const linkUrl = match[2];
-          
-          // Sanitize URL to prevent javascript: and data: URI injection
-          const sanitizedUrl = sanitizeURL(linkUrl);
-          
-          // Check if it's an internal path (starts with /)
-          const isInternalPath = linkUrl.startsWith('/') && !linkUrl.startsWith('//');
-          
-          if (sanitizedUrl) {
-            // Valid external URL (http/https)
-            parts.push(
-              <a 
-                key={match.index} 
-                href={sanitizedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline font-medium"
-              >
-                {linkText}
-              </a>
-            );
-          } else if (isInternalPath) {
-            // Internal path - safe to use with Link
-            parts.push(
-              <Link 
-                key={match.index} 
-                to={linkUrl} 
-                className="text-primary hover:underline font-medium"
-              >
-                {linkText}
-              </Link>
-            );
-          } else {
-            // Invalid URL - render as plain text for security
-            parts.push(text.slice(match.index, match.index + match[0].length));
-          }
-          
-          lastIndex = match.index + match[0].length;
-        }
-        
-        if (lastIndex < text.length) {
-          parts.push(text.slice(lastIndex));
-        }
-        
-        return parts.length > 0 ? parts : text;
-      };
       
       return (
         <p key={index} className="text-muted-foreground leading-relaxed mb-4">
@@ -306,6 +319,38 @@ export default function BlogPostPage() {
           >
             {renderContent(post.content)}
           </motion.div>
+
+          {/* FAQ Section - Collapsible Accordion */}
+          {parseFAQs(post.content).length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mt-12"
+            >
+              <h2 className="text-2xl font-bold text-foreground mb-6">
+                Frequently Asked Questions (FAQs)
+              </h2>
+              <Accordion type="single" collapsible className="space-y-4">
+                {parseFAQs(post.content).map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`faq-${index}`}
+                    className="glass-card rounded-xl px-6 border-none"
+                  >
+                    <AccordionTrigger className="text-left hover:no-underline py-5">
+                      <span className="font-semibold text-foreground">
+                        {faq.question}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-5">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </motion.div>
+          )}
 
           {/* CTA Section */}
           <motion.div
