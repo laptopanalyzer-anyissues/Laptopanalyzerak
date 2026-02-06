@@ -90,8 +90,8 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            #1 laptop checking tool for display, keyboard, camera, speakers & mic. 
-            Perfect laptop checker for testing used laptops before buying.
+            Used Laptop Inspection Tool<br />
+            Catch hidden faults fast: display • keyboard • camera • sound • mic.
           </motion.p>
 
           {/* CTA Button */}
