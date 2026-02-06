@@ -10,8 +10,10 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { PageLoader } from "@/components/ui/page-loader";
 import { CookieConsent } from "@/components/CookieConsent";
 
-// Lazy load all pages for better initial bundle size and high-traffic performance
-const Index = lazy(() => import("./pages/Index"));
+// Eager load homepage for instant first paint
+import Index from "./pages/Index";
+
+// Lazy load other pages for better bundle splitting
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const DisplayTest = lazy(() => import("./pages/tests/DisplayTest"));
 const KeyboardTest = lazy(() => import("./pages/tests/KeyboardTest"));
