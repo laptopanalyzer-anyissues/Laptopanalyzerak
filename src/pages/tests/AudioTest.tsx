@@ -182,7 +182,7 @@ const AudioTest = () => {
                       className="gap-2 border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                     >
                       <ThumbsDown className="h-4 w-4" />
-                      No, Issues Found
+                      Issues Found
                     </Button>
                     <Button
                       size="lg"
@@ -190,7 +190,7 @@ const AudioTest = () => {
                       className="gap-2"
                     >
                       <ThumbsUp className="h-4 w-4" />
-                      Yes, All Working
+                      No Issues
                     </Button>
                   </div>
                 </motion.div>
