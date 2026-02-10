@@ -79,8 +79,9 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
           >
-            Free Laptop Checker Online{" "}
-            <span className="gradient-text">Check Your Laptop Now</span>
+            Laptop Analyzer – Test & Check Your Laptop Hardware Online
+            <br />
+            <span className="gradient-text">Free Laptop Checker to Test Your Laptop in Your Browser</span>
           </motion.h1>
 
           {/* Subheading */}
@@ -90,8 +91,7 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            Used Laptop Inspection Tool<br />
-            Catch hidden faults fast: display • keyboard • camera • sound • mic.
+            Test your laptop online — display, keyboard, camera, microphone, and speakers — no download required.
           </motion.p>
 
           {/* CTA Button */}
