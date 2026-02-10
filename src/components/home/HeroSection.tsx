@@ -77,13 +77,11 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight mb-6"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6"
           >
-            Laptop Analyzer
+            Laptop Analyzer – Test & Check Your Laptop Hardware Online
             <br />
-            <span className="text-3xl md:text-4xl lg:text-5xl">Test & Check Your Laptop Hardware Online</span>
-            <br />
-            <span className="gradient-text text-3xl md:text-4xl lg:text-5xl">Free Laptop Checker to Test Your Laptop in Your Browser</span>
+            <span className="gradient-text">Free Laptop Checker to Test Your Laptop in Your Browser</span>
           </motion.h1>
 
           {/* Subheading */}
