@@ -79,9 +79,7 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6"
           >
-            Laptop Analyzer – Test & Check Your Laptop Hardware Online
-            <br />
-            <span className="gradient-text">Free Laptop Checker to Test Your Laptop in Your Browser</span>
+            Test Your Laptop Hardware Instantly
           </motion.h1>
 
           {/* Subheading */}
