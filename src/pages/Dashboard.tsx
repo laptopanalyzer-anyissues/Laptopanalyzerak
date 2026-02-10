@@ -122,6 +122,7 @@ const Dashboard = () => {
         description="Run free laptop diagnostic tests! Check display, keyboard, webcam, mic, speakers, network, touchpad & USB ports. Complete hardware testing suite for laptops."
         keywords="laptop diagnostic, laptop test, hardware test, laptop checker, pc health check, computer diagnostic, laptop diagnostics free, hardware diagnostic tool"
         canonicalPath="/dashboard"
+        noIndex={true}
       />
       <Header />
       <main className="pt-24 pb-16" role="main" aria-label="Laptop Diagnostics Dashboard">
