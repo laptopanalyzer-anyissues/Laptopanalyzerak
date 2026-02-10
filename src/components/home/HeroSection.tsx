@@ -89,7 +89,7 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            Test your laptop online: display, keyboard, camera, microphone, and speakers. No download required.
+            Check your display, keyboard, camera, microphone, and speakers — directly in your browser.
           </motion.p>
 
           {/* CTA Button */}
