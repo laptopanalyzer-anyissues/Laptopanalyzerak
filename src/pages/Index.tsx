@@ -19,8 +19,8 @@ const Index = () => {
       <Header />
       <main id="main-content" role="main" aria-label="Laptop Checker Home">
         <HeroSection />
-        <SEOContentSection />
         <FeaturesSection />
+        <SEOContentSection />
         <PrivacySection />
         <FAQSection />
       </main>
