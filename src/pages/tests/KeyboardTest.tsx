@@ -78,7 +78,7 @@ const KeyboardTest = () => {
 
   const keyboardLayout = keyboardType ? getKeyboardLayout(keyboardType) : [];
   // Exclude untestable keys from total count
-  const testableKeys = keyboardLayout.flat().filter(key => !untestableKeys.includes(key));
+  const testableKeys = [...new Set(keyboardLayout.flat().filter(key => !untestableKeys.includes(key)))];
   const totalKeys = testableKeys.length;
   const testedKeys = [...pressedKeys].filter(key => !untestableKeys.includes(key) && !untestableKeys.includes(key.toLowerCase())).length;
   const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
