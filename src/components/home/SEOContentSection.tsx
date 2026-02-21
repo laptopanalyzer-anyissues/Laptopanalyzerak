@@ -57,6 +57,11 @@ export function SEOContentSection() {
           </p>
           <p className="text-muted-foreground text-lg leading-relaxed mb-10">
             This laptop test online tool is designed to quickly identify common hardware issues and ensure that your laptop's key input, output, and connectivity components function as expected.
+            Check out our{" "}
+            <Link to="/blog" className="text-primary hover:underline font-medium">
+              guides and articles
+            </Link>{" "}
+            for detailed walkthroughs on testing specific hardware.
           </p>
         </motion.div>
 
@@ -110,6 +115,10 @@ export function SEOContentSection() {
           </ul>
           <p className="text-muted-foreground text-lg leading-relaxed">
             Laptop Analyzer makes it easy to test your laptop online and verify key hardware functions from one place.
+            For more tips, guides, and troubleshooting help, visit our{" "}
+            <Link to="/blog" className="text-primary hover:underline font-medium">
+              blog and how-to guides
+            </Link>.
           </p>
         </motion.div>
 
