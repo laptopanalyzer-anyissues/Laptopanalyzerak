@@ -5,6 +5,9 @@
   RewriteEngine On
   RewriteBase /
   
+  # Proxy sitemap.xml to PHP handler (must be BEFORE the SPA catch-all)
+  RewriteRule ^sitemap\.xml$ /sitemap.php [L]
+  
   # Don't rewrite files or directories
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
