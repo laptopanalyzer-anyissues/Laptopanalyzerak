@@ -8,12 +8,8 @@
   # Proxy sitemap.xml to PHP handler (must be BEFORE the SPA catch-all)
   RewriteRule ^sitemap\.xml$ /sitemap.php [L]
   
-  # Serve pre-rendered blog index (exact match)
-  RewriteRule ^blog/?$ /blog/index.html [L]
-  
-  # Serve pre-rendered blog post pages (skip if already rewritten to index.html)
-  RewriteRule ^blog/.+/index\.html$ - [L]
-  RewriteRule ^blog/(.+)$ /blog/$1/index.html [L]
+  # Route all /blog requests through PHP handler (same proven pattern as sitemap.php)
+  RewriteRule ^blog(/.*)?$ /blog-render.php [L]
   
   # Don't rewrite files or directories
   RewriteCond %{REQUEST_FILENAME} !-f
