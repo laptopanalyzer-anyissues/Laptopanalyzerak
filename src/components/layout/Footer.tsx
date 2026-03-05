@@ -1,8 +1,23 @@
 import { forwardRef } from "react";
 import { Link } from "react-router-dom";
 import { Laptop, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export const Footer = forwardRef<HTMLElement>((_, ref) => {
+  const { data: blogPosts } = useQuery({
+    queryKey: ["footer-blog-posts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("blog_posts")
+        .select("title, slug")
+        .eq("published", true)
+        .order("published_at", { ascending: false })
+        .limit(4);
+      return data || [];
+    },
+  });
+
   return (
     <footer ref={ref} className="border-t border-border/50 bg-muted/30">
       <div className="container mx-auto px-4 py-12">
@@ -41,8 +56,17 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                 to="/blog"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                How It Works
+                Blog
               </Link>
+              {blogPosts?.map((post) => (
+                <Link
+                  key={post.slug}
+                  to={`/blog/${post.slug}`}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors line-clamp-1"
+                >
+                  {post.title}
+                </Link>
+              ))}
               <Link
                 to="/about"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"

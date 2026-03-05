@@ -5,6 +5,7 @@ import { SEOContentSection } from "@/components/home/SEOContentSection";
 import { FeaturesSection } from "@/components/home/FeaturesSection";
 import { PrivacySection } from "@/components/home/PrivacySection";
 import { FAQSection } from "@/components/home/FAQSection";
+import { LatestArticlesSection } from "@/components/home/LatestArticlesSection";
 import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
@@ -21,6 +22,7 @@ const Index = () => {
         <HeroSection />
         <FeaturesSection />
         <SEOContentSection />
+        <LatestArticlesSection />
         <PrivacySection />
         <FAQSection />
       </main>
