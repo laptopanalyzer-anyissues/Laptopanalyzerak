@@ -88,7 +88,7 @@ const MicrophoneTest = () => {
   const [volume, setVolume] = useState(0);
   const [error, setError] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [recordings, setRecordings] = useState<string[]>([]);
   const [micInfo, setMicInfo] = useState<string>("");
   
   const streamRef = useRef<MediaStream | null>(null);
