@@ -205,9 +205,7 @@ const MicrophoneTest = () => {
   useEffect(() => {
     return () => {
       stopListening();
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
+      recordings.forEach(url => URL.revokeObjectURL(url));
     };
   }, []);
 
