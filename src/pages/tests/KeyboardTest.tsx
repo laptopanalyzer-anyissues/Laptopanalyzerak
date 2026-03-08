@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RotateCcw, CheckCircle2, Settings2, PartyPopper } from "lucide-react";
+import { ArrowLeft, RotateCcw, CheckCircle2, Settings2 } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
 import { SEOHead, structuredData } from "@/components/SEOHead";
