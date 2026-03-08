@@ -1,11 +1,87 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Mic, MicOff, Play, Square, Volume2 } from "lucide-react";
+import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2 } from "lucide-react";
+
+// Custom themed audio player
+function AudioPlayer({ src, onClear }: { src: string; onClear: () => void }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  const formatTime = (t: number) => {
+    const m = Math.floor(t / 60);
+    const s = Math.floor(t % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const togglePlay = useCallback(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  }, [isPlaying]);
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = (e.clientX - rect.left) / rect.width;
+    audioRef.current.currentTime = ratio * duration;
+  };
+
+  return (
+    <div className="space-y-3">
+      <audio
+        ref={audioRef}
+        src={src}
+        onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime || 0)}
+        onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
+        onEnded={() => setIsPlaying(false)}
+      />
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border">
+        <button
+          onClick={togglePlay}
+          className="flex-shrink-0 w-9 h-9 rounded-full bg-primary flex items-center justify-center hover:bg-primary/90 transition-colors"
+        >
+          {isPlaying ? (
+            <Pause className="h-4 w-4 text-primary-foreground" />
+          ) : (
+            <Play className="h-4 w-4 text-primary-foreground ml-0.5" />
+          )}
+        </button>
+        <span className="text-xs text-muted-foreground font-mono w-12 flex-shrink-0">
+          {formatTime(currentTime)}
+        </span>
+        <div
+          className="flex-1 h-2 bg-muted rounded-full cursor-pointer relative group"
+          onClick={handleSeek}
+        >
+          <div
+            className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all relative"
+            style={{ width: duration ? `${(currentTime / duration) * 100}%` : "0%" }}
+          >
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-primary shadow-md opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </div>
+        <span className="text-xs text-muted-foreground font-mono w-12 flex-shrink-0 text-right">
+          {formatTime(duration)}
+        </span>
+      </div>
+      <Button variant="ghost" size="sm" onClick={onClear} className="text-muted-foreground">
+        <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+        Clear Recording
+      </Button>
+    </div>
+  );
+}
 
 const MicrophoneTest = () => {
   const [isListening, setIsListening] = useState(false);
