@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Laptop, Menu, X, Sun, Moon } from "lucide-react";
+import { Laptop, Menu, X, Sun, Moon, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
