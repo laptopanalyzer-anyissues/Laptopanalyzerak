@@ -35,6 +35,7 @@ const DMCA = lazy(() => import("./pages/DMCA"));
 const Accessibility = lazy(() => import("./pages/Accessibility"));
 const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
 const EditorialPolicy = lazy(() => import("./pages/EditorialPolicy"));
+const DownloadSoftware = lazy(() => import("./pages/DownloadSoftware"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Optimized QueryClient configuration for high-traffic scenarios
@@ -96,6 +97,7 @@ const App = () => (
                   <Route path="/accessibility" element={<Accessibility />} />
                   <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
                   <Route path="/editorial-policy" element={<EditorialPolicy />} />
+                  <Route path="/download" element={<DownloadSoftware />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
