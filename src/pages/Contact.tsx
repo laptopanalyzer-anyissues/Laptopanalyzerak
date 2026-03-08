@@ -2,16 +2,16 @@ import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { 
-  Mail, 
-  MessageSquare, 
-  Send, 
-  MapPin, 
-  Clock, 
+import {
+  Mail,
+  Send,
+  Clock,
   HelpCircle,
   Bug,
   Lightbulb,
-  Shield
+  Shield,
+  CheckCircle2,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,28 +24,37 @@ const contactReasons = [
   {
     icon: HelpCircle,
     title: "General Inquiry",
-    description: "Questions about LaptopAnalyzer or how to use our tools",
+    description: "Questions about our tools",
+    color: "from-blue-500 to-cyan-500",
+    shadow: "rgba(59, 130, 246, 0.3)",
   },
   {
     icon: Bug,
     title: "Bug Report",
-    description: "Found something that is not working correctly? Let us know",
+    description: "Something not working right",
+    color: "from-red-500 to-orange-500",
+    shadow: "rgba(239, 68, 68, 0.3)",
   },
   {
     icon: Lightbulb,
     title: "Feature Request",
-    description: "Have an idea for a new test or improvement?",
+    description: "Ideas for improvements",
+    color: "from-amber-500 to-yellow-500",
+    shadow: "rgba(245, 158, 11, 0.3)",
   },
   {
     icon: Shield,
     title: "Privacy Concern",
-    description: "Questions about how we handle your data",
+    description: "Data handling questions",
+    color: "from-green-500 to-emerald-500",
+    shadow: "rgba(34, 197, 94, 0.3)",
   },
 ];
 
 const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedReason, setSelectedReason] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -64,7 +73,6 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     toast({
@@ -73,6 +81,7 @@ const Contact = () => {
     });
 
     setFormData({ name: "", email: "", subject: "", message: "" });
+    setSelectedReason(null);
     setIsSubmitting(false);
   };
 
@@ -87,59 +96,131 @@ const Contact = () => {
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
-          {/* Hero Section */}
+          {/* Hero */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-2xl mx-auto mb-12"
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <MessageSquare className="h-4 w-4" />
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 300 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6"
+              style={{ boxShadow: "0 8px 30px -6px hsl(var(--primary) / 0.4)" }}
+            >
+              <Mail className="h-7 w-7 text-primary-foreground" />
+            </motion.div>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Get in Touch
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Contact Us
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Have a question, suggestion, or found a bug? We would love to hear from you. Our team is here to help.
+            <p className="text-lg text-muted-foreground">
+              Have a question or feedback? We'd love to hear from you.
             </p>
           </motion.div>
 
-          <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
+          {/* Reason Selector */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="max-w-3xl mx-auto mb-12"
+          >
+            <p className="text-sm font-medium text-muted-foreground text-center mb-4">
+              What can we help you with?
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {contactReasons.map((reason, index) => (
+                <motion.button
+                  key={index}
+                  whileHover={{ y: -3, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setSelectedReason(index);
+                    setFormData((prev) => ({ ...prev, subject: reason.title }));
+                  }}
+                  className={`relative p-4 rounded-xl border text-left transition-all duration-300 overflow-hidden ${
+                    selectedReason === index
+                      ? "border-primary bg-primary/5"
+                      : "border-border bg-card hover:border-muted-foreground/30"
+                  }`}
+                >
+                  {selectedReason === index && (
+                    <motion.div
+                      layoutId="reason-glow"
+                      className="absolute inset-0 rounded-xl"
+                      style={{
+                        background: `radial-gradient(ellipse at center, ${reason.shadow}, transparent 70%)`,
+                      }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <div className="relative">
+                    <div
+                      className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${reason.color} mb-3`}
+                      style={{ boxShadow: `0 4px 12px -2px ${reason.shadow}` }}
+                    >
+                      <reason.icon className="h-4 w-4 text-white" />
+                    </div>
+                    <p className="font-medium text-foreground text-sm">{reason.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{reason.description}</p>
+                  </div>
+                  {selectedReason === index && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-2 right-2"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                    </motion.div>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Form + Info */}
+          <div className="max-w-3xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
             >
-              <div className="p-6 md:p-8 rounded-2xl bg-card border border-border">
-                <h2 className="text-2xl font-bold text-foreground mb-6">
-                  Send Us a Message
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="p-6 md:p-8 rounded-2xl bg-card border border-border relative overflow-hidden">
+                {/* Subtle corner accent */}
+                <div
+                  className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.07] pointer-events-none"
+                  style={{
+                    background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)",
+                  }}
+                />
+
+                <form onSubmit={handleSubmit} className="relative space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Your Name</Label>
+                      <Label htmlFor="name">Name</Label>
                       <Input
                         id="name"
                         name="name"
-                        placeholder="John Doe"
+                        placeholder="Your name"
                         value={formData.name}
                         onChange={handleInputChange}
                         required
+                        className="h-11"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="you@example.com"
                         value={formData.email}
                         onChange={handleInputChange}
                         required
+                        className="h-11"
                       />
                     </div>
                   </div>
@@ -148,10 +229,11 @@ const Contact = () => {
                     <Input
                       id="subject"
                       name="subject"
-                      placeholder="How can we help you?"
+                      placeholder="What's this about?"
                       value={formData.subject}
                       onChange={handleInputChange}
                       required
+                      className="h-11"
                     />
                   </div>
                   <div className="space-y-2">
@@ -159,111 +241,90 @@ const Contact = () => {
                     <Textarea
                       id="message"
                       name="message"
-                      placeholder="Tell us more about your inquiry..."
+                      placeholder="Tell us more..."
                       rows={5}
                       value={formData.message}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
-                  <Button
-                    type="submit"
-                    variant="hero"
-                    className="w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      "Sending..."
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4 mr-2" />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      className="w-full h-12 text-base font-semibold"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                          Sending...
+                        </div>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-2" />
+                          Send Message
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
                 </form>
               </div>
             </motion.div>
 
-            {/* Contact Info */}
+            {/* Info strip */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-8"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4"
             >
-              {/* Contact Details */}
-              <div className="p-6 rounded-2xl bg-card border border-border">
-                <h2 className="text-xl font-bold text-foreground mb-6">
-                  Contact Information
-                </h2>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Mail className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">Email</h3>
-                      <p className="text-muted-foreground">support@laptopanalyzer.com</p>
-                    </div>
+              {[
+                {
+                  icon: Mail,
+                  label: "Email Us",
+                  value: "support@laptopanalyzer.com",
+                },
+                {
+                  icon: Clock,
+                  label: "Response Time",
+                  value: "Within 24-48 hours",
+                },
+                {
+                  icon: Globe,
+                  label: "Availability",
+                  value: "Worldwide, 100% online",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -2 }}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border"
+                >
+                  <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                    <item.icon className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Clock className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">Response Time</h3>
-                      <p className="text-muted-foreground">We typically respond within 24-48 hours</p>
-                    </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-sm font-medium text-foreground truncate">{item.value}</p>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <MapPin className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">Location</h3>
-                      <p className="text-muted-foreground">Available worldwide, 100% online</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </motion.div>
+              ))}
+            </motion.div>
 
-              {/* Contact Reasons */}
-              <div className="p-6 rounded-2xl bg-card border border-border">
-                <h2 className="text-xl font-bold text-foreground mb-6">
-                  How Can We Help?
-                </h2>
-                <div className="space-y-4">
-                  {contactReasons.map((reason, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-muted">
-                        <reason.icon className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-foreground text-sm">
-                          {reason.title}
-                        </h3>
-                        <p className="text-muted-foreground text-sm">
-                          {reason.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* FAQ CTA */}
-              <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 border border-border">
-                <h3 className="font-bold text-foreground mb-2">
-                  Looking for Quick Answers?
-                </h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Check out our FAQ section for answers to commonly asked questions.
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <a href="/#faq">View FAQ</a>
-                </Button>
-              </div>
+            {/* FAQ CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 p-5 rounded-xl bg-gradient-to-r from-primary/5 to-accent/5 border border-border text-center"
+            >
+              <p className="text-muted-foreground text-sm">
+                Looking for quick answers?{" "}
+                <a href="/#faq" className="text-primary font-medium hover:underline">
+                  Check our FAQ →
+                </a>
+              </p>
             </motion.div>
           </div>
         </div>
