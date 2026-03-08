@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Laptop, Menu, X, Sun, Moon } from "lucide-react";
+import { Laptop, Menu, X, Sun, Moon, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
@@ -9,9 +9,9 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "Tests", path: "/dashboard" },
   { name: "How It Works", path: "/blog" },
+  { name: "Download", path: "/download" },
   { name: "About", path: "/about" },
   { name: "Contact", path: "/contact" },
-  { name: "Privacy Policy", path: "/privacy-policy" },
 ];
 
 export const Header = forwardRef<HTMLElement>((_, ref) => {
