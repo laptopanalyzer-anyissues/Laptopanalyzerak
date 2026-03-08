@@ -368,19 +368,13 @@ const MicrophoneTest = () => {
                 
                 <div className="flex-1 flex flex-col">
                   {audioUrl ? (
-                    <div className="space-y-4">
-                      <audio controls src={audioUrl} className="w-full" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          URL.revokeObjectURL(audioUrl);
-                          setAudioUrl("");
-                        }}
-                      >
-                        Clear Recording
-                      </Button>
-                    </div>
+                    <AudioPlayer
+                      src={audioUrl}
+                      onClear={() => {
+                        URL.revokeObjectURL(audioUrl);
+                        setAudioUrl("");
+                      }}
+                    />
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Volume2 className="h-12 w-12 mb-4" />
