@@ -65,11 +65,12 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
   });
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div className="relative overflow-hidden" style={{ width: size, height: size }}>
       <svg
         width={size}
         height={size}
         className="transform rotate-[135deg]"
+        style={{ overflow: "hidden" }}
       >
         {/* Background arc */}
         <circle
