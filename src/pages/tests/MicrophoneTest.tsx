@@ -210,71 +210,73 @@ const MicrophoneTest = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="glass-card rounded-2xl p-6"
+              className="flex flex-col"
             >
-              <h3 className="font-semibold text-foreground mb-4">Audio Waveform</h3>
-              <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4 relative">
-                {!isListening && !error && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Mic className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground text-sm">Start to see visualization</p>
-                  </div>
-                )}
-                {error && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                    <MicOff className="h-12 w-12 text-destructive mb-4" />
-                    <p className="text-destructive text-sm text-center">{error}</p>
-                  </div>
-                )}
-                <canvas
-                  ref={canvasRef}
-                  width={600}
-                  height={300}
-                  className={`w-full h-full ${!isListening ? "hidden" : ""}`}
-                />
-              </div>
-
-              {/* Volume Meter */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground">Volume Level</span>
-                  <span className="text-sm font-semibold text-foreground">{volume}%</span>
-                </div>
-                <div className="h-4 bg-muted rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-primary to-accent"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${volume}%` }}
-                    transition={{ duration: 0.1 }}
+              <div className="glass-card rounded-2xl p-6 flex-1 flex flex-col">
+                <h3 className="font-semibold text-foreground mb-4">Audio Waveform</h3>
+                <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4 relative">
+                  {!isListening && !error && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <Mic className="h-12 w-12 text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground text-sm">Start to see visualization</p>
+                    </div>
+                  )}
+                  {error && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                      <MicOff className="h-12 w-12 text-destructive mb-4" />
+                      <p className="text-destructive text-sm text-center">{error}</p>
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvasRef}
+                    width={600}
+                    height={300}
+                    className={`w-full h-full ${!isListening ? "hidden" : ""}`}
                   />
                 </div>
-              </div>
 
-              <div className="flex flex-wrap gap-2">
-                {!isListening ? (
-                  <Button variant="hero" onClick={startListening}>
-                    <Mic className="h-4 w-4 mr-2" />
-                    Start Microphone
-                  </Button>
-                ) : (
-                  <>
-                    <Button variant="destructive" onClick={stopListening}>
-                      <MicOff className="h-4 w-4 mr-2" />
-                      Stop
+                {/* Volume Meter */}
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Volume Level</span>
+                    <span className="text-sm font-semibold text-foreground">{volume}%</span>
+                  </div>
+                  <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${volume}%` }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-auto">
+                  {!isListening ? (
+                    <Button variant="hero" onClick={startListening}>
+                      <Mic className="h-4 w-4 mr-2" />
+                      Start Microphone
                     </Button>
-                    {!isRecording ? (
-                      <Button variant="default" onClick={startRecording}>
-                        <Play className="h-4 w-4 mr-2" />
-                        Record
+                  ) : (
+                    <>
+                      <Button variant="destructive" onClick={stopListening}>
+                        <MicOff className="h-4 w-4 mr-2" />
+                        Stop
                       </Button>
-                    ) : (
-                      <Button variant="outline" onClick={stopRecording}>
-                        <Square className="h-4 w-4 mr-2" />
-                        Stop Recording
-                      </Button>
-                    )}
-                  </>
-                )}
+                      {!isRecording ? (
+                        <Button variant="default" onClick={startRecording}>
+                          <Play className="h-4 w-4 mr-2" />
+                          Record
+                        </Button>
+                      ) : (
+                        <Button variant="outline" onClick={stopRecording}>
+                          <Square className="h-4 w-4 mr-2" />
+                          Stop Recording
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </motion.div>
 
@@ -283,36 +285,39 @@ const MicrophoneTest = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col"
             >
-              {/* Mic Info */}
-              {micInfo && (
-                <div className="glass-card rounded-2xl p-6 mb-4">
-                  <h3 className="font-semibold text-foreground mb-2">Microphone Detected</h3>
-                  <p className="text-muted-foreground text-sm">{micInfo}</p>
-                </div>
-              )}
-
-              {/* Playback */}
-              <div className="glass-card rounded-2xl p-6">
+              <div className="glass-card rounded-2xl p-6 flex-1 flex flex-col">
                 <h3 className="font-semibold text-foreground mb-4">Recording Playback</h3>
-                {audioUrl ? (
-                  <div className="space-y-4">
-                    <audio controls src={audioUrl} className="w-full" />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        URL.revokeObjectURL(audioUrl);
-                        setAudioUrl("");
-                      }}
-                    >
-                      Clear Recording
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                    <Volume2 className="h-12 w-12 mb-4" />
-                    <p className="text-sm">Record audio to play it back here</p>
+                
+                <div className="flex-1 flex flex-col">
+                  {audioUrl ? (
+                    <div className="space-y-4">
+                      <audio controls src={audioUrl} className="w-full" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          URL.revokeObjectURL(audioUrl);
+                          setAudioUrl("");
+                        }}
+                      >
+                        Clear Recording
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <Volume2 className="h-12 w-12 mb-4" />
+                      <p className="text-sm">Record audio to play it back here</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mic Info */}
+                {micInfo && (
+                  <div className="mt-auto pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground">Detected Device</p>
+                    <p className="text-sm font-medium text-foreground mt-0.5">{micInfo}</p>
                   </div>
                 )}
               </div>
