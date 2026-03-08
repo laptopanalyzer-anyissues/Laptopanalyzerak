@@ -128,7 +128,7 @@ const PortsTest = () => {
     try {
       const devices = await (navigator as any).usb.getDevices();
       if (devices.length > 0) {
-        const names = devices.map((d: any) => d.productName || "USB Device");
+      const names: string[] = devices.map((d: any) => d.productName || "USB Device");
         const uniqueNames = [...new Set(names)];
         const label = uniqueNames.length > 1 
           ? `${uniqueNames.length} devices: ${uniqueNames.join(", ")}` 
