@@ -110,6 +110,7 @@ const KeyboardTest = () => {
     setLastKeyCode("");
     setJustPressed(null);
     setTestCompleted(false);
+    setResetKey(k => k + 1);
   };
 
   return (
