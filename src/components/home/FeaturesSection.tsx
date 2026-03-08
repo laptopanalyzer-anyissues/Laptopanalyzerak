@@ -81,11 +81,12 @@ const containerVariants = {
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 30, scale: 0.95 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5 },
+    scale: 1,
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 
@@ -94,10 +95,10 @@ export function FeaturesSection() {
     <section id="how-it-works" className="py-24 bg-muted/30" aria-labelledby="features-heading">
       <div className="container mx-auto px-4">
         <motion.header
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
           <h2 id="features-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -119,19 +120,33 @@ export function FeaturesSection() {
           aria-label="Available laptop tests"
         >
           {features.map((feature, index) => (
-            <motion.article key={index} variants={itemVariants} role="listitem">
+            <motion.article
+              key={index}
+              variants={itemVariants}
+              whileHover={{ y: -8, scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              role="listitem"
+            >
               <Link to={feature.path} className="block h-full" aria-label={`${feature.title}: ${feature.description}`}>
-                <div className="test-card h-full group">
+                <div className="test-card h-full group relative overflow-hidden">
+                  {/* Hover glow */}
                   <div
-                    className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    className={`absolute -top-12 -right-12 w-32 h-32 rounded-full bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-15 blur-2xl transition-opacity duration-500`}
+                    aria-hidden="true"
+                  />
+
+                  <motion.div
+                    className={`relative inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.color} mb-4`}
+                    whileHover={{ scale: 1.15, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     aria-hidden="true"
                   >
                     <feature.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                  </motion.div>
+                  <h3 className="relative text-lg font-semibold text-foreground mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="relative text-sm text-muted-foreground">
                     {feature.description}
                   </p>
                 </div>
