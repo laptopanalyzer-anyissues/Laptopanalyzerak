@@ -279,35 +279,68 @@ const KeyboardTest = () => {
               {testCompleted && (
                 <motion.div
                   ref={completionRef}
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.5, type: "spring", stiffness: 200, damping: 20 }}
-                  className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-success/15 to-success/5 border border-success/30 text-center"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, type: "spring", stiffness: 150, damping: 18 }}
+                  className="mt-8 relative overflow-hidden rounded-2xl border border-success/40 p-10 text-center"
+                  style={{
+                    background: "linear-gradient(135deg, hsl(var(--success) / 0.12) 0%, hsl(var(--success) / 0.04) 50%, hsl(var(--success) / 0.1) 100%)",
+                    boxShadow: "0 0 40px -10px hsl(var(--success) / 0.3), inset 0 1px 0 hsl(var(--success) / 0.15)",
+                  }}
                 >
+                  {/* Glow effect */}
                   <motion.div
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
-                    className="text-4xl mb-3"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0.3, 0.6, 0.3] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      background: "radial-gradient(ellipse at center, hsl(var(--success) / 0.15) 0%, transparent 70%)",
+                    }}
+                  />
+
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 12 }}
+                    className="relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-5"
+                    style={{
+                      background: "linear-gradient(135deg, hsl(var(--success) / 0.25), hsl(var(--success) / 0.1))",
+                      boxShadow: "0 0 30px hsl(var(--success) / 0.2)",
+                    }}
                   >
-                    🎉
+                    <CheckCircle2 className="h-10 w-10 text-success" />
                   </motion.div>
-                  <motion.p
-                    initial={{ opacity: 0, y: 8 }}
+
+                  <motion.h3
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="font-bold text-foreground text-lg"
+                    className="relative text-2xl font-bold text-foreground mb-2"
                   >
-                    All {totalKeys} keys passed!
-                  </motion.p>
+                    All {totalKeys} Keys Passed
+                  </motion.h3>
+
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="text-muted-foreground text-sm mt-1"
+                    transition={{ delay: 0.45 }}
+                    className="relative text-muted-foreground max-w-md mx-auto"
                   >
                     Your keyboard is fully functional — every key registered successfully.
                   </motion.p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="relative mt-6"
+                  >
+                    <Button variant="outline" size="sm" onClick={resetTest}>
+                      <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                      Test Again
+                    </Button>
+                  </motion.div>
                 </motion.div>
               )}
 
