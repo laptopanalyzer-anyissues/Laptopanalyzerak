@@ -676,8 +676,23 @@ const PortsTest = () => {
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* Scan button for USB/Display when not connected */}
+                          {/* Scan/Rescan button for USB (always show after permission) */}
                           {canRescan && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-7 px-2 text-xs text-primary hover:bg-primary/10 gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUSBClick();
+                              }}
+                              title="Scan for new USB device"
+                            >
+                              <ScanLine className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">Scan</span>
+                            </Button>
+                          )}
+                          {canRescanDisplay && (
                             <Button 
                               size="sm" 
                               variant="ghost" 
