@@ -164,8 +164,9 @@ const CameraTest = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex flex-col"
             >
-              <div className="glass-card rounded-2xl p-6">
+              <div className="glass-card rounded-2xl p-6 flex-1 flex flex-col">
                 <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4 relative">
                   {!stream && !error && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -188,7 +189,7 @@ const CameraTest = () => {
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mt-auto">
                   {!stream ? (
                     <Button variant="hero" onClick={startCamera}>
                       <Camera className="h-4 w-4 mr-2" />
@@ -240,8 +241,9 @@ const CameraTest = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-col"
             >
-              <div className="glass-card rounded-2xl p-6">
+              <div className="glass-card rounded-2xl p-6 flex-1 flex flex-col">
                 <h3 className="font-semibold text-foreground mb-4">Snapshot Preview</h3>
                 <div className="aspect-video bg-muted rounded-xl overflow-hidden mb-4 relative">
                   {snapshot ? (
@@ -254,7 +256,7 @@ const CameraTest = () => {
                   )}
                 </div>
                 {snapshot && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-auto">
                     <Button variant="outline" onClick={downloadSnapshot}>
                       <Download className="h-4 w-4 mr-2" />
                       Download
