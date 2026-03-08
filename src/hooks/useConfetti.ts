@@ -3,11 +3,12 @@ import confetti from "canvas-confetti";
 
 export const useConfetti = () => {
   const fireConfetti = useCallback(() => {
-    // Fire confetti from both sides
     const count = 200;
     const defaults = {
       origin: { y: 0.7 },
       zIndex: 9999,
+      shapes: ["circle", "square"] as confetti.Shape[],
+      colors: ["#00d4aa", "#0ea5e9", "#22c55e", "#facc15", "#f97316", "#a855f7"],
     };
 
     function fire(particleRatio: number, opts: confetti.Options) {
@@ -58,7 +59,7 @@ export const useConfetti = () => {
       origin: { x: 0.8, y: 0.7 },
     });
 
-    // Second wave after a short delay
+    // Second wave
     setTimeout(() => {
       fire(0.1, {
         spread: 100,
