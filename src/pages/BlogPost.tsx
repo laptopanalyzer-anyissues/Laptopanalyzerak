@@ -363,6 +363,42 @@ export default function BlogPostPage() {
             </motion.div>
           )}
 
+          {/* Related Articles */}
+          {relatedPosts && relatedPosts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mt-12"
+            >
+              <h2 className="text-2xl font-bold text-foreground mb-6">Related Articles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {relatedPosts.map((related) => (
+                  <Link
+                    key={related.slug}
+                    to={`/blog/${related.slug}`}
+                    className="glass-card rounded-xl p-5 flex flex-col gap-2 group hover:border-primary/30 transition-all duration-200"
+                  >
+                    {(related as any).blog_categories && (
+                      <span className="text-xs font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 self-start">
+                        {(related as any).blog_categories.name}
+                      </span>
+                    )}
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm line-clamp-2">
+                      {related.title}
+                    </h3>
+                    {related.excerpt && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{related.excerpt}</p>
+                    )}
+                    <span className="text-xs text-primary flex items-center gap-1 mt-auto pt-2">
+                      Read more <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* CTA Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
