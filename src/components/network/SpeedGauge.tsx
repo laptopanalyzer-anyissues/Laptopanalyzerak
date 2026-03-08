@@ -65,11 +65,12 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
   });
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div className="relative overflow-hidden" style={{ width: size, height: size }}>
       <svg
         width={size}
         height={size}
         className="transform rotate-[135deg]"
+        style={{ overflow: "hidden" }}
       >
         {/* Background arc */}
         <circle
@@ -110,7 +111,7 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
           strokeDasharray={`${arcLength} ${circumference}`}
           style={{ 
             strokeDashoffset: valueDashOffset,
-            filter: phase !== "idle" ? `drop-shadow(0 0 10px ${colors.primary})` : "none",
+            filter: phase !== "idle" ? `drop-shadow(0 0 4px ${colors.primary}90)` : "none",
           }}
         />
         
