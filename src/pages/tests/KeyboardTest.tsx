@@ -27,6 +27,7 @@ const KeyboardTest = () => {
   const [justPressed, setJustPressed] = useState<string | null>(null);
   const [testCompleted, setTestCompleted] = useState(false);
   const { fireConfetti } = useConfetti();
+  const completionRef = useRef<HTMLDivElement>(null);
 
   // Check for stored keyboard type on mount
   useEffect(() => {
