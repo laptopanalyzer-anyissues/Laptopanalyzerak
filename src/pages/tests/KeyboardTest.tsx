@@ -107,6 +107,7 @@ const KeyboardTest = () => {
     setPressedKeys(new Set());
     setLastKey("");
     setLastKeyCode("");
+    setJustPressed(null);
     setTestCompleted(false);
   };
 
