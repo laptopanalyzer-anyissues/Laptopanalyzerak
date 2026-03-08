@@ -77,6 +77,12 @@ const KeyboardTest = () => {
   }, [handleKeyDown]);
 
   const keyboardLayout = keyboardType ? getKeyboardLayout(keyboardType) : [];
+
+  const isKeyPressed = (key: string) => {
+    const normalizedKey = key.startsWith("F") && key.length <= 3 ? key : key.toUpperCase();
+    return pressedKeys.has(normalizedKey) || pressedKeys.has(key) || pressedKeys.has(key.toUpperCase());
+  };
+
   // Exclude untestable keys and deduplicate for accurate counting
   const testableKeys = [...new Set(keyboardLayout.flat().filter(key => !untestableKeys.includes(key)))];
   const totalKeys = testableKeys.length;
@@ -97,12 +103,6 @@ const KeyboardTest = () => {
     setLastKey("");
     setLastKeyCode("");
     setTestCompleted(false);
-  };
-
-  const isKeyPressed = (key: string) => {
-    // Check both original key and normalized versions for F-keys
-    const normalizedKey = key.startsWith("F") && key.length <= 3 ? key : key.toUpperCase();
-    return pressedKeys.has(normalizedKey) || pressedKeys.has(key) || pressedKeys.has(key.toUpperCase());
   };
 
   return (
