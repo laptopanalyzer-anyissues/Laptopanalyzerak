@@ -95,7 +95,11 @@ const KeyboardTest = () => {
   useEffect(() => {
     if (progress === 100 && !testCompleted) {
       setTestCompleted(true);
-      fireConfetti();
+      // Delay confetti slightly so the banner renders first
+      setTimeout(() => {
+        fireConfetti();
+        completionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 300);
     }
   }, [progress, testCompleted, fireConfetti]);
 
