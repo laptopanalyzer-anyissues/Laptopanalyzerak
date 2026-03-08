@@ -9,9 +9,9 @@ const navLinks = [
   { name: "Home", path: "/" },
   { name: "Tests", path: "/dashboard" },
   { name: "How It Works", path: "/blog" },
+  { name: "Download", path: "/download" },
   { name: "About", path: "/about" },
   { name: "Contact", path: "/contact" },
-  { name: "Privacy Policy", path: "/privacy-policy" },
 ];
 
 export const Header = forwardRef<HTMLElement>((_, ref) => {
