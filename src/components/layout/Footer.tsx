@@ -42,46 +42,6 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
-            <nav className="flex flex-col gap-2">
-              <Link
-                to="/dashboard"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                All Tests
-              </Link>
-              <Link
-                to="/blog"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Blog
-              </Link>
-              {blogPosts?.map((post) => (
-                <Link
-                  key={post.slug}
-                  to={`/blog/${post.slug}`}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors line-clamp-1"
-                >
-                  {post.title}
-                </Link>
-              ))}
-              <Link
-                to="/about"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                About Us
-              </Link>
-              <Link
-                to="/contact"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Contact
-              </Link>
-            </nav>
-          </div>
-
           {/* Popular Tests */}
           <div>
             <h4 className="font-semibold text-foreground mb-4">Popular Tests</h4>
