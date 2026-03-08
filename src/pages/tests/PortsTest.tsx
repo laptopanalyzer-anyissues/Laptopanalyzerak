@@ -288,9 +288,9 @@ const PortsTest = () => {
           if (battery.charging) {
             const level = Math.round(battery.level * 100);
             updatePort("charging", "connected", `Charging (${level}%)`, true);
-            if (!detectedDevices.includes("Power Adapter")) {
-              setDetectedDevices(prev => [...prev, "Power Adapter"]);
-            }
+            setDetectedDevices(prev => 
+              prev.includes("Power Adapter") ? prev : [...prev, "Power Adapter"]
+            );
           } else {
             const level = Math.round(battery.level * 100);
             updatePort("charging", "not-connected", `On battery (${level}%)`, true);
@@ -315,7 +315,7 @@ const PortsTest = () => {
     } else {
       updatePort("charging", "not-connected", "Battery API not supported", true);
     }
-  }, [updatePort, detectedDevices]);
+  }, [updatePort]);
 
   // Detect Wi-Fi status
   const detectWifi = useCallback(() => {
