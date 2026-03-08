@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ArrowLeft, Tag } from "lucide-react";
+import { Calendar, ArrowLeft, Tag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
