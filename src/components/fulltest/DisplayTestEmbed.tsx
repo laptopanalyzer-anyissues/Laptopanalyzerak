@@ -602,9 +602,9 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
               <ChevronLeft className="h-5 w-5" />
             </button>
             
-            <div className="px-6 py-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border text-center min-w-64">
+            <div className="px-6 py-3 rounded-xl bg-background/80 backdrop-blur-sm border border-border text-center w-80">
               <p className="font-medium text-foreground">{currentTest.name}</p>
-              <p className="text-xs text-muted-foreground mt-1">{currentTest.description}</p>
+              <p className="text-xs text-muted-foreground mt-1 truncate">{currentTest.description}</p>
             </div>
             
             {isLastTest ? (
