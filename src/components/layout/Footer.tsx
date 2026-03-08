@@ -21,7 +21,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
   return (
     <footer ref={ref} className="border-t border-border/50 bg-muted/30">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -40,46 +40,6 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
               <Shield className="h-4 w-4 text-success" />
               <span>100 Percent Private</span>
             </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-semibold text-foreground mb-4">Quick Links</h4>
-            <nav className="flex flex-col gap-2">
-              <Link
-                to="/dashboard"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                All Tests
-              </Link>
-              <Link
-                to="/blog"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Blog
-              </Link>
-              {blogPosts?.map((post) => (
-                <Link
-                  key={post.slug}
-                  to={`/blog/${post.slug}`}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors line-clamp-1"
-                >
-                  {post.title}
-                </Link>
-              ))}
-              <Link
-                to="/about"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                About Us
-              </Link>
-              <Link
-                to="/contact"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Contact
-              </Link>
-            </nav>
           </div>
 
           {/* Popular Tests */}
