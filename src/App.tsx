@@ -35,6 +35,7 @@ const DMCA = lazy(() => import("./pages/DMCA"));
 const Accessibility = lazy(() => import("./pages/Accessibility"));
 const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
 const EditorialPolicy = lazy(() => import("./pages/EditorialPolicy"));
+const DownloadSoftware = lazy(() => import("./pages/DownloadSoftware"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Optimized QueryClient configuration for high-traffic scenarios
