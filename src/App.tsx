@@ -97,6 +97,7 @@ const App = () => (
                   <Route path="/accessibility" element={<Accessibility />} />
                   <Route path="/affiliate-disclosure" element={<AffiliateDisclosure />} />
                   <Route path="/editorial-policy" element={<EditorialPolicy />} />
+                  <Route path="/download" element={<DownloadSoftware />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
