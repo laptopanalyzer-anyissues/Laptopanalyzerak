@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -119,6 +119,32 @@ const PortsTest = () => {
     setShowUSBDialog(true);
   }, [updatePort]);
 
+  // Ref to track USB permission for use in intervals/events without stale closures
+  const usbPermissionRef = useRef(false);
+
+  // Helper to refresh USB device list
+  const refreshUSBDevices = useCallback(async () => {
+    if (!('usb' in navigator)) return;
+    try {
+      const devices = await (navigator as any).usb.getDevices();
+      if (devices.length > 0) {
+      const names: string[] = devices.map((d: any) => d.productName || "USB Device");
+        const uniqueNames = [...new Set(names)];
+        const label = uniqueNames.length > 1 
+          ? `${uniqueNames.length} devices: ${uniqueNames.join(", ")}` 
+          : uniqueNames[0];
+        updatePort("usb", "connected", label, true);
+        setDetectedDevices(prev => {
+          const filtered = prev.filter(d => !uniqueNames.includes(d));
+          return [...filtered, ...uniqueNames];
+        });
+      } else {
+        updatePort("usb", "not-connected", "No USB devices paired — click to scan", true);
+        setDetectedDevices(prev => prev.filter(d => d === "Power Adapter" || d.includes("Display")));
+      }
+    } catch { /* ignore */ }
+  }, [updatePort]);
+
   // Request USB permission and detect devices (called after dialog confirmation)
   const requestUSBPermission = useCallback(async () => {
     setShowUSBDialog(false);
@@ -126,36 +152,25 @@ const PortsTest = () => {
 
     try {
       // This triggers the browser's USB device picker
-      const device = await (navigator as any).usb.requestDevice({ filters: [] });
+      await (navigator as any).usb.requestDevice({ filters: [] });
       setPermissions(prev => ({ ...prev, usb: true }));
+      usbPermissionRef.current = true;
       
-      if (device) {
-        // Get all paired devices (including the one just selected)
-        const devices = await (navigator as any).usb.getDevices();
-        if (devices.length > 1) {
-          const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-          updatePort("usb", "connected", `${devices.length} devices: ${names}`, true);
-          setDetectedDevices(prev => {
-            const newNames = devices.map((d: any) => d.productName || "USB Device");
-            return [...prev.filter(d => !newNames.includes(d)), ...newNames];
-          });
-        } else {
-          const name = device.productName || "USB Device";
-          updatePort("usb", "connected", name, true);
-          setDetectedDevices(prev => [...prev.filter(d => d !== name), name]);
-        }
-        toast({ title: "USB device detected", description: device.productName || "USB Device" });
-      }
+      // Immediately refresh to get all paired devices
+      await refreshUSBDevices();
+      toast({ title: "USB device detected" });
     } catch (e: any) {
       if (e.name === "NotFoundError") {
-        // User cancelled the picker — that's fine, they still granted permission intent
-        updatePort("usb", "not-connected", "No USB device selected", true);
+        // User cancelled the picker
         setPermissions(prev => ({ ...prev, usb: true }));
+        usbPermissionRef.current = true;
+        // Still check for any previously paired devices
+        await refreshUSBDevices();
       } else {
         updatePort("usb", "needs-permission", "Click to try again");
       }
     }
-  }, [updatePort]);
+  }, [updatePort, refreshUSBDevices]);
 
   // Request Audio permission and detect devices
   const requestAudioPermission = useCallback(async () => {
@@ -365,7 +380,7 @@ const PortsTest = () => {
     detectWifi();
   }, [detectWifi]);
 
-  // Listen for device changes
+  // Listen for device changes + USB polling
   useEffect(() => {
     const cleanupFns: (() => void)[] = [];
 
@@ -386,34 +401,10 @@ const PortsTest = () => {
       window.removeEventListener("offline", handleOffline);
     });
 
-    // USB device events (only if we have permission)
+    // USB: use both events AND polling for reliability
     if ('usb' in navigator && permissions.usb) {
-      const handleUSBConnect = async () => {
-        try {
-          const devices = await (navigator as any).usb.getDevices();
-          if (devices.length > 0) {
-            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-            updatePort("usb", "connected", devices.length > 1 ? `${devices.length} devices: ${names}` : names, true);
-            setDetectedDevices(prev => {
-              const newNames = devices.map((d: any) => d.productName || "USB Device");
-              return [...prev.filter(d => !newNames.includes(d)), ...newNames];
-            });
-            toast({ title: "USB device connected" });
-          }
-        } catch { /* ignore */ }
-      };
-      const handleUSBDisconnect = async () => {
-        try {
-          const devices = await (navigator as any).usb.getDevices();
-          if (devices.length === 0) {
-            updatePort("usb", "not-connected", "No devices connected", true);
-            toast({ title: "USB device disconnected", variant: "destructive" });
-          } else {
-            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-            updatePort("usb", "connected", names, true);
-          }
-        } catch { /* ignore */ }
-      };
+      const handleUSBConnect = () => { refreshUSBDevices(); toast({ title: "USB device connected" }); };
+      const handleUSBDisconnect = () => { refreshUSBDevices(); toast({ title: "USB device disconnected", variant: "destructive" }); };
       
       (navigator as any).usb.addEventListener("connect", handleUSBConnect);
       (navigator as any).usb.addEventListener("disconnect", handleUSBDisconnect);
@@ -421,6 +412,12 @@ const PortsTest = () => {
         (navigator as any).usb.removeEventListener("connect", handleUSBConnect);
         (navigator as any).usb.removeEventListener("disconnect", handleUSBDisconnect);
       });
+
+      // Poll every 3s as fallback for browsers where events are unreliable
+      const pollInterval = setInterval(() => {
+        if (usbPermissionRef.current) refreshUSBDevices();
+      }, 3000);
+      cleanupFns.push(() => clearInterval(pollInterval));
     }
 
     // Audio device changes
@@ -451,7 +448,7 @@ const PortsTest = () => {
     return () => {
       cleanupFns.forEach(fn => fn());
     };
-  }, [detectWifi, permissions, updatePort]);
+  }, [detectWifi, permissions, updatePort, refreshUSBDevices]);
 
   // Auto-detect on mount
   useEffect(() => {
@@ -639,7 +636,8 @@ const PortsTest = () => {
                   {ports.map((port, index) => {
                     const StatusIcon = statusConfig[port.status].icon;
                     const isClickable = port.status === "needs-permission" || (port.permissionType && !port.hasPermission);
-                    const canRescan = port.hasPermission && port.status === "not-connected" && (port.id === "usb" || port.id === "display");
+                    const canRescan = port.hasPermission && port.permissionType === "usb";
+                    const canRescanDisplay = port.hasPermission && port.id === "display" && port.status === "not-connected";
                     
                     return (
                       <motion.div
@@ -678,8 +676,23 @@ const PortsTest = () => {
                         </div>
 
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {/* Scan button for USB/Display when not connected */}
+                          {/* Scan/Rescan button for USB (always show after permission) */}
                           {canRescan && (
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              className="h-7 px-2 text-xs text-primary hover:bg-primary/10 gap-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUSBClick();
+                              }}
+                              title="Scan for new USB device"
+                            >
+                              <ScanLine className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">Scan</span>
+                            </Button>
+                          )}
+                          {canRescanDisplay && (
                             <Button 
                               size="sm" 
                               variant="ghost" 
