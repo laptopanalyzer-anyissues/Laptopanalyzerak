@@ -20,6 +20,7 @@ const KEYBOARD_TYPE_KEY = "laptop-keyboard-type";
 
 const KeyboardTest = () => {
   const [keyboardType, setKeyboardType] = useState<KeyboardType | null>(null);
+  const [resetKey, setResetKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
@@ -109,6 +110,7 @@ const KeyboardTest = () => {
     setLastKeyCode("");
     setJustPressed(null);
     setTestCompleted(false);
+    setResetKey(k => k + 1);
   };
 
   return (
@@ -219,10 +221,11 @@ const KeyboardTest = () => {
 
               {/* Virtual Keyboard */}
               <motion.div
+                key={resetKey}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="glass-card rounded-2xl p-6 overflow-x-auto"
+                className="glass-card rounded-2xl p-6 overflow-x-auto overflow-y-hidden"
               >
                 <div className="min-w-[800px]">
                   {keyboardLayout.map((row, rowIndex) => (
