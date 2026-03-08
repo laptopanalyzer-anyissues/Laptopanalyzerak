@@ -278,22 +278,36 @@ const KeyboardTest = () => {
               {/* Completion Banner */}
               {testCompleted && (
                 <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="mt-6 p-5 rounded-xl bg-success/10 border border-success/20 flex items-center gap-4"
+                  ref={completionRef}
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.5, type: "spring", stiffness: 200, damping: 20 }}
+                  className="mt-6 p-6 rounded-2xl bg-gradient-to-r from-success/15 to-success/5 border border-success/30 text-center"
                 >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">
-                      All {totalKeys} keys passed
-                    </p>
-                    <p className="text-muted-foreground text-xs mt-0.5">
-                      Every key registered successfully — your keyboard is fully functional.
-                    </p>
-                  </div>
+                  <motion.div
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 400, damping: 15 }}
+                    className="text-4xl mb-3"
+                  >
+                    🎉
+                  </motion.div>
+                  <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="font-bold text-foreground text-lg"
+                  >
+                    All {totalKeys} keys passed!
+                  </motion.p>
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                    className="text-muted-foreground text-sm mt-1"
+                  >
+                    Your keyboard is fully functional — every key registered successfully.
+                  </motion.p>
                 </motion.div>
               )}
 
