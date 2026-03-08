@@ -270,31 +270,25 @@ const KeyboardTest = () => {
                 </div>
               </motion.div>
 
-              {/* Congratulations Message */}
+              {/* Completion Banner */}
               {testCompleted && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-                  className="mt-6 p-6 rounded-2xl bg-success/10 border border-success/30 text-center"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="mt-6 p-5 rounded-xl bg-success/10 border border-success/20 flex items-center gap-4"
                 >
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-                    className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success/20 mb-4"
-                  >
-                    <PartyPopper className="h-8 w-8 text-success" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold text-success mb-2">
-                    🎉 Congratulations!
-                  </h3>
-                  <p className="text-foreground font-medium mb-1">
-                    Your keyboard is working perfectly!
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    All {totalKeys} keys have been tested and are functioning correctly.
-                  </p>
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                    <CheckCircle2 className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">
+                      All {totalKeys} keys passed
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      Every key registered successfully — your keyboard is fully functional.
+                    </p>
+                  </div>
                 </motion.div>
               )}
 
