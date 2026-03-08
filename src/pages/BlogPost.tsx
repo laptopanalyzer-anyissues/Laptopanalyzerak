@@ -59,6 +59,20 @@ export default function BlogPostPage() {
     },
   });
 
+  const { data: relatedPosts } = useQuery({
+    queryKey: ["related-posts", slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("blog_posts")
+        .select("title, slug, excerpt, published_at, blog_categories(name)")
+        .eq("published", true)
+        .neq("slug", slug)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      return data || [];
+    },
+  });
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
     return new Date(dateString).toLocaleDateString("en-US", {
