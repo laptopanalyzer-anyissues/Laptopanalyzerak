@@ -119,6 +119,32 @@ const PortsTest = () => {
     setShowUSBDialog(true);
   }, [updatePort]);
 
+  // Ref to track USB permission for use in intervals/events without stale closures
+  const usbPermissionRef = useRef(false);
+
+  // Helper to refresh USB device list
+  const refreshUSBDevices = useCallback(async () => {
+    if (!('usb' in navigator)) return;
+    try {
+      const devices = await (navigator as any).usb.getDevices();
+      if (devices.length > 0) {
+        const names = devices.map((d: any) => d.productName || "USB Device");
+        const uniqueNames = [...new Set(names)];
+        const label = uniqueNames.length > 1 
+          ? `${uniqueNames.length} devices: ${uniqueNames.join(", ")}` 
+          : uniqueNames[0];
+        updatePort("usb", "connected", label, true);
+        setDetectedDevices(prev => {
+          const filtered = prev.filter(d => !uniqueNames.includes(d));
+          return [...filtered, ...uniqueNames];
+        });
+      } else {
+        updatePort("usb", "not-connected", "No USB devices paired — click to scan", true);
+        setDetectedDevices(prev => prev.filter(d => d === "Power Adapter" || d.includes("Display")));
+      }
+    } catch { /* ignore */ }
+  }, [updatePort]);
+
   // Request USB permission and detect devices (called after dialog confirmation)
   const requestUSBPermission = useCallback(async () => {
     setShowUSBDialog(false);
@@ -126,36 +152,25 @@ const PortsTest = () => {
 
     try {
       // This triggers the browser's USB device picker
-      const device = await (navigator as any).usb.requestDevice({ filters: [] });
+      await (navigator as any).usb.requestDevice({ filters: [] });
       setPermissions(prev => ({ ...prev, usb: true }));
+      usbPermissionRef.current = true;
       
-      if (device) {
-        // Get all paired devices (including the one just selected)
-        const devices = await (navigator as any).usb.getDevices();
-        if (devices.length > 1) {
-          const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-          updatePort("usb", "connected", `${devices.length} devices: ${names}`, true);
-          setDetectedDevices(prev => {
-            const newNames = devices.map((d: any) => d.productName || "USB Device");
-            return [...prev.filter(d => !newNames.includes(d)), ...newNames];
-          });
-        } else {
-          const name = device.productName || "USB Device";
-          updatePort("usb", "connected", name, true);
-          setDetectedDevices(prev => [...prev.filter(d => d !== name), name]);
-        }
-        toast({ title: "USB device detected", description: device.productName || "USB Device" });
-      }
+      // Immediately refresh to get all paired devices
+      await refreshUSBDevices();
+      toast({ title: "USB device detected" });
     } catch (e: any) {
       if (e.name === "NotFoundError") {
-        // User cancelled the picker — that's fine, they still granted permission intent
-        updatePort("usb", "not-connected", "No USB device selected", true);
+        // User cancelled the picker
         setPermissions(prev => ({ ...prev, usb: true }));
+        usbPermissionRef.current = true;
+        // Still check for any previously paired devices
+        await refreshUSBDevices();
       } else {
         updatePort("usb", "needs-permission", "Click to try again");
       }
     }
-  }, [updatePort]);
+  }, [updatePort, refreshUSBDevices]);
 
   // Request Audio permission and detect devices
   const requestAudioPermission = useCallback(async () => {
