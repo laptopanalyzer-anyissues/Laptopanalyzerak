@@ -27,14 +27,14 @@ export const SpeedGauge = ({ value, maxValue, unit, phase, progress }: SpeedGaug
 
   // Spring animation for smooth value transitions
   const springValue = useSpring(0, {
-    stiffness: 100,
-    damping: 30,
-    mass: 1,
+    stiffness: 220,
+    damping: 28,
+    mass: 0.5,
   });
 
   const springProgress = useSpring(0, {
-    stiffness: 50,
-    damping: 20,
+    stiffness: 180,
+    damping: 25,
   });
 
   // Update spring values when props change
