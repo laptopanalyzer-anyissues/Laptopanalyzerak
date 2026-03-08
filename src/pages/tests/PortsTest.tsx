@@ -380,7 +380,7 @@ const PortsTest = () => {
     detectWifi();
   }, [detectWifi]);
 
-  // Listen for device changes
+  // Listen for device changes + USB polling
   useEffect(() => {
     const cleanupFns: (() => void)[] = [];
 
@@ -401,34 +401,10 @@ const PortsTest = () => {
       window.removeEventListener("offline", handleOffline);
     });
 
-    // USB device events (only if we have permission)
+    // USB: use both events AND polling for reliability
     if ('usb' in navigator && permissions.usb) {
-      const handleUSBConnect = async () => {
-        try {
-          const devices = await (navigator as any).usb.getDevices();
-          if (devices.length > 0) {
-            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-            updatePort("usb", "connected", devices.length > 1 ? `${devices.length} devices: ${names}` : names, true);
-            setDetectedDevices(prev => {
-              const newNames = devices.map((d: any) => d.productName || "USB Device");
-              return [...prev.filter(d => !newNames.includes(d)), ...newNames];
-            });
-            toast({ title: "USB device connected" });
-          }
-        } catch { /* ignore */ }
-      };
-      const handleUSBDisconnect = async () => {
-        try {
-          const devices = await (navigator as any).usb.getDevices();
-          if (devices.length === 0) {
-            updatePort("usb", "not-connected", "No devices connected", true);
-            toast({ title: "USB device disconnected", variant: "destructive" });
-          } else {
-            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-            updatePort("usb", "connected", names, true);
-          }
-        } catch { /* ignore */ }
-      };
+      const handleUSBConnect = () => { refreshUSBDevices(); toast({ title: "USB device connected" }); };
+      const handleUSBDisconnect = () => { refreshUSBDevices(); toast({ title: "USB device disconnected", variant: "destructive" }); };
       
       (navigator as any).usb.addEventListener("connect", handleUSBConnect);
       (navigator as any).usb.addEventListener("disconnect", handleUSBDisconnect);
@@ -436,6 +412,12 @@ const PortsTest = () => {
         (navigator as any).usb.removeEventListener("connect", handleUSBConnect);
         (navigator as any).usb.removeEventListener("disconnect", handleUSBDisconnect);
       });
+
+      // Poll every 3s as fallback for browsers where events are unreliable
+      const pollInterval = setInterval(() => {
+        if (usbPermissionRef.current) refreshUSBDevices();
+      }, 3000);
+      cleanupFns.push(() => clearInterval(pollInterval));
     }
 
     // Audio device changes
@@ -466,7 +448,7 @@ const PortsTest = () => {
     return () => {
       cleanupFns.forEach(fn => fn());
     };
-  }, [detectWifi, permissions, updatePort]);
+  }, [detectWifi, permissions, updatePort, refreshUSBDevices]);
 
   // Auto-detect on mount
   useEffect(() => {
