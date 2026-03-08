@@ -20,6 +20,7 @@ const KEYBOARD_TYPE_KEY = "laptop-keyboard-type";
 
 const KeyboardTest = () => {
   const [keyboardType, setKeyboardType] = useState<KeyboardType | null>(null);
+  const [resetKey, setResetKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set());
   const [lastKey, setLastKey] = useState<string>("");
