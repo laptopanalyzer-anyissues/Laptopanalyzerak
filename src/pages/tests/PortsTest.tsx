@@ -367,6 +367,8 @@ const PortsTest = () => {
 
   // Listen for device changes
   useEffect(() => {
+    const cleanupFns: (() => void)[] = [];
+
     // Online/offline events
     const handleOnline = () => {
       detectWifi();
@@ -379,53 +381,75 @@ const PortsTest = () => {
     
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
+    cleanupFns.push(() => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    });
 
     // USB device events (only if we have permission)
     if ('usb' in navigator && permissions.usb) {
       const handleUSBConnect = async () => {
-        const devices = await (navigator as any).usb.getDevices();
-        if (devices.length > 0) {
-          const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-          updatePort("usb", "connected", devices.length > 1 ? `${devices.length} devices` : names, true);
-          toast({ title: "USB device connected" });
-        }
+        try {
+          const devices = await (navigator as any).usb.getDevices();
+          if (devices.length > 0) {
+            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
+            updatePort("usb", "connected", devices.length > 1 ? `${devices.length} devices: ${names}` : names, true);
+            setDetectedDevices(prev => {
+              const newNames = devices.map((d: any) => d.productName || "USB Device");
+              return [...prev.filter(d => !newNames.includes(d)), ...newNames];
+            });
+            toast({ title: "USB device connected" });
+          }
+        } catch { /* ignore */ }
       };
       const handleUSBDisconnect = async () => {
-        const devices = await (navigator as any).usb.getDevices();
-        if (devices.length === 0) {
-          updatePort("usb", "not-connected", "No devices connected", true);
-          toast({ title: "USB device disconnected", variant: "destructive" });
-        } else {
-          const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
-          updatePort("usb", "connected", names, true);
-        }
+        try {
+          const devices = await (navigator as any).usb.getDevices();
+          if (devices.length === 0) {
+            updatePort("usb", "not-connected", "No devices connected", true);
+            toast({ title: "USB device disconnected", variant: "destructive" });
+          } else {
+            const names = devices.map((d: any) => d.productName || "USB Device").join(", ");
+            updatePort("usb", "connected", names, true);
+          }
+        } catch { /* ignore */ }
       };
       
       (navigator as any).usb.addEventListener("connect", handleUSBConnect);
       (navigator as any).usb.addEventListener("disconnect", handleUSBDisconnect);
+      cleanupFns.push(() => {
+        (navigator as any).usb.removeEventListener("connect", handleUSBConnect);
+        (navigator as any).usb.removeEventListener("disconnect", handleUSBDisconnect);
+      });
     }
 
     // Audio device changes
     if (navigator.mediaDevices && permissions.audio) {
-      navigator.mediaDevices.addEventListener("devicechange", async () => {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const audioOutputs = devices.filter(d => d.kind === "audiooutput" && d.label);
-        const audioInputs = devices.filter(d => d.kind === "audioinput" && d.label);
-        
-        if (audioOutputs.length > 0) {
-          updatePort("audio-output", "connected", audioOutputs[0].label, true);
-        }
-        if (audioInputs.length > 0) {
-          updatePort("audio-input", "connected", audioInputs[0].label, true);
-        }
-        
-        toast({ title: "Audio device changed" });
+      const handleDeviceChange = async () => {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const audioOutputs = devices.filter(d => d.kind === "audiooutput" && d.label);
+          const audioInputs = devices.filter(d => d.kind === "audioinput" && d.label);
+          
+          if (audioOutputs.length > 0) {
+            updatePort("audio-output", "connected", audioOutputs[0].label, true);
+          }
+          if (audioInputs.length > 0) {
+            updatePort("audio-input", "connected", audioInputs[0].label, true);
+          }
+          
+          toast({ title: "Audio device changed" });
+        } catch { /* ignore */ }
+      };
+      
+      navigator.mediaDevices.addEventListener("devicechange", handleDeviceChange);
+      cleanupFns.push(() => {
+        navigator.mediaDevices.removeEventListener("devicechange", handleDeviceChange);
       });
     }
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      cleanupFns.forEach(fn => fn());
     };
   }, [detectWifi, permissions, updatePort]);
 
