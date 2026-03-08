@@ -636,7 +636,8 @@ const PortsTest = () => {
                   {ports.map((port, index) => {
                     const StatusIcon = statusConfig[port.status].icon;
                     const isClickable = port.status === "needs-permission" || (port.permissionType && !port.hasPermission);
-                    const canRescan = port.hasPermission && port.status === "not-connected" && (port.id === "usb" || port.id === "display");
+                    const canRescan = port.hasPermission && port.permissionType === "usb";
+                    const canRescanDisplay = port.hasPermission && port.id === "display" && port.status === "not-connected";
                     
                     return (
                       <motion.div
