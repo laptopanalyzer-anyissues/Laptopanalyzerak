@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ArrowLeft, Tag } from "lucide-react";
+import { Calendar, ArrowLeft, Tag, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
@@ -56,6 +56,20 @@ export default function BlogPostPage() {
         .single();
       if (error) throw error;
       return data as BlogPost;
+    },
+  });
+
+  const { data: relatedPosts } = useQuery({
+    queryKey: ["related-posts", slug],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("blog_posts")
+        .select("title, slug, excerpt, published_at, blog_categories(name)")
+        .eq("published", true)
+        .neq("slug", slug)
+        .order("published_at", { ascending: false })
+        .limit(3);
+      return data || [];
     },
   });
 
@@ -346,6 +360,42 @@ export default function BlogPostPage() {
                   </AccordionItem>
                 ))}
               </Accordion>
+            </motion.div>
+          )}
+
+          {/* Related Articles */}
+          {relatedPosts && relatedPosts.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="mt-12"
+            >
+              <h2 className="text-2xl font-bold text-foreground mb-6">Related Articles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {relatedPosts.map((related) => (
+                  <Link
+                    key={related.slug}
+                    to={`/blog/${related.slug}`}
+                    className="glass-card rounded-xl p-5 flex flex-col gap-2 group hover:border-primary/30 transition-all duration-200"
+                  >
+                    {(related as any).blog_categories && (
+                      <span className="text-xs font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1 self-start">
+                        {(related as any).blog_categories.name}
+                      </span>
+                    )}
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm line-clamp-2">
+                      {related.title}
+                    </h3>
+                    {related.excerpt && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{related.excerpt}</p>
+                    )}
+                    <span className="text-xs text-primary flex items-center gap-1 mt-auto pt-2">
+                      Read more <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </motion.div>
           )}
 
