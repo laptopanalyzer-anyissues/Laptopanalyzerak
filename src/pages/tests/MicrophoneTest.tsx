@@ -88,7 +88,7 @@ const MicrophoneTest = () => {
   const [volume, setVolume] = useState(0);
   const [error, setError] = useState("");
   const [isRecording, setIsRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [recordings, setRecordings] = useState<string[]>([]);
   const [micInfo, setMicInfo] = useState<string>("");
   
   const streamRef = useRef<MediaStream | null>(null);
@@ -188,7 +188,7 @@ const MicrophoneTest = () => {
 
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      setAudioUrl(URL.createObjectURL(blob));
+      setRecordings(prev => [URL.createObjectURL(blob), ...prev]);
     };
 
     mediaRecorder.start();
@@ -205,9 +205,7 @@ const MicrophoneTest = () => {
   useEffect(() => {
     return () => {
       stopListening();
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
+      recordings.forEach(url => URL.revokeObjectURL(url));
     };
   }, []);
 
@@ -364,17 +362,31 @@ const MicrophoneTest = () => {
               className="flex flex-col"
             >
               <div className="glass-card rounded-2xl p-6 flex-1 flex flex-col">
-                <h3 className="font-semibold text-foreground mb-4">Recording Playback</h3>
+                <h3 className="font-semibold text-foreground mb-4">
+                  Recordings {recordings.length > 0 && <span className="text-xs font-normal text-muted-foreground ml-1">({recordings.length})</span>}
+                </h3>
                 
                 <div className="flex-1 flex flex-col">
-                  {audioUrl ? (
-                    <AudioPlayer
-                      src={audioUrl}
-                      onClear={() => {
-                        URL.revokeObjectURL(audioUrl);
-                        setAudioUrl("");
-                      }}
-                    />
+                  {recordings.length > 0 ? (
+                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                      {recordings.map((url, i) => (
+                        <motion.div
+                          key={url}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-3 rounded-lg bg-muted/30 border border-border"
+                        >
+                          <p className="text-xs text-muted-foreground mb-2">Recording #{recordings.length - i}</p>
+                          <AudioPlayer
+                            src={url}
+                            onClear={() => {
+                              URL.revokeObjectURL(url);
+                              setRecordings(prev => prev.filter(r => r !== url));
+                            }}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <Volume2 className="h-12 w-12 mb-4" />
