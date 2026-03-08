@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, RotateCcw, CheckCircle2, Settings2 } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
-import { RealisticKeyboard } from "@/components/keyboard/RealisticKeyboard";
-import { KeyboardStats } from "@/components/keyboard/KeyboardStats";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import {
   KeyboardType,
   getKeyboardLayout,
+  getKeyDisplay,
+  getKeyWidth,
   untestableKeys,
 } from "@/components/keyboard/keyboardLayouts";
 
@@ -30,6 +30,7 @@ const KeyboardTest = () => {
   const { fireConfetti } = useConfetti();
   const completionRef = useRef<HTMLDivElement>(null);
 
+  // Check for stored keyboard type on mount
   useEffect(() => {
     const stored = localStorage.getItem(KEYBOARD_TYPE_KEY);
     if (stored === "mac" || stored === "windows") {
@@ -43,18 +44,31 @@ const KeyboardTest = () => {
     localStorage.setItem(KEYBOARD_TYPE_KEY, type);
     setKeyboardType(type);
     setShowModal(false);
+    // Reset test when changing keyboard type
     setPressedKeys(new Set());
     setLastKey("");
     setLastKeyCode("");
   };
 
+  const handleChangeKeyboard = () => {
+    setShowModal(true);
+  };
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     e.preventDefault();
     const key = e.key;
+    
+    // Debug logging for F-keys
+    console.log('Key pressed:', { key, code: e.code, keyCode: e.keyCode });
+    
     setLastKey(key);
     setLastKeyCode(e.code);
+    
+    // Normalize key for comparison - keep F-keys as-is, uppercase letters
     const normalizedKey = key.startsWith("F") && key.length <= 3 ? key : key.toUpperCase();
     setPressedKeys((prev) => new Set(prev).add(normalizedKey));
+    
+    // Trigger animation for this specific key
     setJustPressed(normalizedKey);
     setTimeout(() => setJustPressed(null), 600);
   }, []);
@@ -71,14 +85,18 @@ const KeyboardTest = () => {
     return pressedKeys.has(normalizedKey) || pressedKeys.has(key) || pressedKeys.has(key.toUpperCase());
   };
 
+  // Exclude untestable keys and deduplicate for accurate counting
   const testableKeys = [...new Set(keyboardLayout.flat().filter(key => !untestableKeys.includes(key)))];
   const totalKeys = testableKeys.length;
+  // Only count pressed keys that actually match a testable layout key
   const testedKeys = testableKeys.filter(key => isKeyPressed(key)).length;
   const progress = totalKeys > 0 ? Math.min(100, Math.round((testedKeys / totalKeys) * 100)) : 0;
 
+  // Check for test completion (only when all keys are tested)
   useEffect(() => {
     if (progress === 100 && !testCompleted) {
       setTestCompleted(true);
+      // Delay confetti slightly so the banner renders first
       setTimeout(() => {
         fireConfetti();
         completionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -114,10 +132,12 @@ const KeyboardTest = () => {
         )}
       />
       <Header />
+      
+      {/* Keyboard Type Selection Modal */}
       <KeyboardTypeModal isOpen={showModal} onSelect={handleKeyboardSelect} />
 
       <main className="pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-5xl">
+        <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -133,38 +153,26 @@ const KeyboardTest = () => {
             </Button>
           </motion.div>
 
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="mb-8 text-center"
           >
-            <h1 className="text-4xl font-extrabold text-foreground mb-2 tracking-tight">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Keyboard Test
             </h1>
-            <p className="text-muted-foreground mb-5 text-base">
-              Press any key to test it. Tested keys light up{" "}
-              <span className="text-success font-semibold">green</span>.
+            <p className="text-muted-foreground mb-4">
+              Press any key to test. Keys will light up green when pressed.
             </p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={resetTest}
-                className="gap-2"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Reset
+              <Button variant="outline" size="sm" onClick={resetTest}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset Test
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowModal(true)}
-                className="gap-2"
-              >
-                <Settings2 className="h-4 w-4" />
-                {keyboardType === "mac" ? "Mac Layout" : "Windows Layout"}
+              <Button variant="ghost" size="sm" onClick={handleChangeKeyboard}>
+                <Settings2 className="h-4 w-4 mr-2" />
+                {keyboardType === "mac" ? "Mac Keyboard" : "Windows Keyboard"}
               </Button>
             </div>
           </motion.div>
@@ -172,21 +180,104 @@ const KeyboardTest = () => {
           {keyboardType && (
             <>
               {/* Stats */}
-              <KeyboardStats
-                progress={progress}
-                testedKeys={testedKeys}
-                totalKeys={totalKeys}
-                lastKey={lastKey}
-                lastKeyCode={lastKeyCode}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+              >
+                <div className="p-4 rounded-xl bg-card border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Progress</p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        className="h-full bg-gradient-to-r from-primary to-accent"
+                      />
+                    </div>
+                    <span className="text-sm font-semibold">{progress}%</span>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Keys Tested</p>
+                  <p className="font-semibold text-foreground text-lg">
+                    {testedKeys} / {totalKeys}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Last Key</p>
+                  <p className="font-semibold text-foreground text-lg">
+                    {lastKey || "—"}
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-card border border-border">
+                  <p className="text-xs text-muted-foreground mb-1">Key Code</p>
+                  <p className="font-semibold text-foreground text-lg">
+                    {lastKeyCode || "—"}
+                  </p>
+                </div>
+              </motion.div>
 
-              {/* 3D Keyboard */}
-              <RealisticKeyboard
-                keyboardType={keyboardType}
-                pressedKeys={pressedKeys}
-                justPressed={justPressed}
-                resetKey={resetKey}
-              />
+              {/* Virtual Keyboard */}
+              <motion.div
+                key={resetKey}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="glass-card rounded-2xl p-6 overflow-x-auto overflow-y-hidden"
+              >
+                <div className="min-w-[800px]">
+                  {keyboardLayout.map((row, rowIndex) => (
+                    <div key={rowIndex} className="flex gap-1.5 mb-1.5 justify-center">
+                      {row.map((key, keyIndex) => {
+                        const isUntestable = untestableKeys.includes(key);
+                        const pressed = !isUntestable && isKeyPressed(key);
+                        const isJustPressed = !isUntestable && (justPressed === key.toUpperCase() || justPressed === key);
+                        
+                        return (
+                          <motion.div
+                            key={`${rowIndex}-${keyIndex}`}
+                            initial={false}
+                            animate={
+                              isJustPressed
+                                ? {
+                                    scale: [1, 1.15, 1],
+                                    boxShadow: [
+                                      "0 0 0 0 rgba(34, 197, 94, 0)",
+                                      "0 0 20px 8px rgba(34, 197, 94, 0.6)",
+                                      "0 0 0 0 rgba(34, 197, 94, 0)"
+                                    ],
+                                  }
+                                : {}
+                            }
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className={`${getKeyWidth(key, keyboardType)} h-12 flex items-center justify-center rounded-lg font-medium text-sm transition-colors duration-200 ${
+                              isUntestable
+                                ? "bg-muted/50 text-muted-foreground border border-dashed border-muted-foreground/30"
+                                : pressed
+                                  ? "bg-success text-success-foreground"
+                                  : "bg-muted text-foreground hover:bg-muted/80"
+                            }`}
+                            title={isUntestable ? "This key cannot be detected by browsers" : undefined}
+                          >
+                            {pressed && !isUntestable && (
+                              <motion.span
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-1" />
+                              </motion.span>
+                            )}
+                            {getKeyDisplay(key, keyboardType)}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
 
               {/* Completion Banner */}
               {testCompleted && (
@@ -201,13 +292,17 @@ const KeyboardTest = () => {
                     boxShadow: "0 0 40px -10px hsl(var(--success) / 0.3), inset 0 1px 0 hsl(var(--success) / 0.15)",
                   }}
                 >
+                  {/* Glow effect */}
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: [0.3, 0.6, 0.3] }}
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     className="absolute inset-0 pointer-events-none"
-                    style={{ background: "radial-gradient(ellipse at center, hsl(var(--success) / 0.15) 0%, transparent 70%)" }}
+                    style={{
+                      background: "radial-gradient(ellipse at center, hsl(var(--success) / 0.15) 0%, transparent 70%)",
+                    }}
                   />
+
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -220,6 +315,7 @@ const KeyboardTest = () => {
                   >
                     <CheckCircle2 className="h-10 w-10 text-success" />
                   </motion.div>
+
                   <motion.h3
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -228,6 +324,7 @@ const KeyboardTest = () => {
                   >
                     All {totalKeys} Keys Passed
                   </motion.h3>
+
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -236,6 +333,7 @@ const KeyboardTest = () => {
                   >
                     Your keyboard is fully functional — every key registered successfully.
                   </motion.p>
+
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -264,8 +362,8 @@ const KeyboardTest = () => {
                   <li>• If a key doesn't light up, try pressing it multiple times</li>
                   {keyboardType === "mac" && (
                     <>
-                      <li>• <span className="text-warning font-medium">⚠️ F11/F12 keys</span> — macOS may intercept these for Mission Control. Press <strong>fn + F11/F12</strong> or enable "Use F1, F2, etc. keys as standard function keys" in System Preferences</li>
-                      <li>• <span className="text-warning font-medium">⚠️ fn key cannot be tested</span> — it's a hardware-level modifier that browsers cannot detect</li>
+                      <li>• <span className="text-amber-500 font-medium">⚠️ F11/F12 keys</span> — macOS may intercept these for Mission Control. Press <strong>fn + F11/F12</strong> or enable "Use F1, F2, etc. keys as standard function keys" in System Preferences</li>
+                      <li>• <span className="text-amber-500 font-medium">⚠️ fn key cannot be tested</span> — it's a hardware-level modifier that browsers cannot detect</li>
                       <li>• Mac keyboards use ⌘ Command and ⌥ Option instead of Windows key and Alt</li>
                     </>
                   )}
