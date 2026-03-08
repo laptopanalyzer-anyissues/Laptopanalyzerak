@@ -221,10 +221,11 @@ const KeyboardTest = () => {
 
               {/* Virtual Keyboard */}
               <motion.div
+                key={resetKey}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="glass-card rounded-2xl p-6 overflow-x-auto"
+                className="glass-card rounded-2xl p-6 overflow-x-auto overflow-y-hidden">
               >
                 <div className="min-w-[800px]">
                   {keyboardLayout.map((row, rowIndex) => (
