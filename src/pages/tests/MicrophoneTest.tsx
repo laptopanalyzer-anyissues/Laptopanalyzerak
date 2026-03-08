@@ -188,7 +188,7 @@ const MicrophoneTest = () => {
 
     mediaRecorder.onstop = () => {
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      setAudioUrl(URL.createObjectURL(blob));
+      setRecordings(prev => [URL.createObjectURL(blob), ...prev]);
     };
 
     mediaRecorder.start();
