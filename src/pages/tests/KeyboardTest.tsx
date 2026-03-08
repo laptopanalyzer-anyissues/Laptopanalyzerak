@@ -77,11 +77,12 @@ const KeyboardTest = () => {
   }, [handleKeyDown]);
 
   const keyboardLayout = keyboardType ? getKeyboardLayout(keyboardType) : [];
-  // Exclude untestable keys from total count
+  // Exclude untestable keys and deduplicate for accurate counting
   const testableKeys = [...new Set(keyboardLayout.flat().filter(key => !untestableKeys.includes(key)))];
   const totalKeys = testableKeys.length;
-  const testedKeys = [...pressedKeys].filter(key => !untestableKeys.includes(key) && !untestableKeys.includes(key.toLowerCase())).length;
-  const progress = totalKeys > 0 ? Math.round((testedKeys / totalKeys) * 100) : 0;
+  // Only count pressed keys that actually match a testable layout key
+  const testedKeys = testableKeys.filter(key => isKeyPressed(key)).length;
+  const progress = totalKeys > 0 ? Math.min(100, Math.round((testedKeys / totalKeys) * 100)) : 0;
 
   // Check for test completion (only when all keys are tested)
   useEffect(() => {
