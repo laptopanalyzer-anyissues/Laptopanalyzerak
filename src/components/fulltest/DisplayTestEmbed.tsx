@@ -133,19 +133,19 @@ function GradientTest({ steps, color }: { steps: number; color: string }) {
 function SharpnessTest({ fontSize, invert }: { fontSize: number; invert: boolean }) {
   const bg = invert ? "#000" : "#fff";
   const fg = invert ? "#fff" : "#000";
-  const text = "The quick brown fox jumps over the lazy dog. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const text = "The quick brown fox jumps over the lazy dog. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz !@#$%^&*()";
 
   return (
     <div
-      className="w-full h-full flex flex-col items-center justify-center p-8 overflow-auto"
+      className="w-full h-full flex flex-col items-center justify-center p-8"
       style={{ backgroundColor: bg, color: fg }}
     >
-      <div className="max-w-4xl space-y-4 text-center">
-        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "serif" }}>{text}</p>
-        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "sans-serif" }}>{text}</p>
-        <p style={{ fontSize: `${fontSize}px`, lineHeight: 1.6, fontFamily: "monospace" }}>{text}</p>
+      <div className="w-full max-w-4xl space-y-6 text-center">
+        <p className="whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8, fontFamily: "serif" }}>{text}</p>
+        <p className="whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8, fontFamily: "sans-serif" }}>{text}</p>
+        <p className="whitespace-nowrap overflow-hidden text-ellipsis" style={{ fontSize: `${fontSize}px`, lineHeight: 1.8, fontFamily: "monospace" }}>{text}</p>
         
-        <div className="mt-6 flex justify-center gap-1">
+        <div className="mt-8 flex justify-center gap-1">
           {Array.from({ length: 50 }).map((_, i) => (
             <div key={i} className="h-16" style={{ width: "1px", backgroundColor: fg }} />
           ))}
