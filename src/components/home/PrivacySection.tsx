@@ -59,7 +59,7 @@ export function PrivacySection() {
           transition={{ duration: 0.5 }}
           className="max-w-4xl mx-auto"
         >
-          <header className="text-center mb-12">
+          <header className="text-center mb-10">
             {/* Animated Shield Icon */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}
