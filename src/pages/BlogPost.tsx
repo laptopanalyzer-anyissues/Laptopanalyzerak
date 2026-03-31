@@ -454,16 +454,20 @@ export default function BlogPostPage() {
             className="mt-12 p-8 bg-muted/50 rounded-2xl border border-border text-center"
           >
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              {slug === "online-keyboard-test" ? "Ready to Test Your Keyboard?" : "Ready to Test Your Laptop?"}
+              {slug === "online-keyboard-test" ? "Ready to Test Your Keyboard?" 
+                : slug === "touchpad-test-online" ? "Ready to Test Your Touchpad?"
+                : "Ready to Test Your Laptop?"}
             </h3>
             <p className="text-muted-foreground mb-4">
               {slug === "online-keyboard-test" 
                 ? "Check if all your keyboard keys are working properly." 
+                : slug === "touchpad-test-online"
+                ? "Check your touchpad movement, clicks, and gestures instantly."
                 : "Run comprehensive hardware diagnostics right in your browser."}
             </p>
             <Button variant="hero" asChild>
-              <Link to={slug === "online-keyboard-test" ? "/test/keyboard" : "/dashboard"}>
-                {slug === "online-keyboard-test" ? "Test Your Keyboard" : "Start Testing Now"}
+              <Link to={slug === "online-keyboard-test" ? "/test/keyboard" : slug === "touchpad-test-online" ? "/test/touchpad" : "/dashboard"}>
+                {slug === "online-keyboard-test" ? "Test Your Keyboard" : slug === "touchpad-test-online" ? "Test Your Touchpad" : "Start Testing Now"}
               </Link>
             </Button>
           </motion.div>
