@@ -2,18 +2,19 @@ import { motion } from "framer-motion";
 
 const sections = [
   { id: "who-we-are", label: "Who We Are" },
-  { id: "info-collect", label: "Information We Collect" },
+  { id: "info-collect", label: "Data We Collect" },
   { id: "how-we-use", label: "How We Use It" },
-  { id: "browser-permissions", label: "Browser Permissions" },
-  { id: "cookies", label: "Cookies" },
-  { id: "third-party", label: "Third-Party Services" },
+  { id: "local-processing", label: "Local Processing" },
+  { id: "browser-permissions", label: "Permissions" },
+  { id: "cookies", label: "Cookies & Tracking" },
+  { id: "third-party", label: "Third Parties" },
   { id: "advertising", label: "Advertising" },
-  { id: "data-retention", label: "Data Retention" },
+  { id: "data-retention", label: "Retention" },
   { id: "security", label: "Security" },
-  { id: "children", label: "Children's Privacy" },
+  { id: "children", label: "Children" },
   { id: "your-rights", label: "Your Rights" },
-  { id: "international", label: "International Users" },
-  { id: "changes", label: "Policy Changes" },
+  { id: "international", label: "International" },
+  { id: "changes", label: "Updates" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -27,7 +28,7 @@ export function PrivacyNav() {
       aria-label="Policy sections"
     >
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-        On this page
+        Jump to section
       </p>
       <div className="flex flex-wrap gap-2">
         {sections.map((s) => (
