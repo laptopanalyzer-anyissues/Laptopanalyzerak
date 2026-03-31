@@ -98,6 +98,10 @@ export default function Blog() {
         description="Learn how to test your laptop hardware with our expert guides. Tips for dead pixel detection, keyboard testing, webcam checks, and more laptop diagnostic tutorials."
         keywords="laptop testing guide, how to test laptop, dead pixel guide, keyboard testing tips, laptop hardware guide, laptop diagnostic tutorial"
         canonicalPath="/blog"
+        structuredData={structuredData.breadcrumbs([
+          { name: "Home", url: "/" },
+          { name: "Blog", url: "/blog" },
+        ])}
       />
       <Header />
       <main className="pt-24 pb-16">

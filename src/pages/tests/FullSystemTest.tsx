@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import {
   Dialog,
   DialogContent,

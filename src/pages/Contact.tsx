@@ -95,6 +95,10 @@ const Contact = () => {
         description="Reach the Laptop Analyzer support team for technical help, bug reports, feature ideas, or privacy questions."
         keywords="contact laptopanalyzer, support, bug report, feature request, privacy inquiry"
         canonicalPath="/contact"
+        structuredData={structuredData.breadcrumbs([
+          { name: "Home", url: "/" },
+          { name: "Contact", url: "/contact" },
+        ])}
       />
       <Header />
 
