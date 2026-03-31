@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2, Mic, Camera, Monitor } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
 const AudioTest = () => {
