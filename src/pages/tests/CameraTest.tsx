@@ -112,34 +112,13 @@ const CameraTest = () => {
         )}
       />
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
-          {/* Back Button */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mb-6"
-          >
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/dashboard">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Tests
-              </Link>
-            </Button>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8 text-center"
-          >
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Camera Test
-            </h1>
-            <p className="text-muted-foreground">
-              Test your webcam with live preview. All processing happens locally.
+          <TestPageHero
+            icon={Camera}
+            title="Camera Test"
+            description="Test your webcam with live preview. All processing happens locally — nothing is uploaded."
+          />
             </p>
           </motion.div>
 
