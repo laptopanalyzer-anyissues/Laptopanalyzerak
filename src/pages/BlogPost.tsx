@@ -247,7 +247,7 @@ export default function BlogPostPage() {
           </li>
         );
       } else if (line.trim() === "" || line.trim() === "---") {
-        elements.push(<div key={i} className="h-4" />);
+        elements.push(<div key={i} className="h-1" />);
       } else {
         elements.push(
           <p key={i} className="text-muted-foreground leading-relaxed mb-4">
