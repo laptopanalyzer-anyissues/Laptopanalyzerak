@@ -50,7 +50,7 @@ const cardVariants = {
 
 export function PrivacySection() {
   return (
-    <section id="privacy" className="py-24" aria-labelledby="privacy-heading">
+    <section id="privacy" className="py-16" aria-labelledby="privacy-heading">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
