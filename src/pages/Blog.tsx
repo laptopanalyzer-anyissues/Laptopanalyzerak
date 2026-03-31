@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 
 interface BlogPost {
   id: string;

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 
 const tests = [
   { icon: Monitor, label: "Display" },
