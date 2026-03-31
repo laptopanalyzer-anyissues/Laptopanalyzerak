@@ -164,52 +164,99 @@ export default function BlogPostPage() {
   const renderContent = (content: string) => {
     const mainContent = getMainContent(content);
     const lines = mainContent.split("\n");
-    return lines.map((line, index) => {
+    const elements: React.ReactNode[] = [];
+    let i = 0;
+
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Detect table block: consecutive lines starting with |
+      if (line.trim().startsWith("|")) {
+        const tableLines: string[] = [];
+        while (i < lines.length && lines[i].trim().startsWith("|")) {
+          tableLines.push(lines[i]);
+          i++;
+        }
+        // Parse table rows, skip separator rows (|---|---|)
+        const rows = tableLines
+          .filter(l => !l.match(/^\|[\s\-:|]+\|$/))
+          .map(l => l.split("|").filter((_, ci) => ci > 0 && ci < l.split("|").length - 1).map(c => c.trim()));
+        
+        if (rows.length > 0) {
+          const headerRow = rows[0];
+          const bodyRows = rows.slice(1);
+          elements.push(
+            <div key={`table-${i}`} className="my-6 overflow-x-auto">
+              <table className="w-full border-collapse border border-border rounded-lg overflow-hidden">
+                <thead>
+                  <tr className="bg-muted/50">
+                    {headerRow.map((cell, ci) => (
+                      <th key={ci} className="border border-border px-4 py-3 text-left font-semibold text-foreground text-sm">
+                        {cell}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {bodyRows.map((row, ri) => (
+                    <tr key={ri} className={ri % 2 === 0 ? "bg-background" : "bg-muted/20"}>
+                      {row.map((cell, ci) => (
+                        <td key={ci} className="border border-border px-4 py-3 text-muted-foreground text-sm">
+                          {renderLineWithLinks(cell)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+        continue;
+      }
+
       if (line.startsWith("### ")) {
-        return (
-          <h3 key={index} className="text-xl font-semibold text-foreground mt-8 mb-4">
+        elements.push(
+          <h3 key={i} className="text-xl font-semibold text-foreground mt-8 mb-4">
             {line.replace("### ", "")}
           </h3>
         );
-      }
-      if (line.startsWith("## ")) {
-        return (
-          <h2 key={index} className="text-2xl font-bold text-foreground mt-10 mb-4">
+      } else if (line.startsWith("## ")) {
+        elements.push(
+          <h2 key={i} className="text-2xl font-bold text-foreground mt-10 mb-4">
             {line.replace("## ", "")}
           </h2>
         );
-      }
-      if (line.startsWith("# ")) {
-        return (
-          <h1 key={index} className="text-3xl font-bold text-foreground mt-10 mb-6">
+      } else if (line.startsWith("# ")) {
+        elements.push(
+          <h1 key={i} className="text-3xl font-bold text-foreground mt-10 mb-6">
             {line.replace("# ", "")}
           </h1>
         );
-      }
-      if (line.startsWith("- ")) {
-        return (
-          <li key={index} className="text-muted-foreground mb-2 ml-4">
+      } else if (line.startsWith("- ")) {
+        elements.push(
+          <li key={i} className="text-muted-foreground mb-2 ml-4">
             {renderLineWithLinks(line.replace("- ", ""))}
           </li>
         );
-      }
-      if (line.match(/^\d+\. /)) {
-        return (
-          <li key={index} className="text-muted-foreground mb-2 ml-4 list-decimal">
+      } else if (line.match(/^\d+\. /)) {
+        elements.push(
+          <li key={i} className="text-muted-foreground mb-2 ml-4 list-decimal">
             {renderLineWithLinks(line.replace(/^\d+\. /, ""))}
           </li>
         );
+      } else if (line.trim() === "" || line.trim() === "---") {
+        elements.push(<div key={i} className="h-4" />);
+      } else {
+        elements.push(
+          <p key={i} className="text-muted-foreground leading-relaxed mb-4">
+            {renderLineWithLinks(line)}
+          </p>
+        );
       }
-      if (line.trim() === "" || line.trim() === "---") {
-        return <div key={index} className="h-4" />;
-      }
-      
-      return (
-        <p key={index} className="text-muted-foreground leading-relaxed mb-4">
-          {renderLineWithLinks(line)}
-        </p>
-      );
-    });
+      i++;
+    }
+    return elements;
   };
 
   if (isLoading) {
