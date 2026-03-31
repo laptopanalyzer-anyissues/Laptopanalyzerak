@@ -38,6 +38,28 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+function processLineWithLinks(line) {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  let result = '';
+  let lastIdx = 0;
+  let match;
+  while ((match = linkRegex.exec(line)) !== null) {
+    result += escapeHtml(line.slice(lastIdx, match.index));
+    const text = escapeHtml(match[1]);
+    const url = escapeHtml(match[2]);
+    if (match[2].startsWith('/')) {
+      result += `<a href="${url}">${text}</a>`;
+    } else if (match[2].startsWith('http')) {
+      result += `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    } else {
+      result += `${text}`;
+    }
+    lastIdx = match.index + match[0].length;
+  }
+  result += escapeHtml(line.slice(lastIdx));
+  return result;
+}
+
 function markdownToHtml(content) {
   if (!content) return '';
   // Remove FAQ blocks for main content
@@ -45,8 +67,44 @@ function markdownToHtml(content) {
   
   const lines = main.split('\n');
   let html = '';
+  let i = 0;
   
-  for (const line of lines) {
+  while (i < lines.length) {
+    const line = lines[i];
+    
+    // Detect table block
+    if (line.trim().startsWith('|')) {
+      const tableLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        tableLines.push(lines[i]);
+        i++;
+      }
+      const rows = tableLines
+        .filter(l => !l.match(/^\|[\s\-:|]+\|$/))
+        .map(l => l.split('|').filter((_, ci) => ci > 0 && ci < l.split('|').length - 1).map(c => c.trim()));
+      
+      if (rows.length > 0) {
+        const headerRow = rows[0];
+        const bodyRows = rows.slice(1);
+        html += '<table style="width:100%;border-collapse:collapse;margin:24px 0;border:1px solid #333;">\n';
+        html += '<thead><tr style="background:rgba(255,255,255,0.05);">';
+        for (const cell of headerRow) {
+          html += `<th style="border:1px solid #333;padding:12px;text-align:left;font-weight:600;">${escapeHtml(cell)}</th>`;
+        }
+        html += '</tr></thead>\n<tbody>\n';
+        for (let ri = 0; ri < bodyRows.length; ri++) {
+          const bg = ri % 2 === 0 ? '' : ' style="background:rgba(255,255,255,0.02);"';
+          html += `<tr${bg}>`;
+          for (const cell of bodyRows[ri]) {
+            html += `<td style="border:1px solid #333;padding:12px;">${processLineWithLinks(cell)}</td>`;
+          }
+          html += '</tr>\n';
+        }
+        html += '</tbody></table>\n';
+      }
+      continue;
+    }
+    
     if (line.startsWith('### ')) {
       html += `<h3>${escapeHtml(line.slice(4))}</h3>\n`;
     } else if (line.startsWith('## ')) {
@@ -60,30 +118,9 @@ function markdownToHtml(content) {
     } else if (line.trim() === '' || line.trim() === '---') {
       html += '<br/>\n';
     } else {
-      // Handle inline links [text](url)
-      let processed = escapeHtml(line);
-      // Re-process links after escaping (we need to handle this carefully)
-      const linkLine = line;
-      const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-      let result = '';
-      let lastIdx = 0;
-      let match;
-      while ((match = linkRegex.exec(linkLine)) !== null) {
-        result += escapeHtml(linkLine.slice(lastIdx, match.index));
-        const text = escapeHtml(match[1]);
-        const url = escapeHtml(match[2]);
-        if (match[2].startsWith('/')) {
-          result += `<a href="${url}">${text}</a>`;
-        } else if (match[2].startsWith('http')) {
-          result += `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
-        } else {
-          result += `${text}`;
-        }
-        lastIdx = match.index + match[0].length;
-      }
-      result += escapeHtml(linkLine.slice(lastIdx));
-      html += `<p>${result}</p>\n`;
+      html += `<p>${processLineWithLinks(line)}</p>\n`;
     }
+    i++;
   }
   
   // Parse FAQ blocks
