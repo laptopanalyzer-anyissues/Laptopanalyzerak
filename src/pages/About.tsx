@@ -33,16 +33,16 @@ const tests = [
 ];
 
 const values = [
-  { icon: Shield, title: "Privacy-Conscious", desc: "Diagnostics run in your browser. Built to minimize unnecessary data handling." },
+  { icon: Shield, title: "Privacy-First", desc: "Diagnostics run in your browser. No data is collected or transmitted." },
   { icon: Zap, title: "Instant Results", desc: "No downloads, no setup. Pick a test and get feedback in seconds." },
   { icon: Globe, title: "Free for Everyone", desc: "No accounts, no paywalls. Professional-grade tools, zero friction." },
 ];
 
 const steps = [
   { n: "1", title: "Open the site", desc: "Any modern browser — no installs." },
-  { n: "2", title: "Pick a test", desc: "Single component or the full suite." },
+  { n: "2", title: "Pick a test", desc: "One component or the full suite." },
   { n: "3", title: "Grant access", desc: "Camera or mic — only when needed." },
-  { n: "4", title: "See results", desc: "Clear, instant hardware feedback." },
+  { n: "4", title: "Get results", desc: "Clear, instant hardware feedback." },
 ];
 
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
@@ -77,10 +77,11 @@ const About = () => (
             <Laptop className="h-6 w-6 text-primary-foreground" />
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3">
-            Hardware Diagnostics, In Your Browser
+            Hardware Diagnostics,{" "}
+            <span className="gradient-text">In Your Browser</span>
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Laptop Analyzer helps you verify every component of your laptop — display, keyboard, camera, audio, and more — without installing a thing.
+            Verify every component of your laptop — display, keyboard, camera, audio, and more — without installing a thing.
           </p>
         </motion.section>
 
@@ -173,7 +174,7 @@ const About = () => (
         {/* CTA */}
         <motion.section initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">See What Your Laptop Can Do</h2>
-          <p className="text-sm text-muted-foreground mb-7">Full hardware diagnostics — right in your browser.</p>
+          <p className="text-sm text-muted-foreground mb-7">8 hardware diagnostics — right in your browser.</p>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button variant="hero" size="lg" asChild>
               <Link to="/dashboard" className="inline-flex items-center gap-2">

@@ -5,20 +5,20 @@ const steps = [
   {
     icon: MousePointer2,
     step: "01",
-    title: "Choose a Test",
-    description: "Pick from 8 hardware diagnostics — display, keyboard, camera, and more.",
+    title: "Pick a Test",
+    description: "Choose from 8 hardware diagnostics — or run them all at once.",
   },
   {
     icon: Play,
     step: "02",
-    title: "Run It Instantly",
-    description: "Tests run directly in your browser. No downloads, no permissions needed upfront.",
+    title: "Run It",
+    description: "Each test runs directly in your browser. No downloads required.",
   },
   {
     icon: ClipboardCheck,
     step: "03",
-    title: "See Your Results",
-    description: "Get clear, immediate feedback on whether your hardware is working correctly.",
+    title: "Get Results",
+    description: "Clear, immediate feedback on whether your hardware works.",
   },
 ];
 
