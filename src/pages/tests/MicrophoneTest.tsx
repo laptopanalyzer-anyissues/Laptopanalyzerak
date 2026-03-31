@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2, Camera, Monitor } from "lucide-react";
 
 // Custom themed audio player

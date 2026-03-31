@@ -10,6 +10,7 @@ import { SpeedTestResults } from "@/components/network/SpeedTestResults";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { 
   ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
   Gauge, Timer, Server, Globe, Zap, Usb, Monitor, Keyboard

@@ -10,6 +10,7 @@ import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { Monitor, Camera, Mouse } from "lucide-react";
 import {
   KeyboardType,

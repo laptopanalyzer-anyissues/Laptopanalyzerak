@@ -772,6 +772,8 @@ const DisplayTest = () => {
             </div>
           </motion.div>
 
+          <TestPageCTA />
+
           <RelatedArticles articles={[
             { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports instantly before buying a used laptop." },
           ]} />
