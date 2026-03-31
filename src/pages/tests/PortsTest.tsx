@@ -886,6 +886,16 @@ const PortsTest = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          <RelatedArticles articles={[
+            { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Network Test", path: "/test/network", icon: Wifi, description: "Check speed & ping" },
+            { title: "Keyboard Test", path: "/test/keyboard", icon: Keyboard, description: "Test all keys" },
+            { title: "Touchpad Test", path: "/test/touchpad", icon: Mouse, description: "Test trackpad input" },
+          ]} />
         </div>
       </main>
       <Footer />
