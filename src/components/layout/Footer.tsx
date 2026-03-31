@@ -35,10 +35,16 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-5">
               Free, browser-based laptop hardware diagnostics. Test your display, keyboard, camera, speakers, and more — no installs needed.
             </p>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
               <Shield className="h-4 w-4 text-success" aria-hidden="true" />
-              <span>100% Private — No data leaves your device</span>
+              <span>Tests run locally — nothing leaves your device</span>
             </div>
+            <a
+              href="mailto:support@laptopanalyzer.com"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              support@laptopanalyzer.com
+            </a>
           </div>
 
           {/* Tests — spans 2 cols */}
