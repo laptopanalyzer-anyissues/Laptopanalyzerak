@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Mouse, RotateCcw, CheckCircle2 } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Mouse, RotateCcw, CheckCircle2, Keyboard, Monitor, Usb } from "lucide-react";
 
 const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
   const [leftClicks, setLeftClicks] = useState(0);
