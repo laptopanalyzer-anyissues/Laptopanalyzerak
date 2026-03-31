@@ -4,14 +4,13 @@ import { ReactNode } from "react";
 
 interface PrivacySectionProps {
   icon?: LucideIcon;
-  number?: string;
   title: string;
   children: ReactNode;
   highlight?: boolean;
   id?: string;
 }
 
-export function PrivacyPolicySection({ icon: Icon, number, title, children, highlight, id }: PrivacySectionProps) {
+export function PrivacyPolicySection({ icon: Icon, title, children, highlight, id }: PrivacySectionProps) {
   return (
     <motion.section
       id={id}
@@ -29,11 +28,6 @@ export function PrivacyPolicySection({ icon: Icon, number, title, children, high
         {Icon && (
           <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
             <Icon className="h-5 w-5 text-primary" />
-          </div>
-        )}
-        {number && !Icon && (
-          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mt-0.5">
-            <span className="text-sm font-bold text-primary">{number}</span>
           </div>
         )}
         <h2 className="text-xl md:text-2xl font-semibold text-foreground leading-tight pt-1.5">
@@ -66,16 +60,18 @@ export function Bullet({ title, children }: BulletProps) {
 
 interface CalloutProps {
   children: ReactNode;
-  variant?: 'info' | 'trust';
+  variant?: 'info' | 'trust' | 'local';
 }
 
 export function Callout({ children, variant = 'info' }: CalloutProps) {
+  const styles = {
+    trust: 'bg-success/5 border border-success/15 text-success/90',
+    local: 'bg-accent/40 border border-accent/60 text-foreground/80',
+    info: 'bg-primary/5 border border-primary/15 text-muted-foreground',
+  };
+
   return (
-    <div className={`rounded-xl p-4 text-sm leading-relaxed ${
-      variant === 'trust' 
-        ? 'bg-success/5 border border-success/15 text-success/90' 
-        : 'bg-primary/5 border border-primary/15 text-muted-foreground'
-    }`}>
+    <div className={`rounded-xl p-4 text-sm leading-relaxed ${styles[variant]}`}>
       {children}
     </div>
   );
