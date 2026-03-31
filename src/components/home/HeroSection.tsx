@@ -137,15 +137,15 @@ export function HeroSection() {
               className="flex flex-wrap items-center gap-5 justify-center lg:justify-start"
             >
               {[
-                { Icon: Shield, text: "100% Private" },
-                { Icon: Zap, text: "Instant Results" },
-                { Icon: Globe, text: "Works Everywhere" },
+                { Icon: Shield, text: "Runs locally in your browser" },
+                { Icon: Zap, text: "Results in seconds" },
+                { Icon: Globe, text: "Works on any OS" },
               ].map(({ Icon, text }, index) => (
                 <div
                   key={index}
                   className="flex items-center gap-2 text-muted-foreground"
                 >
-                  <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <Icon className="h-4 w-4 text-success" aria-hidden="true" />
                   <span className="text-sm font-medium">{text}</span>
                 </div>
               ))}

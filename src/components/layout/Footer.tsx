@@ -35,10 +35,16 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-5">
               Free, browser-based laptop hardware diagnostics. Test your display, keyboard, camera, speakers, and more — no installs needed.
             </p>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
               <Shield className="h-4 w-4 text-success" aria-hidden="true" />
-              <span>100% Private — No data leaves your device</span>
+              <span>Tests run locally — nothing leaves your device</span>
             </div>
+            <a
+              href="mailto:support@laptopanalyzer.com"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              support@laptopanalyzer.com
+            </a>
           </div>
 
           {/* Tests — spans 2 cols */}
@@ -77,18 +83,18 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </nav>
           </div>
 
-          {/* Legal — spans 3 cols */}
+          {/* Company & Legal — spans 3 cols */}
           <div className="lg:col-span-3">
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Legal
+              Company
             </h4>
-            <nav className="flex flex-col gap-2.5" aria-label="Legal pages">
+            <nav className="flex flex-col gap-2.5" aria-label="Company and legal pages">
+              <Link to="/about" className="footer-link">About</Link>
+              <Link to="/contact" className="footer-link">Contact & Support</Link>
               <Link to="/privacy-policy" className="footer-link">Privacy Policy</Link>
               <Link to="/terms-of-service" className="footer-link">Terms of Service</Link>
               <Link to="/disclaimer" className="footer-link">Disclaimer</Link>
-              <Link to="/dmca" className="footer-link">DMCA & Copyright</Link>
               <Link to="/accessibility" className="footer-link">Accessibility</Link>
-              <Link to="/affiliate-disclosure" className="footer-link">Affiliate Disclosure</Link>
               <Link to="/editorial-policy" className="footer-link">Editorial Policy</Link>
             </nav>
           </div>
