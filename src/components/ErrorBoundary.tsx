@@ -59,7 +59,7 @@ class ErrorBoundary extends Component<Props, State> {
               We encountered an unexpected error. Please try refreshing the page or return to the home page.
             </p>
 
-            {import.meta.env.DEV && this.state.error && (
+            {this.state.error && (
               <div className="mb-6 p-4 bg-muted rounded-lg text-left overflow-auto max-h-32">
                 <p className="text-xs font-mono text-destructive">
                   {this.state.error.message}
