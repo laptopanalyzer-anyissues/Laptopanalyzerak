@@ -33,16 +33,16 @@ const tests = [
 ];
 
 const values = [
-  { icon: Shield, title: "Privacy-Conscious", desc: "Diagnostics run in your browser. Built to minimize unnecessary data handling." },
+  { icon: Shield, title: "Privacy-First", desc: "Diagnostics run in your browser. No data is collected or transmitted." },
   { icon: Zap, title: "Instant Results", desc: "No downloads, no setup. Pick a test and get feedback in seconds." },
   { icon: Globe, title: "Free for Everyone", desc: "No accounts, no paywalls. Professional-grade tools, zero friction." },
 ];
 
 const steps = [
   { n: "1", title: "Open the site", desc: "Any modern browser — no installs." },
-  { n: "2", title: "Pick a test", desc: "Single component or the full suite." },
+  { n: "2", title: "Pick a test", desc: "One component or the full suite." },
   { n: "3", title: "Grant access", desc: "Camera or mic — only when needed." },
-  { n: "4", title: "See results", desc: "Clear, instant hardware feedback." },
+  { n: "4", title: "Get results", desc: "Clear, instant hardware feedback." },
 ];
 
 const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } } };
