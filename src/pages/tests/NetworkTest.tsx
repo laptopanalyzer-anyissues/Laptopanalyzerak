@@ -55,7 +55,7 @@ const NetworkTest = () => {
   
   const isTestingRef = useRef(false);
   const speedSamplesRef = useRef<number[]>([]);
-  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const testStartTimeRef = useRef<number>(0);
 
   // Fetch network metadata
