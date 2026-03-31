@@ -268,6 +268,8 @@ const CameraTest = () => {
 
           <canvas ref={canvasRef} className="hidden" />
 
+          <TestPageCTA />
+
           <RelatedArticles articles={[
             { title: "Laptop Camera Not Working? Try These 15 Fixes", slug: "laptop-camera-not-working", excerpt: "Solve webcam issues, black screen errors, missing camera drivers, and app permission problems." },
             { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
