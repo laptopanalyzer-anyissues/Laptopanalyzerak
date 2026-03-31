@@ -107,7 +107,7 @@ export function PrivacySection() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Your hardware data stays on your device. Always.
+              Every test runs in your browser. No uploads, no servers, no accounts.
             </motion.p>
           </header>
 

@@ -83,18 +83,18 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </nav>
           </div>
 
-          {/* Legal — spans 3 cols */}
+          {/* Company & Legal — spans 3 cols */}
           <div className="lg:col-span-3">
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Legal
+              Company
             </h4>
-            <nav className="flex flex-col gap-2.5" aria-label="Legal pages">
+            <nav className="flex flex-col gap-2.5" aria-label="Company and legal pages">
+              <Link to="/about" className="footer-link">About</Link>
+              <Link to="/contact" className="footer-link">Contact & Support</Link>
               <Link to="/privacy-policy" className="footer-link">Privacy Policy</Link>
               <Link to="/terms-of-service" className="footer-link">Terms of Service</Link>
               <Link to="/disclaimer" className="footer-link">Disclaimer</Link>
-              <Link to="/dmca" className="footer-link">DMCA & Copyright</Link>
               <Link to="/accessibility" className="footer-link">Accessibility</Link>
-              <Link to="/affiliate-disclosure" className="footer-link">Affiliate Disclosure</Link>
               <Link to="/editorial-policy" className="footer-link">Editorial Policy</Link>
             </nav>
           </div>

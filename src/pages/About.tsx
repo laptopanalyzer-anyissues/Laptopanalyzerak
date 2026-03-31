@@ -155,12 +155,12 @@ const About = () => (
             <h2 className="text-lg font-bold text-foreground mb-4 text-center">Why Laptop Analyzer?</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 max-w-2xl mx-auto">
               {[
-                "Completely free — no upsells",
-                "No registration required",
-                "Compatible with all major browsers",
+                "Completely free — no upsells or premium tiers",
+                "No registration or account needed",
+                "Works on Chrome, Firefox, Safari, and Edge",
                 "Privacy-conscious, browser-first architecture",
-                "Actionable results, not raw data dumps",
-                "Actively maintained and regularly updated",
+                "Clear, actionable results — not raw data",
+                "Actively maintained and regularly improved",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <CheckCircle className="h-3.5 w-3.5 text-primary flex-shrink-0" />
