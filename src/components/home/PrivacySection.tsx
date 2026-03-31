@@ -4,23 +4,23 @@ import { Shield, Lock, Eye, Server } from "lucide-react";
 const privacyFeatures = [
   {
     icon: Lock,
-    title: "Local Processing",
-    description: "All tests run entirely in your browser. Your data never leaves your device.",
+    title: "Runs Locally",
+    description: "Every test executes in your browser. Nothing is sent to a server.",
   },
   {
     icon: Eye,
     title: "No Tracking",
-    description: "We don't use cookies, analytics, or any form of user tracking.",
+    description: "No analytics cookies, no fingerprinting, no user profiling.",
   },
   {
     icon: Server,
-    title: "No Data Storage",
-    description: "Test results are not stored on any server. Everything stays on your machine.",
+    title: "Nothing Stored",
+    description: "Results stay on your device. We don't retain any test data.",
   },
   {
     icon: Shield,
-    title: "Transparent Permissions",
-    description: "We only request permissions needed for specific tests, and only when you initiate them.",
+    title: "Permissions on Demand",
+    description: "Camera, mic, or USB access is requested only when you start a specific test.",
   },
 ];
 
