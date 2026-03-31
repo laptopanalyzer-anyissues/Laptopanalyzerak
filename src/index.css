@@ -165,7 +165,7 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg;
+    @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg rounded-2xl;
   }
 
   .gradient-text {
@@ -181,6 +181,28 @@
     @apply glass-card rounded-2xl p-6 hover-lift cursor-pointer;
   }
 
+  /* Unified section spacing */
+  .section-spacing {
+    @apply py-20 md:py-24;
+  }
+
+  /* Premium input styling */
+  .input-premium {
+    @apply h-12 rounded-xl bg-card border border-border/60 px-4 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200;
+    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none;
+    @apply hover:border-border;
+  }
+
+  .textarea-premium {
+    @apply rounded-xl bg-card border border-border/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 resize-none;
+    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none;
+    @apply hover:border-border;
+  }
+
+  .label-premium {
+    @apply text-sm font-medium text-foreground/90 mb-1.5 block;
+  }
+
   /* Touch-optimized buttons for mobile */
   .touch-target {
     @apply min-h-[44px] min-w-[44px];
@@ -189,6 +211,11 @@
   /* Mobile-friendly tap states */
   .tap-highlight {
     @apply active:scale-95 active:opacity-80 transition-transform duration-150;
+  }
+
+  /* Footer link style */
+  .footer-link {
+    @apply text-sm text-muted-foreground hover:text-foreground transition-colors duration-200;
   }
 }
 
