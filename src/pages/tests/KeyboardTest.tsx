@@ -377,6 +377,8 @@ const KeyboardTest = () => {
                 </ul>
               </motion.div>
 
+              <TestPageCTA />
+
               <RelatedArticles articles={[
                 { title: "Online Keyboard Test: Check Your Keys Instantly", slug: "online-keyboard-test", excerpt: "Use the free online keyboard test to check every key instantly. Identify broken buttons." },
                 { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },

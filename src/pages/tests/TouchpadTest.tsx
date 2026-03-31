@@ -251,6 +251,8 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
             </motion.div>
           </div>
 
+          <TestPageCTA />
+
           <RelatedArticles articles={[
             { title: "Touchpad Test Online (Free) - Instantly Check Your Laptop Touchpad", slug: "touchpad-test-online", excerpt: "Test your laptop's touchpad online for free. Check movement, clicks, and gestures instantly." },
             { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },

@@ -416,6 +416,8 @@ const MicrophoneTest = () => {
             </motion.div>
           </div>
 
+          <TestPageCTA />
+
           <RelatedArticles articles={[
             { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
           ]} />
