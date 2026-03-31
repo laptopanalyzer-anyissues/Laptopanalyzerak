@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw, Mic, Monitor, Volume2 } from "lucide-react";
 
 const CameraTest = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
