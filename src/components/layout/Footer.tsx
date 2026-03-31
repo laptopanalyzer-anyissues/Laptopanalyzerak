@@ -59,6 +59,8 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
               <Link to="/test/audio" className="footer-link">Audio Test</Link>
               <Link to="/test/microphone" className="footer-link">Microphone Test</Link>
               <Link to="/test/network" className="footer-link">Network Test</Link>
+              <Link to="/test/touchpad" className="footer-link">Touchpad Test</Link>
+              <Link to="/test/ports" className="footer-link">Ports Test</Link>
             </nav>
           </div>
 
@@ -78,12 +80,10 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
                   {post.title}
                 </Link>
               ))}
-              <Link to="/about" className="footer-link">About</Link>
-              <Link to="/contact" className="footer-link">Contact</Link>
             </nav>
           </div>
 
-          {/* Company & Legal — spans 3 cols */}
+          {/* Company — spans 3 cols */}
           <div className="lg:col-span-3">
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
               Company
