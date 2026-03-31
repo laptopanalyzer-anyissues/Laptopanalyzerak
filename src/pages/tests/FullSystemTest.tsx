@@ -968,6 +968,13 @@ const FullSystemTest = () => {
             </Dialog>
           </div>
         </div>
+
+        <div className="container mx-auto px-4 pb-8">
+          <RelatedArticles articles={[
+            { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+            { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
+          ]} />
+        </div>
       </main>
       <Footer />
     </div>
