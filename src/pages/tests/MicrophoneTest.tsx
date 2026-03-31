@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2 } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2, Camera, Monitor } from "lucide-react";
 
 // Custom themed audio player
 function AudioPlayer({ src, onClear }: { src: string; onClear: () => void }) {
