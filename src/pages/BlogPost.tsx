@@ -218,7 +218,7 @@ export default function BlogPostPage() {
 
       if (line.startsWith("### ")) {
         elements.push(
-          <h3 key={i} className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h3 key={i} className="text-xl font-semibold text-foreground mt-5 mb-2">
             {line.replace("### ", "")}
           </h3>
         );
