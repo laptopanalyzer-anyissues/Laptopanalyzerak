@@ -10,9 +10,9 @@ const reasons = [
   },
   {
     icon: ShieldCheck,
-    title: "Fully Private",
+    title: "Privacy-First Design",
     description:
-      "Tests run locally. No data leaves your device — ever.",
+      "Tests run locally in your browser. We minimize data handling and don't store your results.",
   },
   {
     icon: Download,

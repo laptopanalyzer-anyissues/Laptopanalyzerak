@@ -71,7 +71,8 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </h4>
             <nav className="flex flex-col gap-2.5" aria-label="Resources">
               <Link to="/blog" className="footer-link">Blog & Guides</Link>
-              {blogPosts?.map((post) => (
+              <Link to="/dashboard" className="footer-link">Full System Test</Link>
+              {blogPosts?.slice(0, 3).map((post) => (
                 <Link
                   key={post.slug}
                   to={`/blog/${post.slug}`}

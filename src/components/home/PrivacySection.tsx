@@ -107,7 +107,7 @@ export function PrivacySection() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Every test runs in your browser. No uploads, no servers, no accounts.
+              Hardware tests run locally in your browser. No accounts required.
             </motion.p>
           </header>
 
