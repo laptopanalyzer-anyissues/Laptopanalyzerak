@@ -119,8 +119,6 @@ const CameraTest = () => {
             title="Camera Test"
             description="Test your webcam with live preview. All processing happens locally — nothing is uploaded."
           />
-            </p>
-          </motion.div>
 
           {/* Start Button */}
           <motion.div
