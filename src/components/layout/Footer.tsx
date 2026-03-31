@@ -37,7 +37,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
               <Shield className="h-4 w-4 text-success" aria-hidden="true" />
-              <span>Tests run locally — nothing leaves your device</span>
+              <span>Hardware tests run locally in your browser</span>
             </div>
             <a
               href="mailto:support@laptopanalyzer.com"
@@ -71,7 +71,8 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </h4>
             <nav className="flex flex-col gap-2.5" aria-label="Resources">
               <Link to="/blog" className="footer-link">Blog & Guides</Link>
-              {blogPosts?.map((post) => (
+              <Link to="/dashboard" className="footer-link">Full System Test</Link>
+              {blogPosts?.slice(0, 3).map((post) => (
                 <Link
                   key={post.slug}
                   to={`/blog/${post.slug}`}

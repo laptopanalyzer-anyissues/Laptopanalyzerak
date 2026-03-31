@@ -5,17 +5,17 @@ const privacyFeatures = [
   {
     icon: Lock,
     title: "Runs Locally",
-    description: "Every test executes in your browser. Nothing is sent to a server.",
+    description: "Hardware tests execute directly in your browser — no uploads or external processing required.",
   },
   {
     icon: Eye,
-    title: "No Tracking",
-    description: "No analytics cookies, no fingerprinting, no user profiling.",
+    title: "Privacy-Conscious",
+    description: "Designed to minimize data collection. We don't profile users or sell data.",
   },
   {
     icon: Server,
-    title: "Nothing Stored",
-    description: "Results stay on your device. We don't retain any test data.",
+    title: "Minimal Data Handling",
+    description: "Test results stay on your device. We don't store or retain your hardware diagnostics.",
   },
   {
     icon: Shield,
@@ -107,7 +107,7 @@ export function PrivacySection() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              Every test runs in your browser. No uploads, no servers, no accounts.
+              Hardware tests run locally in your browser. No accounts required.
             </motion.p>
           </header>
 

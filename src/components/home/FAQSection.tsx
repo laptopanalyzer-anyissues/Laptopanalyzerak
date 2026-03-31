@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     question: "Is my data safe?",
-    answer: "All tests run locally in your browser. We don't collect, store, or transmit your hardware data."
+    answer: "Hardware tests run locally in your browser. We don't store your test results, and we've designed the tool to minimize unnecessary data handling."
   },
   {
     question: "Why isn't my camera or microphone working?",

@@ -25,7 +25,7 @@ export function FinalCTASection() {
               Ready to Test Your Laptop?
             </h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
-              Full hardware diagnostics in under 5 minutes. Free, private, and browser-based.
+              Full hardware diagnostics in under 5 minutes. Free, privacy-conscious, and browser-based.
             </p>
             <Button variant="hero" size="xl" asChild>
               <Link to="/dashboard">
