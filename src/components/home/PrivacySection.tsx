@@ -98,7 +98,7 @@ export function PrivacySection() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-3xl md:text-4xl font-bold text-foreground mb-4"
             >
-              Your Privacy Comes First
+              Built for Privacy
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -107,8 +107,7 @@ export function PrivacySection() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="text-lg text-muted-foreground max-w-2xl mx-auto"
             >
-              LaptopAnalyzer is built with privacy at its core. No data collection,
-              no servers, no compromises.
+              Your hardware data stays on your device. Always.
             </motion.p>
           </header>
 

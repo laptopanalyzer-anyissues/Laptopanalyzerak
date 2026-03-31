@@ -55,8 +55,7 @@ export function WhySection() {
             Why Laptop Analyzer
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            The fastest way to verify your laptop hardware is working — before
-            you buy, sell, or troubleshoot.
+            Verify your laptop hardware works — before you buy, sell, or troubleshoot.
           </p>
         </motion.header>
 

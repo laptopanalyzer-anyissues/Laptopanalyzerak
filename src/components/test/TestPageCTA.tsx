@@ -11,8 +11,8 @@ interface TestPageCTAProps {
 }
 
 export function TestPageCTA({
-  title = "Run a Full System Test",
-  description = "Check all your hardware in one session — display, keyboard, camera, mic, speakers, network, touchpad, and ports.",
+  title = "Want the Full Picture?",
+  description = "Run all 8 hardware diagnostics in a single session.",
   linkTo = "/test/full",
   linkLabel = "Start Full Test",
 }: TestPageCTAProps) {

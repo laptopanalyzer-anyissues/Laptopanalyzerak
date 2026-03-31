@@ -189,7 +189,7 @@ export function FeaturesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Comprehensive Testing Suite
+            8 Diagnostic Tests
           </motion.h2>
           <motion.p
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
@@ -198,8 +198,7 @@ export function FeaturesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            Every tool you need to verify your laptop's hardware is working
-            perfectly. All tests run directly in your browser.
+            Everything you need to verify your laptop hardware — running directly in your browser.
           </motion.p>
         </motion.header>
 

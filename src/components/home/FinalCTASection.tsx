@@ -22,15 +22,14 @@ export function FinalCTASection() {
               id="final-cta-heading"
               className="text-2xl md:text-3xl font-bold text-foreground mb-4"
             >
-              Ready to Check Your Laptop?
+              Ready to Test Your Laptop?
             </h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
-              Run a complete hardware diagnostic in under 5 minutes. Free,
-              private, and entirely in your browser.
+              Full hardware diagnostics in under 5 minutes. Free, private, and browser-based.
             </p>
             <Button variant="hero" size="xl" asChild>
               <Link to="/dashboard">
-                Start Testing Now
+                Start Testing
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Link>
             </Button>

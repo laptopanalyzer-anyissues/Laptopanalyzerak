@@ -62,10 +62,10 @@ export const FAQSection = () => {
             <span>FAQ</span>
           </div>
           <h2 id="faq-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Frequently Asked Questions
+            Common Questions
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Got questions? We've got answers. Find solutions to common issues and learn more about how LaptopAnalyzer works.
+            Quick answers about how Laptop Analyzer works.
           </p>
         </motion.header>
 
