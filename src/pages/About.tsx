@@ -1,14 +1,11 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { 
-  Laptop, 
-  Shield, 
-  Zap, 
-  Globe, 
-  Users, 
-  Target, 
-  Heart,
+import {
+  Laptop,
+  Shield,
+  Zap,
+  Globe,
   CheckCircle,
   Monitor,
   Keyboard,
@@ -17,251 +14,269 @@ import {
   Volume2,
   Wifi,
   Usb,
-  MousePointer
+  MousePointer,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 
-const features = [
-  { icon: Monitor, label: "Display Test" },
-  { icon: Keyboard, label: "Keyboard Test" },
-  { icon: Camera, label: "Camera Test" },
-  { icon: Mic, label: "Microphone Test" },
-  { icon: Volume2, label: "Audio Test" },
-  { icon: Wifi, label: "Network Test" },
-  { icon: Usb, label: "Ports Test" },
-  { icon: MousePointer, label: "Touchpad Test" },
+const tests = [
+  { icon: Monitor, label: "Display" },
+  { icon: Keyboard, label: "Keyboard" },
+  { icon: Camera, label: "Camera" },
+  { icon: Mic, label: "Microphone" },
+  { icon: Volume2, label: "Audio" },
+  { icon: Wifi, label: "Network" },
+  { icon: Usb, label: "Ports" },
+  { icon: MousePointer, label: "Touchpad" },
 ];
 
 const values = [
   {
     icon: Shield,
-    title: "Privacy First",
-    description: "Your data never leaves your device. All tests run locally in your browser with zero server-side processing.",
+    title: "Privacy-Conscious",
+    desc: "Core diagnostics run locally in your browser. We're built to minimize unnecessary data handling.",
   },
   {
     icon: Zap,
-    title: "Fast & Efficient",
-    description: "Comprehensive diagnostics in minutes. No downloads, installations, or lengthy processes required.",
+    title: "Instant & Lightweight",
+    desc: "No downloads or installations. Open the site, pick a test, and get results in seconds.",
   },
   {
     icon: Globe,
-    title: "Accessible to All",
-    description: "Free for everyone, everywhere. No accounts, subscriptions, or hidden fees. Just open and test.",
-  },
-  {
-    icon: Heart,
-    title: "User-Focused",
-    description: "Designed for real people, not just tech experts. Clear results and actionable insights for everyone.",
+    title: "Free & Accessible",
+    desc: "No sign-ups, no subscriptions. Professional-grade diagnostics available to everyone.",
   },
 ];
 
-const About = () => {
-  return (
-    <div className="min-h-screen bg-background">
-      <SEOHead
-        title="About LaptopAnalyzer - Free Laptop Diagnostic Tool"
-        description="Learn about LaptopAnalyzer, the free browser-based laptop diagnostic tool. Test your laptop hardware with complete privacy - no downloads, no data collection."
-        keywords="about laptopanalyzer, laptop diagnostic tool, free hardware test, laptop testing website, about us"
-        canonicalPath="/about"
-      />
-      <Header />
-      <main className="pt-24 pb-16" role="main" aria-label="About LaptopAnalyzer">
-        <div className="container mx-auto px-4">
-          {/* Hero Section */}
+const steps = [
+  { n: "1", title: "Open the website", desc: "Works on any modern browser — no setup needed." },
+  { n: "2", title: "Choose a test", desc: "Pick a specific component or run the full suite." },
+  { n: "3", title: "Allow permissions", desc: "Some tests need camera or mic access — requested only when needed." },
+  { n: "4", title: "Review results", desc: "Get clear, instant feedback on your hardware." },
+];
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const About = () => (
+  <div className="min-h-screen bg-background">
+    <SEOHead
+      title="About LaptopAnalyzer - Browser-Based Laptop Diagnostics"
+      description="Laptop Analyzer is a free, browser-based diagnostic platform for testing laptop hardware — display, keyboard, camera, mic, audio, network, ports, and touchpad."
+      keywords="about laptopanalyzer, laptop diagnostic tool, free hardware test, browser laptop test"
+      canonicalPath="/about"
+    />
+    <Header />
+
+    <main className="pt-24 pb-20">
+      <div className="container mx-auto px-4 max-w-4xl">
+
+        {/* ═══ Hero ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-20"
+        >
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            initial={{ scale: 0, rotate: -15 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.08, type: "spring", stiffness: 200, damping: 14 }}
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6"
+            style={{ boxShadow: "0 10px 32px -8px hsl(var(--primary) / 0.35)" }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
-              <Laptop className="h-4 w-4" />
-              About LaptopAnalyzer
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-              Empowering Users to Understand Their Hardware
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              LaptopAnalyzer is a free, browser-based diagnostic platform that helps you verify every component of your laptop works correctly—without compromising your privacy.
-            </p>
+            <Laptop className="h-6 w-6 text-primary-foreground" />
           </motion.div>
 
-          {/* Mission Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="max-w-4xl mx-auto mb-20"
+          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4">
+            Diagnostics That Run Where You Do
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Laptop Analyzer is a free, browser-based platform that lets you verify your laptop's hardware — from display and keyboard to camera and network — without installing anything.
+          </p>
+        </motion.section>
+
+        {/* ═══ Mission ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
+          className="mb-20"
+        >
+          <div className="rounded-2xl bg-gradient-to-br from-primary/[0.04] to-accent/[0.03] border border-border p-8 md:p-10 relative overflow-hidden">
+            <div
+              className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.04] pointer-events-none"
+              style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
+            />
+            <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3">Why We Built This</h2>
+            <p className="text-muted-foreground leading-relaxed max-w-2xl">
+              Professional hardware diagnostics shouldn't require expensive software or technical expertise. Whether you're buying a used laptop, troubleshooting an issue, or just curious — Laptop Analyzer gives you the tools to check every component, right from your browser.
+            </p>
+          </div>
+        </motion.section>
+
+        {/* ═══ What We Test ═══ */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="mb-20"
+        >
+          <motion.h2
+            variants={fadeUp}
+            className="text-2xl md:text-3xl font-bold text-foreground text-center mb-3"
           >
-            <div className="p-8 rounded-2xl bg-gradient-to-br from-primary/5 to-accent/5 border border-border">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Target className="h-6 w-6 text-primary" />
+            8 Hardware Tests, One Platform
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-10 max-w-lg mx-auto">
+            A complete diagnostic suite covering every major laptop component.
+          </motion.p>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {tests.map((t) => (
+              <motion.div
+                key={t.label}
+                variants={fadeUp}
+                whileHover={{ y: -4, scale: 1.03 }}
+                className="flex flex-col items-center gap-2.5 p-5 rounded-xl bg-card border border-border hover:border-primary/30 transition-colors group cursor-default"
+              >
+                <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                  <t.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold text-foreground">Our Mission</h2>
-              </div>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                We believe everyone deserves access to professional-grade hardware diagnostics. Whether you are buying a used laptop, troubleshooting an issue, or simply curious about your device's health, LaptopAnalyzer provides the tools you need—completely free and without any data collection.
-              </p>
-            </div>
-          </motion.section>
+                <span className="text-sm font-medium text-foreground">{t.label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
 
-          {/* What We Test Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-20"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
-              Comprehensive Hardware Testing
-            </h2>
-            <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-              Our diagnostic suite covers all major laptop components, giving you a complete picture of your device's health.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={feature.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 * index }}
-                  className="flex flex-col items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors"
-                >
-                  <div className="p-3 rounded-lg bg-primary/10">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <span className="text-sm font-medium text-foreground text-center">{feature.label}</span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
+        {/* ═══ Values ═══ */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="mb-20"
+        >
+          <motion.h2 variants={fadeUp} className="text-2xl md:text-3xl font-bold text-foreground text-center mb-10">
+            What We Stand For
+          </motion.h2>
 
-          {/* Values Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mb-20"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
-              Our Core Values
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {values.map((value, index) => (
-                <motion.div
-                  key={value.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 * index }}
-                  className="p-6 rounded-xl bg-card border border-border"
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <value.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground">{value.title}</h3>
-                  </div>
-                  <p className="text-muted-foreground">{value.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.section>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {values.map((v) => (
+              <motion.div
+                key={v.title}
+                variants={fadeUp}
+                whileHover={{ y: -3 }}
+                className="p-6 rounded-xl bg-card border border-border hover:border-primary/20 transition-colors"
+              >
+                <div className="p-2 rounded-lg bg-primary/10 inline-flex mb-4">
+                  <v.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-base font-semibold text-foreground mb-1.5">{v.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{v.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
 
-          {/* How It Works Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="mb-20"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-foreground mb-8">
-              How LaptopAnalyzer Works
-            </h2>
-            <div className="max-w-3xl mx-auto space-y-4">
+        {/* ═══ How It Works ═══ */}
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="mb-20"
+        >
+          <motion.h2 variants={fadeUp} className="text-2xl md:text-3xl font-bold text-foreground text-center mb-10">
+            How It Works
+          </motion.h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+            {steps.map((s) => (
+              <motion.div
+                key={s.n}
+                variants={fadeUp}
+                className="flex items-start gap-3.5 p-5 rounded-xl bg-card border border-border"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground text-sm font-bold">
+                  {s.n}
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-0.5">{s.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.section>
+
+        {/* ═══ Why Choose ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
+          className="mb-20"
+        >
+          <div className="rounded-2xl bg-card border border-border p-8">
+            <h2 className="text-xl font-bold text-foreground mb-5 text-center">Why Laptop Analyzer?</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 max-w-2xl mx-auto">
               {[
-                { step: "1", title: "Open Your Browser", description: "No downloads or installations needed. Just visit our website on any modern browser." },
-                { step: "2", title: "Select a Test", description: "Choose from our comprehensive suite of hardware diagnostics or run all tests at once." },
-                { step: "3", title: "Grant Permissions", description: "For certain tests, we will ask for browser permissions. These are only used locally." },
-                { step: "4", title: "Get Results", description: "Receive instant, clear results about your hardware's functionality and health." },
-              ].map((item, index) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 * index }}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-card border border-border"
-                >
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm">{item.description}</p>
-                  </div>
-                </motion.div>
+                "Free — no hidden costs or upsells",
+                "No account or registration needed",
+                "Works on all major browsers",
+                "Privacy-conscious, browser-first design",
+                "Clear results with actionable feedback",
+                "Continuously updated with new tests",
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2.5">
+                  <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                  <span className="text-sm text-muted-foreground">{item}</span>
+                </div>
               ))}
             </div>
-          </motion.section>
+          </div>
+        </motion.section>
 
-          {/* Why Choose Us Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            className="mb-20"
-          >
-            <div className="max-w-4xl mx-auto p-8 rounded-2xl bg-card border border-border">
-              <h2 className="text-2xl font-bold text-foreground mb-6 text-center">
-                Why Choose LaptopAnalyzer?
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  "100% free with no hidden costs",
-                  "No account or registration required",
-                  "Works on all major browsers",
-                  "Complete privacy - no data collection",
-                  "Instant results with clear explanations",
-                  "Professional-grade diagnostic accuracy",
-                  "Regular updates and new tests",
-                  "Mobile-friendly interface",
-                ].map((item, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.section>
-
-          {/* CTA Section */}
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="text-center"
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">
-              Ready to Test Your Laptop?
-            </h2>
-            <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-              Start running diagnostics on your laptop in seconds. No downloads, no sign-ups, just instant results.
-            </p>
+        {/* ═══ CTA ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.45 }}
+          className="text-center"
+        >
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+            Ready to Check Your Hardware?
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            Run a full diagnostic in your browser — no downloads, no sign-ups.
+          </p>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button variant="hero" size="lg" asChild>
-              <Link to="/dashboard">
-                <Laptop className="h-5 w-5 mr-2" />
-                Start Testing Now
+              <Link to="/dashboard" className="inline-flex items-center gap-2">
+                Start Testing
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-          </motion.section>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-};
+          </motion.div>
+        </motion.section>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+);
 
 export default About;
