@@ -4,27 +4,27 @@ import { Zap, ShieldCheck, Download, Gauge } from "lucide-react";
 const reasons = [
   {
     icon: Zap,
-    title: "Instant Browser Tests",
+    title: "Instant, In-Browser",
     description:
-      "Open the page and start testing. No accounts, no installs, no waiting.",
+      "Open the page and start. No accounts, no installs, no waiting.",
   },
   {
     icon: ShieldCheck,
     title: "Fully Private",
     description:
-      "Every test runs locally in your browser. No data leaves your device.",
+      "Tests run locally. No data leaves your device — ever.",
   },
   {
     icon: Download,
     title: "Zero Downloads",
     description:
-      "No software to install or update. Works on any modern browser, any OS.",
+      "Works on any modern browser and OS. Nothing to install or update.",
   },
   {
     icon: Gauge,
-    title: "Comprehensive Coverage",
+    title: "8 Diagnostic Tests",
     description:
-      "8 diagnostic tests covering display, keyboard, camera, mic, audio, network, touchpad, and ports.",
+      "Display, keyboard, camera, mic, speakers, network, touchpad, and ports — all covered.",
   },
 ];
 
