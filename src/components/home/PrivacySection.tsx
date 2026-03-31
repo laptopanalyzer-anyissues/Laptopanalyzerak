@@ -5,17 +5,17 @@ const privacyFeatures = [
   {
     icon: Lock,
     title: "Runs Locally",
-    description: "Every test executes in your browser. Nothing is sent to a server.",
+    description: "Hardware tests execute directly in your browser — no uploads or external processing required.",
   },
   {
     icon: Eye,
-    title: "No Tracking",
-    description: "No analytics cookies, no fingerprinting, no user profiling.",
+    title: "Privacy-Conscious",
+    description: "Designed to minimize data collection. We don't profile users or sell data.",
   },
   {
     icon: Server,
-    title: "Nothing Stored",
-    description: "Results stay on your device. We don't retain any test data.",
+    title: "Minimal Data Handling",
+    description: "Test results stay on your device. We don't store or retain your hardware diagnostics.",
   },
   {
     icon: Shield,
