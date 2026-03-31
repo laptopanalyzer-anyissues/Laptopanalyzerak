@@ -10,7 +10,6 @@ const SITE_URL = "https://laptopanalyzer.com";
 
 const staticPages = [
   { loc: "/", priority: "1.0", changefreq: "weekly" },
-  { loc: "/dashboard", priority: "0.9", changefreq: "weekly" },
   { loc: "/test/display", priority: "0.9", changefreq: "monthly" },
   { loc: "/test/keyboard", priority: "0.9", changefreq: "monthly" },
   { loc: "/test/camera", priority: "0.8", changefreq: "monthly" },
