@@ -10,7 +10,7 @@ import { HelpCircle } from "lucide-react";
 const faqs = [
   {
     question: "Is Laptop Analyzer free?",
-    answer: "Yes — completely free with no hidden costs, subscriptions, or premium tiers. Every test runs directly in your browser."
+    answer: "Yes — completely free with no hidden costs, subscriptions, or premium tiers. Tests run directly in your browser."
   },
   {
     question: "Is my data safe?",

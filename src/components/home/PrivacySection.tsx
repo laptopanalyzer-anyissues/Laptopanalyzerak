@@ -50,7 +50,7 @@ const cardVariants = {
 
 export function PrivacySection() {
   return (
-    <section id="privacy" className="py-24" aria-labelledby="privacy-heading">
+    <section id="privacy" className="py-16" aria-labelledby="privacy-heading">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -59,7 +59,7 @@ export function PrivacySection() {
           transition={{ duration: 0.5 }}
           className="max-w-4xl mx-auto"
         >
-          <header className="text-center mb-12">
+          <header className="text-center mb-10">
             {/* Animated Shield Icon */}
             <motion.div
               initial={{ scale: 0, rotate: -180 }}

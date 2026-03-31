@@ -39,7 +39,7 @@ const cardVariants = {
 
 export function WhySection() {
   return (
-    <section className="py-24" aria-labelledby="why-heading">
+    <section className="py-20" aria-labelledby="why-heading">
       <div className="container mx-auto px-4 max-w-5xl">
         <motion.header
           initial={{ opacity: 0, y: 20 }}

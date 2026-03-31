@@ -64,13 +64,13 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
             </nav>
           </div>
 
-          {/* Resources — spans 3 cols */}
+          {/* Guides — spans 3 cols */}
           <div className="lg:col-span-3">
             <h4 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-              Resources
+              Guides
             </h4>
-            <nav className="flex flex-col gap-2.5" aria-label="Resources">
-              <Link to="/blog" className="footer-link">Blog & Guides</Link>
+            <nav className="flex flex-col gap-2.5" aria-label="Guides and resources">
+              <Link to="/blog" className="footer-link">All Articles</Link>
               <Link to="/dashboard" className="footer-link">Full System Test</Link>
               {blogPosts?.slice(0, 3).map((post) => (
                 <Link
