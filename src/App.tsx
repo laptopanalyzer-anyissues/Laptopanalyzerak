@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, ComponentType } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +13,24 @@ import { CookieConsent } from "@/components/CookieConsent";
 // Eager load homepage for instant first paint
 import Index from "./pages/Index";
 
+// Auto-reload on stale chunk errors (happens after new deployments)
+function lazyRetry(factory: () => Promise<{ default: ComponentType<any> }>) {
+  return lazy(() =>
+    factory().catch((err) => {
+      const hasRefreshed = sessionStorage.getItem("chunk_retry");
+      if (!hasRefreshed) {
+        sessionStorage.setItem("chunk_retry", "1");
+        window.location.reload();
+        return new Promise(() => {}); // never resolves — page reloads
+      }
+      sessionStorage.removeItem("chunk_retry");
+      throw err;
+    })
+  );
+}
+
 // Lazy load other pages for better bundle splitting
-const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Dashboard = lazyRetry(() => import("./pages/Dashboard"));
 const DisplayTest = lazy(() => import("./pages/tests/DisplayTest"));
 const KeyboardTest = lazy(() => import("./pages/tests/KeyboardTest"));
 const CameraTest = lazy(() => import("./pages/tests/CameraTest"));
