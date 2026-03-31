@@ -17,7 +17,7 @@ const features = [
   {
     icon: Monitor,
     title: "Display Test",
-    description: "Dead pixel detection, color accuracy, and screen quality tests",
+    description: "Dead pixel detection, color accuracy, and gradient checks",
     path: "/test/display",
     color: "from-blue-500 to-cyan-500",
     shadow: "rgba(59, 130, 246, 0.4)",
@@ -25,7 +25,7 @@ const features = [
   {
     icon: Keyboard,
     title: "Keyboard Test",
-    description: "Interactive keyboard tester to verify every key works",
+    description: "Verify every key registers correctly",
     path: "/test/keyboard",
     color: "from-violet-500 to-purple-500",
     shadow: "rgba(139, 92, 246, 0.4)",
@@ -33,7 +33,7 @@ const features = [
   {
     icon: Camera,
     title: "Camera Test",
-    description: "Test your webcam with live preview and snapshot",
+    description: "Live webcam preview with snapshot capture",
     path: "/test/camera",
     color: "from-pink-500 to-rose-500",
     shadow: "rgba(236, 72, 153, 0.4)",
@@ -41,7 +41,7 @@ const features = [
   {
     icon: Mic,
     title: "Microphone Test",
-    description: "Audio input test with real-time waveform visualization",
+    description: "Real-time waveform and recording playback",
     path: "/test/microphone",
     color: "from-amber-500 to-orange-500",
     shadow: "rgba(245, 158, 11, 0.4)",
@@ -49,7 +49,7 @@ const features = [
   {
     icon: Speaker,
     title: "Speaker Test",
-    description: "Stereo audio test for left and right speaker verification",
+    description: "Left, right, and stereo channel verification",
     path: "/test/audio",
     color: "from-green-500 to-emerald-500",
     shadow: "rgba(34, 197, 94, 0.4)",
@@ -57,7 +57,7 @@ const features = [
   {
     icon: Wifi,
     title: "Network Test",
-    description: "Connection status, speed test, and latency check",
+    description: "Download, upload, ping, and jitter measurement",
     path: "/test/network",
     color: "from-teal-500 to-cyan-500",
     shadow: "rgba(20, 184, 166, 0.4)",
@@ -65,7 +65,7 @@ const features = [
   {
     icon: Mouse,
     title: "Touchpad Test",
-    description: "Track cursor movement, clicks, and scroll gestures",
+    description: "Cursor tracking, click detection, and scroll",
     path: "/test/touchpad",
     color: "from-indigo-500 to-blue-500",
     shadow: "rgba(99, 102, 241, 0.4)",
@@ -73,7 +73,7 @@ const features = [
   {
     icon: Cable,
     title: "Ports & Connectivity",
-    description: "Verify physical ports and wireless connections",
+    description: "USB, audio, display, and wireless detection",
     path: "/test/ports",
     color: "from-orange-500 to-red-500",
     shadow: "rgba(249, 115, 22, 0.4)",
