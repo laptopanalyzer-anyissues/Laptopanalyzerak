@@ -49,7 +49,7 @@ export function TestCard({
         aria-label={`${title}: ${description}. Status: ${statusInfo.text}`}
       >
         <div 
-          className={`test-card h-full relative overflow-hidden flex flex-col transition-all duration-200 ${
+          className={`test-card h-full relative overflow-hidden flex flex-col ${
             isFocused ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-[1.02]" : ""
           }`}
         >

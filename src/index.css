@@ -179,6 +179,7 @@
 
   .test-card {
     @apply glass-card rounded-2xl p-6 hover-lift cursor-pointer;
+    @apply hover:border-primary/25 hover:shadow-[0_8px_30px_-8px_hsl(var(--primary)/0.12)];
   }
 
   /* Unified section spacing */
@@ -189,18 +190,30 @@
   /* Premium input styling */
   .input-premium {
     @apply h-12 rounded-xl bg-card border border-border/60 px-4 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200;
-    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none;
+    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.08)];
     @apply hover:border-border;
   }
 
   .textarea-premium {
     @apply rounded-xl bg-card border border-border/60 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all duration-200 resize-none;
-    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none;
+    @apply focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none focus:shadow-[0_0_0_4px_hsl(var(--primary)/0.08)];
     @apply hover:border-border;
   }
 
   .label-premium {
     @apply text-sm font-medium text-foreground/90 mb-1.5 block;
+  }
+
+  /* Interactive card with glow on hover */
+  .card-interactive {
+    @apply relative transition-all duration-300 ease-out;
+    @apply hover:-translate-y-1 hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.15)];
+    @apply hover:border-primary/20;
+  }
+
+  /* Selection state for toggleable cards */
+  .card-selected {
+    @apply border-primary/40 bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.2),0_4px_20px_-4px_hsl(var(--primary)/0.15)];
   }
 
   /* Touch-optimized buttons for mobile */
