@@ -14,6 +14,7 @@ import {
   Globe,
   ArrowRight,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,28 +29,28 @@ const categories = [
     title: "General Support",
     desc: "Help with tests or results",
     gradient: "from-primary to-accent",
-    glow: "hsl(var(--primary) / 0.25)",
+    glowColor: "var(--primary)",
   },
   {
     icon: Bug,
     title: "Bug Report",
     desc: "Something isn't working right",
     gradient: "from-destructive to-warning",
-    glow: "hsl(var(--destructive) / 0.25)",
+    glowColor: "var(--destructive)",
   },
   {
     icon: Lightbulb,
     title: "Feature Request",
-    desc: "Suggest a new tool or improvement",
+    desc: "Suggest a new tool or idea",
     gradient: "from-warning to-[hsl(50,92%,55%)]",
-    glow: "hsl(var(--warning) / 0.25)",
+    glowColor: "var(--warning)",
   },
   {
     icon: Shield,
     title: "Privacy Inquiry",
     desc: "Data, cookies, or permissions",
     gradient: "from-success to-accent",
-    glow: "hsl(var(--success) / 0.25)",
+    glowColor: "var(--success)",
   },
 ];
 
@@ -108,27 +109,41 @@ const Contact = () => {
             className="text-center mb-14"
           >
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{
-                delay: 0.1,
-                type: "spring",
-                stiffness: 220,
-                damping: 16,
-              }}
-              className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent mb-5"
-              style={{
-                boxShadow: "0 8px 30px -6px hsl(var(--primary) / 0.35)",
-              }}
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 14 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6 relative"
+              style={{ boxShadow: "0 10px 36px -8px hsl(var(--primary) / 0.4)" }}
             >
-              <MessageSquare className="h-6 w-6 text-primary-foreground" />
+              <MessageSquare className="h-7 w-7 text-primary-foreground" />
+              <motion.div
+                className="absolute inset-0 rounded-2xl"
+                animate={{
+                  boxShadow: [
+                    "0 0 0 0px hsl(var(--primary) / 0.3)",
+                    "0 0 0 12px hsl(var(--primary) / 0)",
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+              />
             </motion.div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-2">
+
+            <motion.h1
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3"
+            >
               Get in Touch
-            </h1>
-            <p className="text-muted-foreground text-base md:text-lg max-w-md mx-auto">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22, duration: 0.4 }}
+              className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto"
+            >
               Support, bug reports, feature requests, and privacy questions.
-            </p>
+            </motion.p>
           </motion.section>
 
           {/* ═══ Category Cards ═══ */}
@@ -137,103 +152,142 @@ const Contact = () => {
             animate="visible"
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
+              visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
             }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12"
+            className="mb-14"
           >
-            {categories.map((cat, i) => {
-              const active = selected === i;
-              return (
-                <motion.button
-                  key={i}
-                  variants={{
-                    hidden: { opacity: 0, y: 18, scale: 0.95 },
-                    visible: { opacity: 1, y: 0, scale: 1 },
-                  }}
-                  whileHover={{ y: -4, scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    setSelected(i);
-                    setFormData((p) => ({ ...p, subject: cat.title }));
-                  }}
-                  className={`relative p-4 rounded-xl border text-left transition-all duration-200 overflow-hidden group ${
-                    active
-                      ? "border-primary/50 bg-primary/[0.06]"
-                      : "border-border bg-card hover:border-primary/25"
-                  }`}
-                  style={{
-                    boxShadow: active
-                      ? `0 0 24px -4px ${cat.glow}`
-                      : "none",
-                  }}
-                >
-                  {/* Hover glow layer */}
-                  <div
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(ellipse at 50% 80%, ${cat.glow}, transparent 70%)`,
+            <motion.p
+              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+              className="text-xs font-medium text-muted-foreground text-center mb-4 uppercase tracking-wider"
+            >
+              What can we help with?
+            </motion.p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {categories.map((cat, i) => {
+                const active = selected === i;
+                const glowHsl = `hsl(${cat.glowColor} / 0.25)`;
+                const glowHslStrong = `hsl(${cat.glowColor} / 0.35)`;
+
+                return (
+                  <motion.button
+                    key={i}
+                    variants={{
+                      hidden: { opacity: 0, y: 20, scale: 0.92 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        transition: { type: "spring", stiffness: 260, damping: 20 },
+                      },
                     }}
-                  />
-
-                  <div className="relative z-10">
-                    <motion.div
-                      className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${cat.gradient} mb-3`}
-                      animate={active ? { scale: [1, 1.1, 1] } : {}}
-                      transition={{ duration: 0.4 }}
+                    whileHover={{ y: -5, scale: 1.04 }}
+                    whileTap={{ scale: 0.96 }}
+                    onClick={() => {
+                      setSelected(i);
+                      setFormData((p) => ({ ...p, subject: cat.title }));
+                    }}
+                    className={`relative p-5 rounded-xl border text-left transition-all duration-300 overflow-hidden group cursor-pointer ${
+                      active
+                        ? "border-primary/50 bg-primary/[0.07]"
+                        : "border-border bg-card hover:border-primary/30"
+                    }`}
+                    style={{
+                      boxShadow: active ? `0 0 28px -4px ${glowHslStrong}, inset 0 1px 0 0 hsl(${cat.glowColor} / 0.1)` : "none",
+                    }}
+                  >
+                    {/* Hover radial glow */}
+                    <div
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
                       style={{
-                        boxShadow: `0 4px 14px -3px ${cat.glow}`,
+                        background: `radial-gradient(ellipse at 50% 100%, ${glowHsl}, transparent 65%)`,
                       }}
-                    >
-                      <cat.icon className="h-4 w-4 text-primary-foreground" />
-                    </motion.div>
+                    />
 
-                    <p className="font-semibold text-foreground text-sm leading-tight">
-                      {cat.title}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                      {cat.desc}
-                    </p>
-                  </div>
+                    {/* Active shimmer line */}
+                    <AnimatePresence>
+                      {active && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl pointer-events-none"
+                          style={{
+                            background: `linear-gradient(90deg, transparent 0%, hsl(${cat.glowColor} / 0.6) 50%, transparent 100%)`,
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
 
-                  <AnimatePresence>
-                    {active && (
+                    <div className="relative z-10">
                       <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        exit={{ scale: 0, opacity: 0 }}
-                        className="absolute top-2.5 right-2.5"
+                        className={`inline-flex p-2.5 rounded-xl bg-gradient-to-br ${cat.gradient} mb-3`}
+                        animate={active ? { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] } : {}}
+                        transition={{ duration: 0.5 }}
+                        style={{ boxShadow: `0 6px 18px -4px ${glowHsl}` }}
                       >
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        <cat.icon className="h-4 w-4 text-primary-foreground" />
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-              );
-            })}
+
+                      <p className="font-semibold text-foreground text-sm leading-tight">
+                        {cat.title}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
+                        {cat.desc}
+                      </p>
+                    </div>
+
+                    <AnimatePresence>
+                      {active && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                          className="absolute top-3 right-3"
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.button>
+                );
+              })}
+            </div>
           </motion.section>
 
           {/* ═══ Form Card ═══ */}
           <motion.section
-            initial={{ opacity: 0, y: 22 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
             <div className="rounded-2xl bg-card border border-border p-6 md:p-8 relative overflow-hidden">
               {/* Corner glow */}
               <div
-                className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.05] pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(circle, hsl(var(--primary)), transparent 70%)",
-                }}
+                className="absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-[0.04] pointer-events-none"
+                style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
               />
+              <div
+                className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full opacity-[0.03] pointer-events-none"
+                style={{ background: "radial-gradient(circle, hsl(var(--accent)), transparent 70%)" }}
+              />
+
+              {/* Form header */}
+              <div className="flex items-center gap-2.5 mb-6 pb-5 border-b border-border/60">
+                <div className="p-1.5 rounded-lg bg-primary/10">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <h2 className="text-sm font-semibold text-foreground">Send us a message</h2>
+                <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>Avg. reply: 24–48 hrs</span>
+                </div>
+              </div>
 
               <form onSubmit={handleSubmit} className="relative space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="name" className="text-xs font-medium">
-                      Name
-                    </Label>
+                  <motion.div className="space-y-1.5" whileFocus={{ scale: 1 }}>
+                    <Label htmlFor="name" className="text-xs font-medium">Name</Label>
                     <Input
                       id="name"
                       name="name"
@@ -241,13 +295,11 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-shadow duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
                     />
-                  </div>
+                  </motion.div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-xs font-medium">
-                      Email
-                    </Label>
+                    <Label htmlFor="email" className="text-xs font-medium">Email</Label>
                     <Input
                       id="email"
                       name="email"
@@ -256,15 +308,13 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-shadow duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="subject" className="text-xs font-medium">
-                    Subject
-                  </Label>
+                  <Label htmlFor="subject" className="text-xs font-medium">Subject</Label>
                   <Input
                     id="subject"
                     name="subject"
@@ -272,14 +322,12 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="h-11 transition-shadow duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                    className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="message" className="text-xs font-medium">
-                    Message
-                  </Label>
+                  <Label htmlFor="message" className="text-xs font-medium">Message</Label>
                   <Textarea
                     id="message"
                     name="message"
@@ -288,18 +336,15 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="transition-shadow duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)]"
+                    className="transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
                   />
                 </div>
 
-                <motion.div
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
+                <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
                   <Button
                     type="submit"
                     variant="hero"
-                    className="w-full h-12 text-sm font-semibold"
+                    className="w-full h-12 text-sm font-semibold group"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -309,7 +354,7 @@ const Contact = () => {
                       </span>
                     ) : (
                       <>
-                        <Send className="h-4 w-4 mr-2" />
+                        <Send className="h-4 w-4 mr-2 transition-transform group-hover:translate-x-0.5" />
                         Send Message
                       </>
                     )}
@@ -317,25 +362,32 @@ const Contact = () => {
                 </motion.div>
               </form>
 
-              <p className="text-[11px] text-muted-foreground/60 text-center mt-4">
-                We respond within 24–48 hours · Please avoid sending sensitive
-                financial information.
+              <p className="text-[11px] text-muted-foreground/50 text-center mt-4">
+                We respond within 24–48 hours · Avoid sending sensitive financial information.
               </p>
             </div>
           </motion.section>
 
           {/* ═══ Support Info Row ═══ */}
           <motion.section
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.06, delayChildren: 0.4 } },
+            }}
             className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3"
           >
             {infoItems.map((item, i) => (
               <motion.div
                 key={i}
-                whileHover={{ y: -2 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border transition-colors hover:border-primary/20"
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+                whileHover={{ y: -3, borderColor: "hsl(var(--primary) / 0.2)" }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border"
               >
                 <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
                   <item.icon className="h-4 w-4 text-primary" />
@@ -356,13 +408,11 @@ const Contact = () => {
           <motion.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="mt-6 rounded-xl bg-gradient-to-r from-primary/[0.05] to-accent/[0.03] border border-primary/10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
           >
             <div>
-              <p className="text-sm font-semibold text-foreground">
-                Need a quicker answer?
-              </p>
+              <p className="text-sm font-semibold text-foreground">Need a quicker answer?</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Most common questions are already covered in our FAQ.
               </p>
@@ -372,7 +422,7 @@ const Contact = () => {
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap group"
             >
               Visit FAQ
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </a>
           </motion.section>
         </div>
