@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 
 const tests = [
   { icon: Monitor, label: "Display" },
@@ -55,6 +55,10 @@ const About = () => (
       description="Laptop Analyzer is a free, browser-based platform for testing laptop hardware — display, keyboard, camera, mic, audio, network, ports, and touchpad."
       keywords="about laptopanalyzer, laptop diagnostic tool, free hardware test, browser laptop test"
       canonicalPath="/about"
+      structuredData={structuredData.breadcrumbs([
+        { name: "Home", url: "/" },
+        { name: "About", url: "/about" },
+      ])}
     />
     <Header />
 

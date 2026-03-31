@@ -2,10 +2,16 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { Copyright, FileText, Mail, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
 
 const DMCA = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="DMCA Policy — LaptopAnalyzer"
+        description="DMCA takedown policy for Laptop Analyzer. Learn how to report copyright infringement and our process for handling DMCA notices."
+        canonicalPath="/dmca"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">

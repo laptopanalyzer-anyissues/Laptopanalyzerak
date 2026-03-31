@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { SEOHead } from "@/components/SEOHead";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 
 const categories = [
   {
@@ -95,6 +95,10 @@ const Contact = () => {
         description="Reach the Laptop Analyzer support team for technical help, bug reports, feature ideas, or privacy questions."
         keywords="contact laptopanalyzer, support, bug report, feature request, privacy inquiry"
         canonicalPath="/contact"
+        structuredData={structuredData.breadcrumbs([
+          { name: "Home", url: "/" },
+          { name: "Contact", url: "/contact" },
+        ])}
       />
       <Header />
 

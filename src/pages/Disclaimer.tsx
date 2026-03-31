@@ -2,10 +2,16 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { AlertTriangle, Info, Shield, CheckCircle, XCircle } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
 
 const Disclaimer = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Disclaimer — LaptopAnalyzer"
+        description="Disclaimer for Laptop Analyzer. Our browser-based diagnostic tests provide general guidance and are not a substitute for professional hardware evaluation."
+        canonicalPath="/disclaimer"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">

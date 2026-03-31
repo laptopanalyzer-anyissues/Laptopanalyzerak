@@ -16,6 +16,7 @@ const PrivacyPolicy = () => {
       <SEOHead
         title="Privacy Policy — Laptop Analyzer"
         description="Laptop Analyzer's privacy policy. Learn how we handle diagnostics, cookies, analytics, advertising, and your rights."
+        canonicalPath="/privacy-policy"
       />
       <Header />
       <main className="pt-24 pb-20">

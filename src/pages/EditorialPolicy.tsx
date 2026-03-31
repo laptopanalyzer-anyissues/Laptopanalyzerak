@@ -2,10 +2,16 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { BookOpen, Target, Users, CheckCircle, Shield, RefreshCw, AlertTriangle, Star } from "lucide-react";
+import { SEOHead } from "@/components/SEOHead";
 
 const EditorialPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Editorial Policy — LaptopAnalyzer"
+        description="Laptop Analyzer's editorial policy. Learn about our content standards, fact-checking process, and commitment to accurate laptop diagnostic information."
+        canonicalPath="/editorial-policy"
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">

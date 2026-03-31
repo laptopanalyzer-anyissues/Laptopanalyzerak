@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { SEOHead, structuredData } from "@/components/SEOHead";
 import {
   Dialog,
   DialogContent,
@@ -395,6 +396,20 @@ const FullSystemTest = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead
+        title="Full Laptop Diagnostic Test - Complete Hardware Check Free 2026"
+        description="Run a full laptop diagnostic test online for free. Test display, keyboard, camera, microphone, speakers, network, touchpad, and ports — all in one session."
+        canonicalPath="/test/full"
+        structuredData={structuredData.howTo(
+          "How to Run a Full Laptop Diagnostic",
+          "Use our free full system test to check every hardware component on your laptop in one session.",
+          [
+            { name: "Start the full test", text: "Click Start Full Test to begin the diagnostic suite" },
+            { name: "Complete each test", text: "Follow on-screen prompts for each hardware component" },
+            { name: "Review results", text: "Get a comprehensive health score and detailed report" },
+          ]
+        )}
+      />
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
