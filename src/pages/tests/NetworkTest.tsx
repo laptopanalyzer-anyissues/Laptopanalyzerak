@@ -8,9 +8,11 @@ import { SpeedGauge } from "@/components/network/SpeedGauge";
 import { SpeedGraph } from "@/components/network/SpeedGraph";
 import { SpeedTestResults } from "@/components/network/SpeedTestResults";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
 import { 
   ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
-  Gauge, Timer, Server, Globe, Zap 
+  Gauge, Timer, Server, Globe, Zap, Usb, Monitor, Keyboard
 } from "lucide-react";
 
 interface NetworkInfo {
