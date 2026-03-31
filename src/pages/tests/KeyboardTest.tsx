@@ -10,6 +10,7 @@ import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { Monitor, Camera, Mouse } from "lucide-react";
 import {
   KeyboardType,
@@ -139,7 +140,7 @@ const KeyboardTest = () => {
       {/* Keyboard Type Selection Modal */}
       <KeyboardTypeModal isOpen={showModal} onSelect={handleKeyboardSelect} />
 
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div
@@ -375,6 +376,8 @@ const KeyboardTest = () => {
                   )}
                 </ul>
               </motion.div>
+
+              <TestPageCTA />
 
               <RelatedArticles articles={[
                 { title: "Online Keyboard Test: Check Your Keys Instantly", slug: "online-keyboard-test", excerpt: "Use the free online keyboard test to check every key instantly. Identify broken buttons." },

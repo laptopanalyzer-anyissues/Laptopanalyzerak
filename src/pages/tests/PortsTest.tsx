@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -522,7 +523,7 @@ const PortsTest = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
           <motion.div
@@ -886,6 +887,8 @@ const PortsTest = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          <TestPageCTA />
 
           <RelatedArticles articles={[
             { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },

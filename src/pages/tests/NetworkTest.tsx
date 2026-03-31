@@ -10,6 +10,7 @@ import { SpeedTestResults } from "@/components/network/SpeedTestResults";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { 
   ArrowLeft, Wifi, WifiOff, ArrowDown, ArrowUp, Activity, 
   Gauge, Timer, Server, Globe, Zap, Usb, Monitor, Keyboard
@@ -413,7 +414,7 @@ const NetworkTest = () => {
         )}
       />
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div
@@ -662,6 +663,8 @@ const NetworkTest = () => {
                 the <strong>90th percentile</strong> speed for accurate results matching professional tools.
               </p>
             </motion.div>
+
+            <TestPageCTA />
 
             <RelatedArticles articles={[
               { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },

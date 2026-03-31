@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { ArrowLeft, Mouse, RotateCcw, CheckCircle2, Keyboard, Monitor, Usb } from "lucide-react";
 
 const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
@@ -69,7 +70,7 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
         )}
       />
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div
@@ -249,6 +250,8 @@ const TouchpadTest = forwardRef<HTMLDivElement>((_, ref) => {
               </div>
             </motion.div>
           </div>
+
+          <TestPageCTA />
 
           <RelatedArticles articles={[
             { title: "Touchpad Test Online (Free) - Instantly Check Your Laptop Touchpad", slug: "touchpad-test-online", excerpt: "Test your laptop's touchpad online for free. Check movement, clicks, and gestures instantly." },

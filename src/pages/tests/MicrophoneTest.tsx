@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2, Camera, Monitor } from "lucide-react";
 
 // Custom themed audio player
@@ -230,7 +231,7 @@ const MicrophoneTest = () => {
         )}
       />
       <Header />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <motion.div
@@ -414,6 +415,8 @@ const MicrophoneTest = () => {
               </div>
             </motion.div>
           </div>
+
+          <TestPageCTA />
 
           <RelatedArticles articles={[
             { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
