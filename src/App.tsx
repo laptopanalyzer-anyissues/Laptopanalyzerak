@@ -31,28 +31,28 @@ function lazyRetry(factory: () => Promise<{ default: ComponentType<any> }>) {
 
 // Lazy load other pages for better bundle splitting
 const Dashboard = lazyRetry(() => import("./pages/Dashboard"));
-const DisplayTest = lazy(() => import("./pages/tests/DisplayTest"));
-const KeyboardTest = lazy(() => import("./pages/tests/KeyboardTest"));
-const CameraTest = lazy(() => import("./pages/tests/CameraTest"));
-const MicrophoneTest = lazy(() => import("./pages/tests/MicrophoneTest"));
-const AudioTest = lazy(() => import("./pages/tests/AudioTest"));
-const NetworkTest = lazy(() => import("./pages/tests/NetworkTest"));
-const TouchpadTest = lazy(() => import("./pages/tests/TouchpadTest"));
-const PortsTest = lazy(() => import("./pages/tests/PortsTest"));
-const FullSystemTest = lazy(() => import("./pages/tests/FullSystemTest"));
-const Blog = lazy(() => import("./pages/Blog"));
-const BlogPost = lazy(() => import("./pages/BlogPost"));
-const About = lazy(() => import("./pages/About"));
-const Contact = lazy(() => import("./pages/Contact"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const Disclaimer = lazy(() => import("./pages/Disclaimer"));
-const DMCA = lazy(() => import("./pages/DMCA"));
-const Accessibility = lazy(() => import("./pages/Accessibility"));
-const AffiliateDisclosure = lazy(() => import("./pages/AffiliateDisclosure"));
-const EditorialPolicy = lazy(() => import("./pages/EditorialPolicy"));
+const DisplayTest = lazyRetry(() => import("./pages/tests/DisplayTest"));
+const KeyboardTest = lazyRetry(() => import("./pages/tests/KeyboardTest"));
+const CameraTest = lazyRetry(() => import("./pages/tests/CameraTest"));
+const MicrophoneTest = lazyRetry(() => import("./pages/tests/MicrophoneTest"));
+const AudioTest = lazyRetry(() => import("./pages/tests/AudioTest"));
+const NetworkTest = lazyRetry(() => import("./pages/tests/NetworkTest"));
+const TouchpadTest = lazyRetry(() => import("./pages/tests/TouchpadTest"));
+const PortsTest = lazyRetry(() => import("./pages/tests/PortsTest"));
+const FullSystemTest = lazyRetry(() => import("./pages/tests/FullSystemTest"));
+const Blog = lazyRetry(() => import("./pages/Blog"));
+const BlogPost = lazyRetry(() => import("./pages/BlogPost"));
+const About = lazyRetry(() => import("./pages/About"));
+const Contact = lazyRetry(() => import("./pages/Contact"));
+const PrivacyPolicy = lazyRetry(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazyRetry(() => import("./pages/TermsOfService"));
+const Disclaimer = lazyRetry(() => import("./pages/Disclaimer"));
+const DMCA = lazyRetry(() => import("./pages/DMCA"));
+const Accessibility = lazyRetry(() => import("./pages/Accessibility"));
+const AffiliateDisclosure = lazyRetry(() => import("./pages/AffiliateDisclosure"));
+const EditorialPolicy = lazyRetry(() => import("./pages/EditorialPolicy"));
 
-const NotFound = lazy(() => import("./pages/NotFound"));
+const NotFound = lazyRetry(() => import("./pages/NotFound"));
 
 // Optimized QueryClient configuration for high-traffic scenarios
 const queryClient = new QueryClient({
