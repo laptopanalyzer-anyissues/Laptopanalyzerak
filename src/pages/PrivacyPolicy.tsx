@@ -37,7 +37,7 @@ const PrivacyPolicy = () => {
             {/* 2. Information We Collect */}
             <PrivacyPolicySection id="info-collect" icon={Database} title="Information We Collect" highlight>
               <Callout variant="trust">
-                <strong className="text-green-400">Privacy-first approach:</strong> Laptop Analyzer does not require user accounts, and our diagnostic tests are designed to run locally in your browser. However, like most websites, certain technical data may be collected through standard web technologies and third-party services.
+                <strong className="text-success">Privacy-first approach:</strong> Laptop Analyzer does not require user accounts, and our diagnostic tests are designed to run locally in your browser. However, like most websites, certain technical data may be collected through standard web technologies and third-party services.
               </Callout>
 
               <div>

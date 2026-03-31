@@ -49,12 +49,12 @@ export function PrivacyHero() {
           </span>
           <span className="hidden sm:inline text-border">|</span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
-            <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+            <CheckCircle className="h-3.5 w-3.5 text-success" />
             AdSense compliant
           </span>
           <span className="hidden sm:inline text-border">|</span>
           <span className="flex items-center gap-1.5 text-muted-foreground">
-            <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+            <CheckCircle className="h-3.5 w-3.5 text-success" />
             GDPR-aware
           </span>
         </motion.div>

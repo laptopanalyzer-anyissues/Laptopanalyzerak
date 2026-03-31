@@ -73,7 +73,7 @@ export function Callout({ children, variant = 'info' }: CalloutProps) {
   return (
     <div className={`rounded-xl p-4 text-sm leading-relaxed ${
       variant === 'trust' 
-        ? 'bg-green-500/5 border border-green-500/15 text-green-400/90' 
+        ? 'bg-success/5 border border-success/15 text-success/90' 
         : 'bg-primary/5 border border-primary/15 text-muted-foreground'
     }`}>
       {children}
