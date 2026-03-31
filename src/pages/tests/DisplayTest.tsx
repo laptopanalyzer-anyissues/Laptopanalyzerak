@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
 import {
   ArrowLeft,
   Expand,
@@ -20,6 +22,8 @@ import {
   Type,
   Eye,
   CircleDot,
+  Keyboard,
+  Camera,
 } from "lucide-react";
 
 // Test categories

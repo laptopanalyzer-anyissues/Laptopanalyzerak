@@ -662,6 +662,16 @@ const NetworkTest = () => {
                 the <strong>90th percentile</strong> speed for accurate results matching professional tools.
               </p>
             </motion.div>
+
+            <RelatedArticles articles={[
+              { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+            ]} />
+
+            <RelatedTests tests={[
+              { title: "Ports Test", path: "/test/ports", icon: Usb, description: "Check USB & ports" },
+              { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+              { title: "Keyboard Test", path: "/test/keyboard", icon: Keyboard, description: "Test all keys" },
+            ]} />
           </div>
         </div>
       </main>
