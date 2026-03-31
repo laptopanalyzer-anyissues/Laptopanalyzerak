@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
 import {
   Dialog,
   DialogContent,
@@ -973,6 +974,12 @@ const FullSystemTest = () => {
           <RelatedArticles articles={[
             { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
             { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+            { title: "Keyboard Test", path: "/test/keyboard", icon: Keyboard, description: "Test all keys" },
+            { title: "Camera Test", path: "/test/camera", icon: Camera, description: "Check your webcam" },
           ]} />
         </div>
       </main>
