@@ -458,6 +458,9 @@ export default function BlogPostPage() {
               {slug === "online-keyboard-test" ? "Ready to Test Your Keyboard?" 
                 : slug === "touchpad-test-online" ? "Ready to Test Your Touchpad?"
                 : slug === "laptop-camera-not-working" ? "Need to Test Your Webcam?"
+                : slug === "laptop-camera-not-working-fix-webcam-test" ? "Test Your Webcam Now"
+                : slug === "camera-and-mic-test-online" ? "Test Your Camera & Mic"
+                : slug === "what-to-check-buying-used-laptop" ? "Run a Full Hardware Check"
                 : "Ready to Test Your Laptop?"}
             </h3>
             <p className="text-muted-foreground mb-4">
@@ -467,11 +470,31 @@ export default function BlogPostPage() {
                 ? "Check your touchpad movement, clicks, and gestures instantly."
                 : slug === "laptop-camera-not-working"
                 ? "Run a free browser-based camera test and find out if your webcam is working properly."
+                : slug === "laptop-camera-not-working-fix-webcam-test"
+                ? "Verify your webcam works with our instant browser-based camera test."
+                : slug === "camera-and-mic-test-online"
+                ? "Check your camera and microphone before your next call — no downloads needed."
+                : slug === "what-to-check-buying-used-laptop"
+                ? "Test display, keyboard, camera, speakers, and more — all in one session."
                 : "Run comprehensive hardware diagnostics right in your browser."}
             </p>
             <Button variant="hero" asChild>
-              <Link to={slug === "online-keyboard-test" ? "/test/keyboard" : slug === "touchpad-test-online" ? "/test/touchpad" : slug === "laptop-camera-not-working" ? "/test/camera" : "/dashboard"}>
-                {slug === "online-keyboard-test" ? "Test Your Keyboard" : slug === "touchpad-test-online" ? "Test Your Touchpad" : slug === "laptop-camera-not-working" ? "Test Your Camera" : "Start Testing Now"}
+              <Link to={
+                slug === "online-keyboard-test" ? "/test/keyboard" 
+                : slug === "touchpad-test-online" ? "/test/touchpad" 
+                : slug === "laptop-camera-not-working" ? "/test/camera" 
+                : slug === "laptop-camera-not-working-fix-webcam-test" ? "/test/camera"
+                : slug === "camera-and-mic-test-online" ? "/test/camera"
+                : slug === "what-to-check-buying-used-laptop" ? "/test/full"
+                : "/dashboard"
+              }>
+                {slug === "online-keyboard-test" ? "Test Your Keyboard" 
+                  : slug === "touchpad-test-online" ? "Test Your Touchpad" 
+                  : slug === "laptop-camera-not-working" ? "Test Your Camera"
+                  : slug === "laptop-camera-not-working-fix-webcam-test" ? "Test Your Camera"
+                  : slug === "camera-and-mic-test-online" ? "Test Camera & Mic"
+                  : slug === "what-to-check-buying-used-laptop" ? "Run Full System Test"
+                  : "Start Testing Now"}
               </Link>
             </Button>
           </motion.div>

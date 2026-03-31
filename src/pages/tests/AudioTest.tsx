@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2 } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Volume2, VolumeX, Play, Square, Music, ThumbsUp, ThumbsDown, CheckCircle2, Mic, Camera, Monitor } from "lucide-react";
 import howYouLikeThatAudio from "@/assets/audio/how-you-like-that.mp3";
 
 const AudioTest = () => {
@@ -447,6 +449,16 @@ const AudioTest = () => {
               <li>• The music test helps verify both speakers work together with dynamic audio</li>
             </ul>
           </motion.div>
+
+          <RelatedArticles articles={[
+            { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Microphone Test", path: "/test/microphone", icon: Mic, description: "Test your mic" },
+            { title: "Camera Test", path: "/test/camera", icon: Camera, description: "Check your webcam" },
+            { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+          ]} />
         </div>
       </main>
       <Footer />

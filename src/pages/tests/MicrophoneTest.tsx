@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2 } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Mic, MicOff, Play, Square, Volume2, Pause, Trash2, Camera, Monitor } from "lucide-react";
 
 // Custom themed audio player
 function AudioPlayer({ src, onClear }: { src: string; onClear: () => void }) {
@@ -412,6 +414,16 @@ const MicrophoneTest = () => {
               </div>
             </motion.div>
           </div>
+
+          <RelatedArticles articles={[
+            { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Camera Test", path: "/test/camera", icon: Camera, description: "Check your webcam" },
+            { title: "Speaker Test", path: "/test/audio", icon: Volume2, description: "Test audio output" },
+            { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+          ]} />
         </div>
       </main>
       <Footer />

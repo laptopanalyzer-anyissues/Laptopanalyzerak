@@ -4,6 +4,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -36,6 +38,8 @@ import {
   Lock,
   Unlock,
   Info,
+  Keyboard,
+  Mouse,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -882,6 +886,16 @@ const PortsTest = () => {
               </CardContent>
             </Card>
           </motion.div>
+
+          <RelatedArticles articles={[
+            { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Network Test", path: "/test/network", icon: Wifi, description: "Check speed & ping" },
+            { title: "Keyboard Test", path: "/test/keyboard", icon: Keyboard, description: "Test all keys" },
+            { title: "Touchpad Test", path: "/test/touchpad", icon: Mouse, description: "Test trackpad input" },
+          ]} />
         </div>
       </main>
       <Footer />

@@ -5,7 +5,9 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw } from "lucide-react";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw, Mic, Monitor, Volume2 } from "lucide-react";
 
 const CameraTest = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -284,6 +286,18 @@ const CameraTest = () => {
           </div>
 
           <canvas ref={canvasRef} className="hidden" />
+
+          <RelatedArticles articles={[
+            { title: "Laptop Camera Not Working? Try These 15 Fixes", slug: "laptop-camera-not-working", excerpt: "Solve webcam issues, black screen errors, missing camera drivers, and app permission problems." },
+            { title: "How to Test Your Camera and Mic Before Any Call", slug: "camera-and-mic-test-online", excerpt: "Test your camera and mic online before meetings, interviews, or classes." },
+            { title: "Fix Your Webcam & Test It Online", slug: "laptop-camera-not-working-fix-webcam-test", excerpt: "Fix black screens, permission issues, and driver errors. Then test your webcam instantly." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Microphone Test", path: "/test/microphone", icon: Mic, description: "Test your mic" },
+            { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+            { title: "Speaker Test", path: "/test/audio", icon: Volume2, description: "Test audio output" },
+          ]} />
         </div>
       </main>
       <Footer />

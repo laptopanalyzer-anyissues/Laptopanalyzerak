@@ -8,6 +8,9 @@ import { ArrowLeft, RotateCcw, CheckCircle2, Settings2 } from "lucide-react";
 import { useConfetti } from "@/hooks/useConfetti";
 import { KeyboardTypeModal } from "@/components/keyboard/KeyboardTypeModal";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
+import { RelatedTests } from "@/components/internal-links/RelatedTests";
+import { Monitor, Camera, Mouse } from "lucide-react";
 import {
   KeyboardType,
   getKeyboardLayout,
@@ -372,6 +375,17 @@ const KeyboardTest = () => {
                   )}
                 </ul>
               </motion.div>
+
+              <RelatedArticles articles={[
+                { title: "Online Keyboard Test: Check Your Keys Instantly", slug: "online-keyboard-test", excerpt: "Use the free online keyboard test to check every key instantly. Identify broken buttons." },
+                { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports before buying a used laptop." },
+              ]} />
+
+              <RelatedTests tests={[
+                { title: "Display Test", path: "/test/display", icon: Monitor, description: "Check for dead pixels" },
+                { title: "Touchpad Test", path: "/test/touchpad", icon: Mouse, description: "Test trackpad input" },
+                { title: "Camera Test", path: "/test/camera", icon: Camera, description: "Check your webcam" },
+              ]} />
             </>
           )}
         </div>
