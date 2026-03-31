@@ -766,6 +766,16 @@ const DisplayTest = () => {
               </div>
             </div>
           </motion.div>
+
+          <RelatedArticles articles={[
+            { title: "Used Laptop Buying Guide: How to Test Hardware Before You Buy", slug: "what-to-check-buying-used-laptop", excerpt: "Learn how to test the screen, keyboard, speakers, and ports instantly before buying a used laptop." },
+          ]} />
+
+          <RelatedTests tests={[
+            { title: "Keyboard Test", path: "/test/keyboard", icon: Keyboard, description: "Test all keys" },
+            { title: "Camera Test", path: "/test/camera", icon: Camera, description: "Check your webcam" },
+            { title: "Full System Test", path: "/test/full", icon: Monitor, description: "Complete diagnostic" },
+          ]} />
         </div>
       </main>
       <Footer />
