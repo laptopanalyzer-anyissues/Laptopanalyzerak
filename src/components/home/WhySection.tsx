@@ -1,0 +1,101 @@
+import { motion } from "framer-motion";
+import { Zap, ShieldCheck, Download, Gauge } from "lucide-react";
+
+const reasons = [
+  {
+    icon: Zap,
+    title: "Instant Browser Tests",
+    description:
+      "Open the page and start testing. No accounts, no installs, no waiting.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Fully Private",
+    description:
+      "Every test runs locally in your browser. No data leaves your device.",
+  },
+  {
+    icon: Download,
+    title: "Zero Downloads",
+    description:
+      "No software to install or update. Works on any modern browser, any OS.",
+  },
+  {
+    icon: Gauge,
+    title: "Comprehensive Coverage",
+    description:
+      "8 diagnostic tests covering display, keyboard, camera, mic, audio, network, touchpad, and ports.",
+  },
+];
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.45, delay: i * 0.1, ease: "easeOut" },
+  }),
+};
+
+export function WhySection() {
+  return (
+    <section className="py-24" aria-labelledby="why-heading">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <motion.header
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-14"
+        >
+          <h2
+            id="why-heading"
+            className="text-3xl md:text-4xl font-bold text-foreground mb-4"
+          >
+            Why Laptop Analyzer
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            The fastest way to verify your laptop hardware is working — before
+            you buy, sell, or troubleshoot.
+          </p>
+        </motion.header>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {reasons.map((reason, index) => (
+            <motion.div
+              key={index}
+              custom={index}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className="group relative p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+            >
+              <div className="flex items-start gap-4">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 6 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                  className="flex-shrink-0 h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center"
+                >
+                  <reason.icon
+                    className="h-6 w-6 text-primary"
+                    aria-hidden="true"
+                  />
+                </motion.div>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                    {reason.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {reason.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
