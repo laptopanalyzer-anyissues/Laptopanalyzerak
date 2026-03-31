@@ -91,7 +91,7 @@ const About = () => (
             <div className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-[0.04] pointer-events-none" style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }} />
             <h2 className="text-xl font-bold text-foreground mb-2">Why We Built This</h2>
             <p className="text-muted-foreground leading-relaxed max-w-2xl">
-              Buying a used laptop? Troubleshooting a hardware issue? You shouldn't need expensive software to check if your screen, speakers, or webcam actually work. Laptop Analyzer puts professional diagnostics one click away.
+              Buying a used laptop? Troubleshooting a hardware issue? You shouldn't need expensive software or a trip to a repair shop to check if your screen, speakers, or webcam actually work. Laptop Analyzer puts professional-grade diagnostics one click away — free, private, and browser-based.
             </p>
           </div>
         </motion.section>
