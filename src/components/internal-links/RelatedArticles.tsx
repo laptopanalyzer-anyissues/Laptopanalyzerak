@@ -1,0 +1,52 @@
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { BookOpen, ArrowRight } from "lucide-react";
+
+interface RelatedArticle {
+  title: string;
+  slug: string;
+  excerpt: string;
+}
+
+interface RelatedArticlesProps {
+  articles: RelatedArticle[];
+}
+
+export function RelatedArticles({ articles }: RelatedArticlesProps) {
+  if (articles.length === 0) return null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+      className="mt-8"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
+          Helpful Guides
+        </h3>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {articles.map((article) => (
+          <Link
+            key={article.slug}
+            to={`/blog/${article.slug}`}
+            className="group p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all duration-200"
+          >
+            <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-1.5">
+              {article.title}
+            </h4>
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+              {article.excerpt}
+            </p>
+            <span className="inline-flex items-center gap-1 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              Read guide <ArrowRight className="h-3 w-3" />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
