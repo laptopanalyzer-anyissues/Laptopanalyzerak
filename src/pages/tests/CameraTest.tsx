@@ -8,6 +8,8 @@ import { SEOHead, structuredData } from "@/components/SEOHead";
 import { RelatedArticles } from "@/components/internal-links/RelatedArticles";
 import { RelatedTests } from "@/components/internal-links/RelatedTests";
 import { ArrowLeft, Camera, FlipHorizontal, Download, VideoOff, RefreshCw, Mic, Monitor, Volume2 } from "lucide-react";
+import { TestPageHero } from "@/components/test/TestPageHero";
+import { TestPageCTA } from "@/components/test/TestPageCTA";
 
 const CameraTest = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
