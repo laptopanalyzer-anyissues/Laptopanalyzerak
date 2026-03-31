@@ -80,8 +80,9 @@ function markdownToHtml(content) {
         i++;
       }
       const rows = tableLines
-        .filter(l => !l.match(/^\|[\s\-:|]+\|$/))
-        .map(l => l.split('|').filter((_, ci) => ci > 0 && ci < l.split('|').length - 1).map(c => c.trim()));
+        .filter(l => !l.match(/^\|[\s\-:|]*\|[\s\-:|]*\|?$/) && l.replace(/\|/g, '').trim().length > 0)
+        .map(l => l.split('|').filter((_, ci) => ci > 0 && ci < l.split('|').length - 1).map(c => c.trim()))
+        .filter(r => r.some(c => c.length > 0));
       
       if (rows.length > 0) {
         const headerRow = rows[0];
