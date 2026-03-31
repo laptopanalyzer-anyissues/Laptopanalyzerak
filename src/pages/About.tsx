@@ -174,7 +174,7 @@ const About = () => (
         {/* CTA */}
         <motion.section initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">See What Your Laptop Can Do</h2>
-          <p className="text-sm text-muted-foreground mb-7">Full hardware diagnostics — right in your browser.</p>
+          <p className="text-sm text-muted-foreground mb-7">8 hardware diagnostics — right in your browser.</p>
           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button variant="hero" size="lg" asChild>
               <Link to="/dashboard" className="inline-flex items-center gap-2">

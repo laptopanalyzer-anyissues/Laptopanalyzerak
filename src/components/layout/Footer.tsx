@@ -33,8 +33,7 @@ export const Footer = forwardRef<HTMLElement>((_, ref) => {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mb-5">
-              The most comprehensive laptop diagnostic tool. Test every component
-              of your device right in your browser.
+              Free, browser-based laptop hardware diagnostics. Test your display, keyboard, camera, speakers, and more — no installs needed.
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 text-success" aria-hidden="true" />
