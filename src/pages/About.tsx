@@ -77,10 +77,11 @@ const About = () => (
             <Laptop className="h-6 w-6 text-primary-foreground" />
           </motion.div>
           <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3">
-            Hardware Diagnostics, In Your Browser
+            Hardware Diagnostics,{" "}
+            <span className="gradient-text">In Your Browser</span>
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Laptop Analyzer helps you verify every component of your laptop — display, keyboard, camera, audio, and more — without installing a thing.
+            Verify every component of your laptop — display, keyboard, camera, audio, and more — without installing a thing.
           </p>
         </motion.section>
 
