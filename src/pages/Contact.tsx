@@ -371,6 +371,19 @@ const Contact = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="relative space-y-5">
+                {/* Honeypot field — hidden from users, catches bots */}
+                <div className="absolute opacity-0 h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+                  <label htmlFor="website">Website</label>
+                  <input
+                    type="text"
+                    id="website"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    autoComplete="off"
+                    tabIndex={-1}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <motion.div className="space-y-1.5" whileFocus={{ scale: 1 }}>
                     <Label htmlFor="name" className="text-xs font-medium">Name</Label>
