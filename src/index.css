@@ -166,6 +166,8 @@
 @layer components {
   .glass-card {
     @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg rounded-2xl;
+    box-shadow: 0 4px 24px -4px hsl(var(--background) / 0.5), 0 1px 2px hsl(0 0% 0% / 0.06);
+  }
   }
 
   .gradient-text {
