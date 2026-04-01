@@ -172,7 +172,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 
 export function FeaturesSection() {
   return (
-    <section id="how-it-works" className="py-24 bg-muted/30" aria-labelledby="features-heading">
+    <section id="how-it-works" className="py-24" aria-labelledby="features-heading">
       <div className="container mx-auto px-4">
         <motion.header
           initial={{ opacity: 0, y: 30 }}

@@ -9,19 +9,21 @@ import { LatestArticlesSection } from "@/components/home/LatestArticlesSection";
 import { PrivacySection } from "@/components/home/PrivacySection";
 import { FinalCTASection } from "@/components/home/FinalCTASection";
 import { FAQSection } from "@/components/home/FAQSection";
+import { HomepageBackground } from "@/components/home/HomepageBackground";
 import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <SEOHead
         title="Laptop Analyzer – Test & Check Your Laptop Hardware Online (Free)"
         description="Run a complete laptop test online to check your screen, speakers, mic, and keyboard. The easiest way to test a laptop is without downloading software. Free & instant."
         keywords="laptop analyzer, laptop checker, laptop checker online, laptop test online, test laptop online, check laptop hardware, laptop hardware test, free laptop checker, laptop diagnostic tool, dead pixel test, keyboard tester, webcam test, mic test, speaker test"
         canonicalPath="/"
       />
+      <HomepageBackground />
       <Header />
-      <main id="main-content" role="main" aria-label="Laptop Checker Home">
+      <main id="main-content" role="main" aria-label="Laptop Checker Home" className="relative z-10">
         <HeroSection />
         <FeaturesSection />
         <WhySection />
