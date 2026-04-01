@@ -4,24 +4,23 @@ import { MousePointer2, Play, ClipboardCheck } from "lucide-react";
 const steps = [
   {
     icon: MousePointer2,
-    step: "01",
+    step: 1,
     title: "Pick a Test",
     description: "Choose from 8 hardware diagnostics — or run them all at once.",
   },
   {
     icon: Play,
-    step: "02",
+    step: 2,
     title: "Run It",
     description: "Each test runs directly in your browser. No downloads required.",
   },
   {
     icon: ClipboardCheck,
-    step: "03",
+    step: 3,
     title: "Get Results",
     description: "Clear, immediate feedback on whether your hardware works.",
   },
 ];
-
 export function HowItWorksSection() {
   return (
     <section className="py-20 bg-muted/30" aria-labelledby="how-works-heading">
