@@ -21,8 +21,9 @@ const Index = () => {
         keywords="laptop analyzer, laptop checker, laptop checker online, laptop test online, test laptop online, check laptop hardware, laptop hardware test, free laptop checker, laptop diagnostic tool, dead pixel test, keyboard tester, webcam test, mic test, speaker test"
         canonicalPath="/"
       />
+      <HomepageBackground />
       <Header />
-      <main id="main-content" role="main" aria-label="Laptop Checker Home">
+      <main id="main-content" role="main" aria-label="Laptop Checker Home" className="relative z-10">
         <HeroSection />
         <FeaturesSection />
         <WhySection />
