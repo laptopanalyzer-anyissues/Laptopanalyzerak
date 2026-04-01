@@ -122,7 +122,7 @@ export function HeroSection() {
                 asChild
                 className="border-border/60 hover:border-primary/40"
               >
-                <Link to="#how-it-works">
+                <Link to="/dashboard">
                   <span>View All Tests</span>
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </Link>
