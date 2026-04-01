@@ -58,16 +58,18 @@ export function HowItWorksSection() {
                 <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-px bg-border" />
               )}
 
-              <motion.div
-                whileHover={{ scale: 1.08, y: -4 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="relative inline-flex items-center justify-center h-20 w-20 rounded-2xl bg-card border border-border shadow-md mb-6 mx-auto group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all duration-300"
-              >
-                <s.icon className="h-8 w-8 text-primary" aria-hidden="true" />
-                <span className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow">
-                  {s.step}
+              <div className="flex flex-col items-center mb-6">
+                <span className="text-sm font-semibold text-primary mb-3 tracking-wide">
+                  Step {s.step}
                 </span>
-              </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.06, y: -3 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-card border border-border/60 shadow-md group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all duration-300"
+                >
+                  <s.icon className="h-7 w-7 text-primary" aria-hidden="true" />
+                </motion.div>
+              </div>
 
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 {s.title}
