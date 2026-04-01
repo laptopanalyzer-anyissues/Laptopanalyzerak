@@ -33,7 +33,7 @@ const benefits = [
 
 export function SEOContentSection() {
   return (
-    <section className="py-16 bg-background" aria-labelledby="seo-how-to">
+    <section className="py-16" aria-labelledby="seo-how-to">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* What You Can Test */}
         <motion.div

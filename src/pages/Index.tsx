@@ -22,15 +22,34 @@ const Index = () => {
       />
       <Header />
       <main id="main-content" role="main" aria-label="Laptop Checker Home">
-        <HeroSection />
+        {/* Grid section (1) — Hero */}
+        <div className="homepage-grid-section homepage-grid-section-first">
+          <HeroSection />
+        </div>
+        {/* Clean section (2) */}
         <FeaturesSection />
-        <WhySection />
+        {/* Grid section (3) */}
+        <div className="homepage-grid-section">
+          <WhySection />
+        </div>
+        {/* Clean section (4) */}
         <HowItWorksSection />
-        <SEOContentSection />
+        {/* Grid section (5) */}
+        <div className="homepage-grid-section">
+          <SEOContentSection />
+        </div>
+        {/* Clean section (6) */}
         <LatestArticlesSection />
-        <PrivacySection />
+        {/* Grid section (7) */}
+        <div className="homepage-grid-section">
+          <PrivacySection />
+        </div>
+        {/* Clean section (8) */}
         <FinalCTASection />
-        <FAQSection />
+        {/* Grid section (9) — Last */}
+        <div className="homepage-grid-section homepage-grid-section-last">
+          <FAQSection />
+        </div>
       </main>
       <Footer />
     </div>

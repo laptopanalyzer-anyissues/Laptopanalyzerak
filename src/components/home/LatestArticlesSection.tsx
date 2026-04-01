@@ -22,7 +22,7 @@ export function LatestArticlesSection() {
   if (!posts || posts.length === 0) return null;
 
   return (
-    <section className="py-20 bg-muted/30" aria-labelledby="latest-articles">
+    <section className="py-20" aria-labelledby="latest-articles">
       <div className="container mx-auto px-4 max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
