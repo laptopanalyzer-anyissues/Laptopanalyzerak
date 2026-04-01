@@ -168,7 +168,6 @@
     @apply bg-card/80 backdrop-blur-xl border border-border/50 shadow-lg rounded-2xl;
     box-shadow: 0 4px 24px -4px hsl(var(--background) / 0.5), 0 1px 2px hsl(0 0% 0% / 0.06);
   }
-  }
 
   .gradient-text {
     @apply bg-clip-text text-transparent;
@@ -256,5 +255,4 @@
     from { box-shadow: 0 0 20px hsl(199 89% 48% / 0.2); }
     to { box-shadow: 0 0 40px hsl(199 89% 48% / 0.4); }
   }
-}
 }
