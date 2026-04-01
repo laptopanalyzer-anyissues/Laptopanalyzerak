@@ -354,8 +354,10 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                      maxLength={100}
+                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.name ? "border-destructive" : ""}`}
                     />
+                    {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
                   </motion.div>
                   <div className="space-y-1.5">
                     <Label htmlFor="email" className="text-xs font-medium">Email</Label>
@@ -367,8 +369,10 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                      maxLength={254}
+                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.email ? "border-destructive" : ""}`}
                     />
+                    {formErrors.email && <p className="text-xs text-destructive">{formErrors.email}</p>}
                   </div>
                 </div>
 
@@ -381,8 +385,10 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                    maxLength={200}
+                    className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.subject ? "border-destructive" : ""}`}
                   />
+                  {formErrors.subject && <p className="text-xs text-destructive">{formErrors.subject}</p>}
                 </div>
 
                 <div className="space-y-1.5">
@@ -395,8 +401,10 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                    maxLength={5000}
+                    className={`transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.message ? "border-destructive" : ""}`}
                   />
+                  {formErrors.message && <p className="text-xs text-destructive">{formErrors.message}</p>}
                 </div>
 
                 <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
