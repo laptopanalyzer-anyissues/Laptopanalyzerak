@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { isValidEmail, isValidLength, hasXSSPatterns } from "@/lib/security";
-import { useRateLimit } from "@/hooks/useRateLimit";
+import { supabase } from "@/integrations/supabase/client";
 
 const categories = [
   {
