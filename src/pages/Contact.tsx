@@ -170,6 +170,7 @@ const Contact = () => {
     }
   };
 
+  return (
     <div className="min-h-screen bg-background">
       <SEOHead
         title="Contact Support - LaptopAnalyzer"
