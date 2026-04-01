@@ -438,7 +438,7 @@ const Contact = () => {
                     type="submit"
                     variant="hero"
                     className="w-full h-12 text-sm font-semibold group"
-                    disabled={isSubmitting || isBlocked}
+                    disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
