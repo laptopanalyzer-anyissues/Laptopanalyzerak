@@ -22,6 +22,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { isValidEmail, isValidLength, hasXSSPatterns } from "@/lib/security";
+import { useRateLimit } from "@/hooks/useRateLimit";
 
 const categories = [
   {
@@ -70,13 +72,65 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const { checkLimit, isBlocked, retryAfter } = useRateLimit("contact_form", {
+    maxRequests: 3,
+    windowMs: 60000,
+    blockDurationMs: 120000,
+  });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  ) => {
+    const { name, value } = e.target;
+    setFormData((p) => ({ ...p, [name]: value }));
+    // Clear error on change
+    if (formErrors[name]) {
+      setFormErrors((p) => ({ ...p, [name]: "" }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    if (!isValidLength(formData.name.trim(), 1, 100)) {
+      errors.name = "Name is required (max 100 characters)";
+    }
+    if (!isValidEmail(formData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    if (!isValidLength(formData.subject.trim(), 1, 200)) {
+      errors.subject = "Subject is required (max 200 characters)";
+    }
+    if (!isValidLength(formData.message.trim(), 10, 5000)) {
+      errors.message = "Message must be 10–5,000 characters";
+    }
+
+    // Check for XSS patterns in all fields
+    const allValues = [formData.name, formData.email, formData.subject, formData.message];
+    if (allValues.some(hasXSSPatterns)) {
+      errors.message = "Your message contains content that cannot be processed.";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
+    if (!checkLimit()) {
+      toast({
+        title: "Too many submissions",
+        description: `Please wait ${retryAfter ?? 60} seconds before trying again.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     await new Promise((r) => setTimeout(r, 1000));
     toast({
@@ -84,6 +138,7 @@ const Contact = () => {
       description: "We'll get back to you within 24–48 hours.",
     });
     setFormData({ name: "", email: "", subject: "", message: "" });
+    setFormErrors({});
     setSelected(null);
     setIsSubmitting(false);
   };
@@ -299,8 +354,10 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                      maxLength={100}
+                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.name ? "border-destructive" : ""}`}
                     />
+                    {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
                   </motion.div>
                   <div className="space-y-1.5">
                     <Label htmlFor="email" className="text-xs font-medium">Email</Label>
@@ -312,8 +369,10 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                      maxLength={254}
+                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.email ? "border-destructive" : ""}`}
                     />
+                    {formErrors.email && <p className="text-xs text-destructive">{formErrors.email}</p>}
                   </div>
                 </div>
 
@@ -326,8 +385,10 @@ const Contact = () => {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                    maxLength={200}
+                    className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.subject ? "border-destructive" : ""}`}
                   />
+                  {formErrors.subject && <p className="text-xs text-destructive">{formErrors.subject}</p>}
                 </div>
 
                 <div className="space-y-1.5">
@@ -340,8 +401,10 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40"
+                    maxLength={5000}
+                    className={`transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.message ? "border-destructive" : ""}`}
                   />
+                  {formErrors.message && <p className="text-xs text-destructive">{formErrors.message}</p>}
                 </div>
 
                 <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
@@ -349,7 +412,7 @@ const Contact = () => {
                     type="submit"
                     variant="hero"
                     className="w-full h-12 text-sm font-semibold group"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isBlocked}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">

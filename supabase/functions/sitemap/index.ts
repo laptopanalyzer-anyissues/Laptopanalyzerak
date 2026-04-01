@@ -86,6 +86,9 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     console.error("Sitemap generation error:", error);
-    return new Response("Error generating sitemap", { status: 500 });
+    return new Response("Internal server error", {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "text/plain" },
+    });
   }
 });
