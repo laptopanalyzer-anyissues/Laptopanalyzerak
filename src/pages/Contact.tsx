@@ -66,6 +66,7 @@ const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [honeypot, setHoneypot] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -73,75 +74,6 @@ const Contact = () => {
     message: "",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  const { checkLimit, isBlocked, retryAfter } = useRateLimit("contact_form", {
-    maxRequests: 3,
-    windowMs: 60000,
-    blockDurationMs: 120000,
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
-    // Clear error on change
-    if (formErrors[name]) {
-      setFormErrors((p) => ({ ...p, [name]: "" }));
-    }
-  };
-
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!isValidLength(formData.name.trim(), 1, 100)) {
-      errors.name = "Name is required (max 100 characters)";
-    }
-    if (!isValidEmail(formData.email)) {
-      errors.email = "Please enter a valid email address";
-    }
-    if (!isValidLength(formData.subject.trim(), 1, 200)) {
-      errors.subject = "Subject is required (max 200 characters)";
-    }
-    if (!isValidLength(formData.message.trim(), 10, 5000)) {
-      errors.message = "Message must be 10–5,000 characters";
-    }
-
-    // Check for XSS patterns in all fields
-    const allValues = [formData.name, formData.email, formData.subject, formData.message];
-    if (allValues.some(hasXSSPatterns)) {
-      errors.message = "Your message contains content that cannot be processed.";
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) return;
-
-    if (!checkLimit()) {
-      toast({
-        title: "Too many submissions",
-        description: `Please wait ${retryAfter ?? 60} seconds before trying again.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    toast({
-      title: "Message sent",
-      description: "We'll get back to you within 24–48 hours.",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setFormErrors({});
-    setSelected(null);
-    setIsSubmitting(false);
-  };
 
   return (
     <div className="min-h-screen bg-background">
