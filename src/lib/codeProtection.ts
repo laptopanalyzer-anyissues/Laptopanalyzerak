@@ -63,7 +63,7 @@ export const initializeCodeProtection = (): void => {
     watermarkElement.setAttribute('data-la-sig', CODE_FINGERPRINTS.signature);
     watermarkElement.setAttribute('data-protected', 'true');
     watermarkElement.style.display = 'none';
-    watermarkElement.innerHTML = `<!-- LaptopAnalyzer Proprietary Code - ID: ${CODE_FINGERPRINTS.id} -->`;
+    watermarkElement.textContent = `LaptopAnalyzer Proprietary Code - ID: ${CODE_FINGERPRINTS.id}`;
     document.body.appendChild(watermarkElement);
     
     // Add meta watermark

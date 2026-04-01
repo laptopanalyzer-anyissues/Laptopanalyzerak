@@ -29,4 +29,10 @@
 # Allow all search engine bots
 <IfModule mod_headers.c>
   Header set X-Robots-Tag "index, follow"
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+  Header set Permissions-Policy "camera=(self), microphone=(self), geolocation=(), payment=(), usb=(self), bluetooth=(self)"
+  Header set X-DNS-Prefetch-Control "on"
 </IfModule>
