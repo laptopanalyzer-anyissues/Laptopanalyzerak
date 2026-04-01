@@ -23,7 +23,7 @@ const steps = [
 ];
 export function HowItWorksSection() {
   return (
-    <section className="py-20 bg-muted/30" aria-labelledby="how-works-heading">
+    <section className="py-20" aria-labelledby="how-works-heading">
       <div className="container mx-auto px-4 max-w-5xl">
         <motion.header
           initial={{ opacity: 0, y: 20 }}

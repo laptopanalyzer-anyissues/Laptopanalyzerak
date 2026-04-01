@@ -232,6 +232,44 @@
   }
 }
 
+@layer components {
+  /* Homepage alternating grid section */
+  .homepage-grid-section {
+    position: relative;
+  }
+
+  .homepage-grid-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--primary) / 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .homepage-grid-section > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* First grid section — fade from top */
+  .homepage-grid-section-first::before {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 85%, transparent 100%);
+  }
+
+  /* Last grid section — fade to bottom */
+  .homepage-grid-section-last::before {
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 70%, transparent 100%);
+  }
+}
+
 @layer utilities {
   .animate-float {
     animation: float 6s ease-in-out infinite;
