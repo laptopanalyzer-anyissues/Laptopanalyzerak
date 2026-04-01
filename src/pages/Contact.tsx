@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { SEOHead, structuredData } from "@/components/SEOHead";
 import { isValidEmail, isValidLength, hasXSSPatterns } from "@/lib/security";
-import { useRateLimit } from "@/hooks/useRateLimit";
+import { supabase } from "@/integrations/supabase/client";
 
 const categories = [
   {
@@ -66,6 +66,7 @@ const Contact = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [honeypot, setHoneypot] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -74,18 +75,11 @@ const Contact = () => {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  const { checkLimit, isBlocked, retryAfter } = useRateLimit("contact_form", {
-    maxRequests: 3,
-    windowMs: 60000,
-    blockDurationMs: 120000,
-  });
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
-    // Clear error on change
     if (formErrors[name]) {
       setFormErrors((p) => ({ ...p, [name]: "" }));
     }
@@ -107,7 +101,6 @@ const Contact = () => {
       errors.message = "Message must be 10–5,000 characters";
     }
 
-    // Check for XSS patterns in all fields
     const allValues = [formData.name, formData.email, formData.subject, formData.message];
     if (allValues.some(hasXSSPatterns)) {
       errors.message = "Your message contains content that cannot be processed.";
@@ -122,25 +115,59 @@ const Contact = () => {
 
     if (!validateForm()) return;
 
-    if (!checkLimit()) {
+    setIsSubmitting(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("contact-form", {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          website: honeypot, // honeypot field
+        },
+      });
+
+      if (error) {
+        const errorBody = typeof error === "object" && "context" in error
+          ? await (error as any).context?.json?.().catch(() => null)
+          : null;
+
+        if (errorBody?.error === "Too many requests. Please try again later.") {
+          toast({
+            title: "Too many submissions",
+            description: "Please wait a few minutes before trying again.",
+            variant: "destructive",
+          });
+        } else if (errorBody?.errors) {
+          setFormErrors(errorBody.errors);
+        } else {
+          toast({
+            title: "Something went wrong",
+            description: "Please try again later.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
       toast({
-        title: "Too many submissions",
-        description: `Please wait ${retryAfter ?? 60} seconds before trying again.`,
+        title: "Message sent",
+        description: "We'll get back to you within 24–48 hours.",
+      });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+      setHoneypot("");
+      setFormErrors({});
+      setSelected(null);
+    } catch {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    toast({
-      title: "Message sent",
-      description: "We'll get back to you within 24–48 hours.",
-    });
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setFormErrors({});
-    setSelected(null);
-    setIsSubmitting(false);
   };
 
   return (
@@ -344,6 +371,19 @@ const Contact = () => {
               </div>
 
               <form onSubmit={handleSubmit} className="relative space-y-5">
+                {/* Honeypot field — hidden from users, catches bots */}
+                <div className="absolute opacity-0 h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+                  <label htmlFor="website">Website</label>
+                  <input
+                    type="text"
+                    id="website"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    autoComplete="off"
+                    tabIndex={-1}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <motion.div className="space-y-1.5" whileFocus={{ scale: 1 }}>
                     <Label htmlFor="name" className="text-xs font-medium">Name</Label>
@@ -412,7 +452,7 @@ const Contact = () => {
                     type="submit"
                     variant="hero"
                     className="w-full h-12 text-sm font-semibold group"
-                    disabled={isSubmitting || isBlocked}
+                    disabled={isSubmitting}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
