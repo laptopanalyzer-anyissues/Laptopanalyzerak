@@ -9,11 +9,12 @@ import { LatestArticlesSection } from "@/components/home/LatestArticlesSection";
 import { PrivacySection } from "@/components/home/PrivacySection";
 import { FinalCTASection } from "@/components/home/FinalCTASection";
 import { FAQSection } from "@/components/home/FAQSection";
+import { HomepageBackground } from "@/components/home/HomepageBackground";
 import { SEOHead } from "@/components/SEOHead";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <SEOHead
         title="Laptop Analyzer – Test & Check Your Laptop Hardware Online (Free)"
         description="Run a complete laptop test online to check your screen, speakers, mic, and keyboard. The easiest way to test a laptop is without downloading software. Free & instant."
