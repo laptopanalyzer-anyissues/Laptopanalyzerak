@@ -39,7 +39,7 @@ const Index = () => {
         canonicalPath="/"
       />
       <Header />
-      <main id="main-content" role="main" aria-label="Laptop Checker Home">
+      <main id="main-content" role="main" aria-label="Laptop Checker Home" className="relative z-10">
         <HeroSection />
         <FeaturesSection />
         <WhySection />
