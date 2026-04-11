@@ -310,8 +310,9 @@ export default function BlogPostPage() {
         ogType="article"
         publishedTime={post.published_at || undefined}
         ogImage={post.cover_image || undefined}
+        slug={post.slug}
         structuredData={structuredData.article(
-          post.title,
+          getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
           post.excerpt || "",
           `/blog/${post.slug}`,
           post.published_at || new Date().toISOString(),
