@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
 import { SEOHead, structuredData } from "@/components/SEOHead";
-import { getSEOTitle } from "@/lib/seoTitle";
+import { getSEOTitle, getSEODescription } from "@/lib/seoTitle";
 import {
   Accordion,
   AccordionContent,
@@ -305,7 +305,7 @@ export default function BlogPostPage() {
     <div className="min-h-screen bg-background">
       <SEOHead
         title={post.title}
-        description={post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`}
+        description={getSEODescription(post.slug) || post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`}
         canonicalPath={`/blog/${post.slug}`}
         ogType="article"
         publishedTime={post.published_at || undefined}
@@ -313,7 +313,7 @@ export default function BlogPostPage() {
         slug={post.slug}
         structuredData={structuredData.article(
           getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
-          post.excerpt || "",
+          getSEODescription(post.slug) || post.excerpt || "",
           `/blog/${post.slug}`,
           post.published_at || new Date().toISOString(),
           undefined,
