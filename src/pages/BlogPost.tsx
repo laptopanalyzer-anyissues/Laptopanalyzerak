@@ -313,7 +313,7 @@ export default function BlogPostPage() {
         slug={post.slug}
         structuredData={structuredData.article(
           getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
-          post.excerpt || "",
+          getSEODescription(post.slug) || post.excerpt || "",
           `/blog/${post.slug}`,
           post.published_at || new Date().toISOString(),
           undefined,
