@@ -25,6 +25,16 @@ const TITLE_OVERRIDES = {
   'what-to-check-buying-used-laptop': 'Used Laptop Buying Checklist',
 };
 
+const DESCRIPTION_OVERRIDES = {
+  'laptop-keyboard-not-working': 'Laptop keyboard not working on Windows 11 or 10? Try these 11 practical fixes to solve typing issues and hardware lag. Test your keys at Laptop Analyzer.',
+  'laptop-camera-not-working': 'Laptop camera not working? Fix black screens and driver errors with these 15 proven fixes. Then test your webcam instantly online with Laptop Analyzer.',
+};
+
+function getSEODescription(slug, fallback) {
+  if (slug && DESCRIPTION_OVERRIDES[slug]) return DESCRIPTION_OVERRIDES[slug];
+  return fallback;
+}
+
 function getSEOTitle(title, slug) {
   if (slug && TITLE_OVERRIDES[slug]) {
     return `${TITLE_OVERRIDES[slug]}${BRAND_SUFFIX}`;
@@ -177,7 +187,7 @@ function generateBlogPostHtml(post) {
   const title = escapeHtml(post.title);
   const seoTitleEscaped = escapeHtml(seoTitle);
   const fullTitle = seoTitleEscaped;
-  const description = escapeHtml(post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`);
+  const description = escapeHtml(getSEODescription(post.slug, post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`));
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
   const ogImage = post.cover_image || `${SITE_URL}/og-image.png`;
   const publishedAt = post.published_at || new Date().toISOString();

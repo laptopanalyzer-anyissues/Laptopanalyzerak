@@ -13,6 +13,22 @@ const TITLE_OVERRIDES: Record<string, string> = {
   "what-to-check-buying-used-laptop": "Used Laptop Buying Checklist",
 };
 
+// Manual description overrides for specific blog posts
+const DESCRIPTION_OVERRIDES: Record<string, string> = {
+  "laptop-keyboard-not-working": "Laptop keyboard not working on Windows 11 or 10? Try these 11 practical fixes to solve typing issues and hardware lag. Test your keys at Laptop Analyzer.",
+  "laptop-camera-not-working": "Laptop camera not working? Fix black screens and driver errors with these 15 proven fixes. Then test your webcam instantly online with Laptop Analyzer.",
+};
+
+/**
+ * Returns a manually overridden description for a blog post, or null if none exists.
+ */
+export function getSEODescription(slug?: string): string | null {
+  if (slug && DESCRIPTION_OVERRIDES[slug]) {
+    return DESCRIPTION_OVERRIDES[slug];
+  }
+  return null;
+}
+
 /**
  * Returns a title that fits within 60 characters including brand suffix.
  * Uses manual overrides first, then auto-truncates if needed.
