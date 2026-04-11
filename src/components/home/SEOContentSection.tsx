@@ -51,7 +51,7 @@ export function SEOContentSection() {
             How to Test a Laptop Online with Laptop Analyzer
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-8">
-            Laptop Analyzer is a free laptop checker online that helps you verify essential hardware components directly in your browser — no software to install. Explore our{" "}
+            Laptop Analyzer is a free online laptop diagnostics tool that helps you verify essential hardware components directly in your browser — no software to install. Explore our{" "}
             <Link to="/blog" className="text-primary hover:underline font-medium">
               guides and articles
             </Link>{" "}
