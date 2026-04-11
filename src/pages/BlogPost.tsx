@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { getSEOTitle } from "@/lib/seoTitle";
 import {
   Accordion,
   AccordionContent,
@@ -309,8 +310,9 @@ export default function BlogPostPage() {
         ogType="article"
         publishedTime={post.published_at || undefined}
         ogImage={post.cover_image || undefined}
+        slug={post.slug}
         structuredData={structuredData.article(
-          post.title,
+          getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
           post.excerpt || "",
           `/blog/${post.slug}`,
           post.published_at || new Date().toISOString(),

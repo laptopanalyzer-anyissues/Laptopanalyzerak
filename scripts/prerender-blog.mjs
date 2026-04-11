@@ -16,6 +16,28 @@ const SUPABASE_URL = 'https://bcgiweqxociljuheyxwz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJjZ2l3ZXF4b2NpbGp1aGV5eHd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxODcwNTksImV4cCI6MjA4Mjc2MzA1OX0.2iada8dArrf7In9eJTskKvnE8uzexoisc-XBBfl0tGA';
 const SITE_URL = 'https://laptopanalyzer.com';
 
+// ── SEO Title Logic (must match src/lib/seoTitle.ts) ──
+const BRAND_SUFFIX = ' | Laptop Analyzer';
+const MAX_TITLE_LENGTH = 60;
+const TITLE_OVERRIDES = {
+  'laptop-keyboard-not-working': 'Keyboard Fix Guide: 11 Practical Tips',
+  'touchpad-test-online': 'Free Online Touchpad Test Tool',
+  'what-to-check-buying-used-laptop': 'Used Laptop Buying Checklist',
+};
+
+function getSEOTitle(title, slug) {
+  if (slug && TITLE_OVERRIDES[slug]) {
+    return `${TITLE_OVERRIDES[slug]}${BRAND_SUFFIX}`;
+  }
+  const full = `${title}${BRAND_SUFFIX}`;
+  if (full.length <= MAX_TITLE_LENGTH) return full;
+  const maxPart = MAX_TITLE_LENGTH - BRAND_SUFFIX.length;
+  let shortened = title.slice(0, maxPart).trim();
+  const lastSpace = shortened.lastIndexOf(' ');
+  if (lastSpace > maxPart * 0.6) shortened = shortened.slice(0, lastSpace);
+  return `${shortened}${BRAND_SUFFIX}`;
+}
+
 async function fetchBlogPosts() {
   const url = `${SUPABASE_URL}/rest/v1/blog_posts?select=id,title,slug,excerpt,content,cover_image,published_at,blog_categories(name,slug)&published=eq.true&order=published_at.desc`;
   const res = await fetch(url, {
@@ -151,8 +173,10 @@ function formatDate(dateString) {
 }
 
 function generateBlogPostHtml(post) {
+  const seoTitle = getSEOTitle(post.title, post.slug);
   const title = escapeHtml(post.title);
-  const fullTitle = `${title} | Laptop Analyzer`;
+  const seoTitleEscaped = escapeHtml(seoTitle);
+  const fullTitle = seoTitleEscaped;
   const description = escapeHtml(post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`);
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
   const ogImage = post.cover_image || `${SITE_URL}/og-image.png`;
@@ -163,7 +187,7 @@ function generateBlogPostHtml(post) {
   const structuredData = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": post.title,
+    "headline": seoTitle.replace(BRAND_SUFFIX, ''),
     "description": post.excerpt || '',
     "url": canonicalUrl,
     "datePublished": publishedAt,
