@@ -327,7 +327,8 @@
     </noscript>
     <div id="root">
       <!-- Static pre-render fallback for search engine crawlers -->
-      <div id="seo-fallback" style="font-family: system-ui, -apple-system, sans-serif; color: #e6edf3; background: #0d1117; padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+      <div id="seo-fallback" style="display:none; font-family: system-ui, -apple-system, sans-serif; color: #e6edf3; background: #0d1117; padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+        <script>document.getElementById('seo-fallback').style.display='none';</script>
         <h1 style="font-size: 2rem; margin-bottom: 16px;">Test Your Laptop Hardware Instantly</h1>
         <p style="font-size: 1.1rem; line-height: 1.7; margin-bottom: 24px;">
           LaptopAnalyzer is a free, browser-based diagnostic tool that lets you test every major hardware component of your laptop — display, keyboard, webcam, microphone, speakers, touchpad, USB ports, and network speed. No downloads or installations required. Simply open the site and start testing. Perfect for checking used or refurbished laptops before buying.
