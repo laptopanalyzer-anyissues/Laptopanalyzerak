@@ -326,6 +326,8 @@
       </div>
     </noscript>
     <div id="root">
+      <!-- Hide static fallback instantly when JS is available; bots without JS still see it -->
+      <script>document.write('<style>#seo-fallback{display:none!important}</style>');</script>
       <!-- Static pre-render fallback for search engine crawlers -->
       <div id="seo-fallback" style="font-family: system-ui, -apple-system, sans-serif; color: #e6edf3; background: #0d1117; padding: 40px 20px; max-width: 900px; margin: 0 auto;">
         <h1 style="font-size: 2rem; margin-bottom: 16px;">Test Your Laptop Hardware Instantly</h1>
