@@ -152,7 +152,7 @@ function formatDate(dateString) {
 
 function generateBlogPostHtml(post) {
   const title = escapeHtml(post.title);
-  const fullTitle = `${title} | LaptopAnalyzer`;
+  const fullTitle = `${title} | Laptop Analyzer`;
   const description = escapeHtml(post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`);
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
   const ogImage = post.cover_image || `${SITE_URL}/og-image.png`;
