@@ -187,7 +187,7 @@ function generateBlogPostHtml(post) {
   const structuredData = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": post.title,
+    "headline": seoTitle.replace(BRAND_SUFFIX, ''),
     "description": post.excerpt || '',
     "url": canonicalUrl,
     "datePublished": publishedAt,
