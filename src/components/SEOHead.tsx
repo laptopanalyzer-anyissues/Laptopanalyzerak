@@ -12,6 +12,7 @@ interface SEOHeadProps {
   modifiedTime?: string;
   noIndex?: boolean;
   structuredData?: object;
+  slug?: string;
 }
 
 /**
@@ -31,10 +32,11 @@ export function SEOHead({
   modifiedTime,
   noIndex = false,
   structuredData,
+  slug,
 }: SEOHeadProps) {
-  const fullTitle = title.includes("LaptopAnalyzer") 
+  const fullTitle = title.includes("LaptopAnalyzer") || title.includes("Laptop Analyzer")
     ? title 
-    : `${title} | LaptopAnalyzer`;
+    : getSEOTitle(title, slug);
   const canonicalUrl = `https://laptopanalyzer.com${canonicalPath}`;
 
   useEffect(() => {
