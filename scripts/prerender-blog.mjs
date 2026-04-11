@@ -152,7 +152,7 @@ function formatDate(dateString) {
 
 function generateBlogPostHtml(post) {
   const title = escapeHtml(post.title);
-  const fullTitle = `${title} | LaptopAnalyzer`;
+  const fullTitle = `${title} | Laptop Analyzer`;
   const description = escapeHtml(post.excerpt || `Read about ${post.title} on LaptopAnalyzer blog.`);
   const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
   const ogImage = post.cover_image || `${SITE_URL}/og-image.png`;
@@ -169,11 +169,22 @@ function generateBlogPostHtml(post) {
     "datePublished": publishedAt,
     "dateModified": publishedAt,
     "image": ogImage,
-    "author": { "@type": "Organization", "name": "LaptopAnalyzer", "url": SITE_URL },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+    "author": { "@type": "Organization", "name": "Laptop Analyzer", "url": SITE_URL },
     "publisher": {
-      "@type": "Organization", "name": "LaptopAnalyzer", "url": SITE_URL,
+      "@type": "Organization", "name": "Laptop Analyzer", "url": SITE_URL,
       "logo": { "@type": "ImageObject", "url": `${SITE_URL}/favicon.png` }
     }
+  });
+
+  const breadcrumbData = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": canonicalUrl }
+    ]
   });
 
   // Read the built index.html to get asset references (CSS/JS)
@@ -205,10 +216,9 @@ function generateBlogPostHtml(post) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <title>${fullTitle}</title>
-    <meta name="title" content="${fullTitle}" />
     <meta name="description" content="${description}" />
     <meta name="robots" content="index, follow, noai, noimageai" />
-    <meta name="author" content="LaptopAnalyzer" />
+    <meta name="author" content="Laptop Analyzer" />
     <link rel="canonical" href="${canonicalUrl}" />
     
     <!-- Open Graph -->
@@ -217,7 +227,7 @@ function generateBlogPostHtml(post) {
     <meta property="og:title" content="${fullTitle}" />
     <meta property="og:description" content="${description}" />
     <meta property="og:image" content="${escapeHtml(ogImage)}" />
-    <meta property="og:site_name" content="LaptopAnalyzer - Free Laptop Diagnostic Tool" />
+    <meta property="og:site_name" content="Laptop Analyzer - Free Laptop Diagnostic Tool" />
     <meta property="article:published_time" content="${publishedAt}" />
     
     <!-- Twitter -->
@@ -227,8 +237,10 @@ function generateBlogPostHtml(post) {
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${escapeHtml(ogImage)}" />
     
-    <!-- Structured Data -->
+    <!-- Structured Data - Article -->
     <script type="application/ld+json">${structuredData}</script>
+    <!-- Structured Data - Breadcrumbs -->
+    <script type="application/ld+json">${breadcrumbData}</script>
     
     <meta name="theme-color" content="#0d1117" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -242,7 +254,15 @@ function generateBlogPostHtml(post) {
   <body>
     <div id="root">
       <!-- Pre-rendered blog content for SEO crawlers -->
-      <article style="max-width:768px;margin:0 auto;padding:80px 16px 64px;">
+      <!-- Static Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" style="max-width:768px;margin:0 auto;padding:80px 16px 0;">
+        <ol style="list-style:none;padding:0;margin:0;display:flex;gap:8px;font-size:14px;color:#888;">
+          <li><a href="/" style="color:#58a6ff;text-decoration:none;">Home</a> ›</li>
+          <li><a href="/blog" style="color:#58a6ff;text-decoration:none;">Blog</a> ›</li>
+          <li style="color:#e6edf3;">${title}</li>
+        </ol>
+      </nav>
+      <article style="max-width:768px;margin:0 auto;padding:24px 16px 64px;">
         <a href="/blog" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;color:#0ea5e9;text-decoration:none;">← Back to Articles</a>
         ${categoryName ? `<span style="display:inline-block;padding:4px 12px;font-size:14px;border-radius:9999px;background:rgba(14,165,233,0.1);color:#0ea5e9;margin-bottom:16px;">${escapeHtml(categoryName)}</span>` : ''}
         <h1 style="font-size:2rem;font-weight:700;margin-bottom:16px;line-height:1.2;">${title}</h1>
