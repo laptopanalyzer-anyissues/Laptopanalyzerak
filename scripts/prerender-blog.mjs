@@ -254,7 +254,15 @@ function generateBlogPostHtml(post) {
   <body>
     <div id="root">
       <!-- Pre-rendered blog content for SEO crawlers -->
-      <article style="max-width:768px;margin:0 auto;padding:80px 16px 64px;">
+      <!-- Static Breadcrumb Navigation -->
+      <nav aria-label="Breadcrumb" style="max-width:768px;margin:0 auto;padding:80px 16px 0;">
+        <ol style="list-style:none;padding:0;margin:0;display:flex;gap:8px;font-size:14px;color:#888;">
+          <li><a href="/" style="color:#58a6ff;text-decoration:none;">Home</a> ›</li>
+          <li><a href="/blog" style="color:#58a6ff;text-decoration:none;">Blog</a> ›</li>
+          <li style="color:#e6edf3;">${title}</li>
+        </ol>
+      </nav>
+      <article style="max-width:768px;margin:0 auto;padding:24px 16px 64px;">
         <a href="/blog" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;color:#0ea5e9;text-decoration:none;">← Back to Articles</a>
         ${categoryName ? `<span style="display:inline-block;padding:4px 12px;font-size:14px;border-radius:9999px;background:rgba(14,165,233,0.1);color:#0ea5e9;margin-bottom:16px;">${escapeHtml(categoryName)}</span>` : ''}
         <h1 style="font-size:2rem;font-weight:700;margin-bottom:16px;line-height:1.2;">${title}</h1>
