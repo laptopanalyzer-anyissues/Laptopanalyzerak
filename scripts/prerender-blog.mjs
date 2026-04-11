@@ -169,11 +169,22 @@ function generateBlogPostHtml(post) {
     "datePublished": publishedAt,
     "dateModified": publishedAt,
     "image": ogImage,
-    "author": { "@type": "Organization", "name": "LaptopAnalyzer", "url": SITE_URL },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+    "author": { "@type": "Organization", "name": "Laptop Analyzer", "url": SITE_URL },
     "publisher": {
-      "@type": "Organization", "name": "LaptopAnalyzer", "url": SITE_URL,
+      "@type": "Organization", "name": "Laptop Analyzer", "url": SITE_URL,
       "logo": { "@type": "ImageObject", "url": `${SITE_URL}/favicon.png` }
     }
+  });
+
+  const breadcrumbData = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `${SITE_URL}/blog` },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": canonicalUrl }
+    ]
   });
 
   // Read the built index.html to get asset references (CSS/JS)
