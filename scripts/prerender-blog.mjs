@@ -194,15 +194,29 @@ function generateBlogPostHtml(post) {
   const categoryName = post.blog_categories?.name || '';
   const articleContent = markdownToHtml(post.content);
   
+  // Extract first 200 chars of plain text for articleBody
+  const plainText = (post.content || '')
+    .replace(/:::faq\n[\s\S]*?:::/g, '')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/[#*_`|>\-]/g, '')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const articleBody = plainText.slice(0, 200);
+
+  // Ensure image is absolute URL
+  const articleImage = ogImage.startsWith('http') ? ogImage : `${SITE_URL}${ogImage}`;
+
   const structuredData = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": seoTitle.replace(BRAND_SUFFIX, ''),
-    "description": post.excerpt || '',
+    "description": getSEODescription(post.slug, post.excerpt || ''),
     "url": canonicalUrl,
     "datePublished": publishedAt,
     "dateModified": publishedAt,
-    "image": ogImage,
+    "image": articleImage,
+    "articleBody": articleBody,
     "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
     "author": { "@type": "Organization", "name": "Laptop Analyzer", "url": SITE_URL },
     "publisher": {
