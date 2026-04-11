@@ -311,14 +311,25 @@ export default function BlogPostPage() {
         publishedTime={post.published_at || undefined}
         ogImage={post.cover_image || undefined}
         slug={post.slug}
-        structuredData={structuredData.article(
-          getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
-          getSEODescription(post.slug) || post.excerpt || "",
-          `/blog/${post.slug}`,
-          post.published_at || new Date().toISOString(),
-          undefined,
-          post.cover_image || undefined
-        )}
+        structuredData={(() => {
+          const plainText = (post.content || '')
+            .replace(/:::faq\n[\s\S]*?:::/g, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/[#*_`|>\-]/g, '')
+            .replace(/\n+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 200);
+          return structuredData.article(
+            getSEOTitle(post.title, post.slug).replace(" | Laptop Analyzer", ""),
+            getSEODescription(post.slug) || post.excerpt || "",
+            `/blog/${post.slug}`,
+            post.published_at || new Date().toISOString(),
+            undefined,
+            post.cover_image || undefined,
+            plainText
+          );
+        })()}
       />
       <Header />
       <main className="pt-24 pb-16">
