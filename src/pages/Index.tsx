@@ -17,11 +17,11 @@ const Index = () => {
       <SEOHead
         title="Laptop Analyzer – Test & Check Your Laptop Hardware Online (Free)"
         description="Run a complete laptop test online to check your screen, speakers, mic, and keyboard. The easiest way to test a laptop is without downloading software. Free & instant."
-        keywords="laptop analyzer, laptop checker, laptop checker online, laptop test online, test laptop online, check laptop hardware, laptop hardware test, free laptop checker, laptop diagnostic tool, dead pixel test, keyboard tester, webcam test, mic test, speaker test"
+        keywords="laptop analyzer, laptop diagnostics, laptop test online, test laptop online, check laptop hardware, laptop hardware test, free laptop diagnostic tool, dead pixel test, keyboard tester, webcam test, mic test, speaker test"
         canonicalPath="/"
       />
       <Header />
-      <main id="main-content" role="main" aria-label="Laptop Checker Home">
+      <main id="main-content" role="main" aria-label="Laptop Analyzer Home">
         {/* Grid section (1) — Hero */}
         <div className="homepage-grid-section homepage-grid-section-first">
           <HeroSection />

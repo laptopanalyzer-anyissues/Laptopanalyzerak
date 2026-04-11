@@ -120,7 +120,7 @@ const Dashboard = () => {
       <SEOHead
         title="Laptop Diagnostic Tests - Free Hardware Checker 2026"
         description="Run free laptop diagnostic tests! Check display, keyboard, webcam, mic, speakers, network, touchpad & USB ports. Complete hardware testing suite for laptops."
-        keywords="laptop diagnostic, laptop test, hardware test, laptop checker, pc health check, computer diagnostic, laptop diagnostics free, hardware diagnostic tool"
+        keywords="laptop analyzer, laptop diagnostic, laptop test, hardware test, pc health check, computer diagnostic, laptop diagnostics free, hardware diagnostic tool"
         canonicalPath="/dashboard"
         noIndex={true}
       />
