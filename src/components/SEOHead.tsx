@@ -186,31 +186,37 @@ export const structuredData = {
     url: string,
     publishedTime: string,
     modifiedTime?: string,
-    image?: string
-  ) => ({
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: title,
-    description,
-    url: `https://laptopanalyzer.com${url}`,
-    datePublished: publishedTime,
-    dateModified: modifiedTime || publishedTime,
-    image: image || "https://laptopanalyzer.com/og-image.png",
-    author: {
-      "@type": "Organization",
-      name: "LaptopAnalyzer",
-      url: "https://laptopanalyzer.com",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "LaptopAnalyzer",
-      url: "https://laptopanalyzer.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://laptopanalyzer.com/favicon.png",
+    image?: string,
+    articleBody?: string
+  ) => {
+    const absoluteImage = (image && image.startsWith('http')) ? image : `https://laptopanalyzer.com${image || '/og-image.png'}`;
+    return {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: title,
+      description,
+      url: `https://laptopanalyzer.com${url}`,
+      datePublished: publishedTime,
+      dateModified: modifiedTime || publishedTime,
+      image: absoluteImage,
+      ...(articleBody ? { articleBody } : {}),
+      mainEntityOfPage: { "@type": "WebPage", "@id": `https://laptopanalyzer.com${url}` },
+      author: {
+        "@type": "Organization",
+        name: "Laptop Analyzer",
+        url: "https://laptopanalyzer.com",
       },
-    },
-  }),
+      publisher: {
+        "@type": "Organization",
+        name: "Laptop Analyzer",
+        url: "https://laptopanalyzer.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://laptopanalyzer.com/favicon.png",
+        },
+      },
+    };
+  },
 };
 
 export default SEOHead;
