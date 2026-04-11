@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { sanitizeURL } from "@/lib/security";
 import { SEOHead, structuredData } from "@/components/SEOHead";
+import { getSEOTitle } from "@/lib/seoTitle";
 import {
   Accordion,
   AccordionContent,

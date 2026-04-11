@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { getSEOTitle } from "@/lib/seoTitle";
 
 interface SEOHeadProps {
   title: string;
