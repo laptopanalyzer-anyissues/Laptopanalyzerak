@@ -15,19 +15,3 @@ import './index.css'
 
 const rootEl = document.getElementById("root")!;
 createRoot(rootEl).render(<App />);
-
-// Keep the instant boot loader visible for at least ~900ms, then fade out
-const removeBootLoader = () => {
-  const el = document.getElementById('boot-loader');
-  if (!el) return;
-  el.style.transition = 'opacity 350ms ease';
-  el.style.opacity = '0';
-  setTimeout(() => el.remove(), 380);
-};
-
-const MIN_DISPLAY = 900;
-const start = performance.now();
-requestAnimationFrame(() => {
-  const wait = Math.max(0, MIN_DISPLAY - (performance.now() - start));
-  setTimeout(removeBootLoader, wait);
-});
