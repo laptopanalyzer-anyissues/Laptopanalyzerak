@@ -7,7 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { SecurityProvider } from "@/contexts/SecurityContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import { PageLoader } from "@/components/ui/page-loader";
+const PageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="h-8 w-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+  </div>
+);
 import { CookieConsent } from "@/components/CookieConsent";
 
 // Eager load homepage for instant first paint
