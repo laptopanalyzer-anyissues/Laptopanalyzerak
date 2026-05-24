@@ -13,6 +13,8 @@ const PageLoader = () => (
   </div>
 );
 import { CookieConsent } from "@/components/CookieConsent";
+import { SecretKeyEasterEgg } from "@/components/SecretKeyEasterEgg";
+
 
 // Eager load homepage for instant first paint
 import Index from "./pages/Index";
