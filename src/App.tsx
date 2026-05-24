@@ -95,6 +95,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <SecretKeyEasterEgg />
               <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
