@@ -124,6 +124,8 @@
     -webkit-tap-highlight-color: transparent;
     scroll-padding-top: 5rem;
     text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -132,6 +134,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior-y: none;
+    /* Smoother momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Reduce paint flashes during fast scroll */
+    text-rendering: optimizeLegibility;
+  }
+
+  /* GPU-accelerate fixed/sticky chrome to keep scroll buttery */
+  header, [data-sticky], .sticky, .fixed {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Sharper, faster image decoding */
+  img, video {
+    content-visibility: auto;
+    image-rendering: auto;
+  }
+
+  /* Offscreen sections skip layout/paint until near viewport */
+  section {
+    contain-intrinsic-size: auto 600px;
   }
 
   /* Respect reduced motion preferences globally */
@@ -142,6 +165,29 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+
+  /* Universal smooth transitions on interactive surfaces (cheap props only) */
+  a, button, [role="button"], input, textarea, select, summary {
+    transition: color 200ms ease, background-color 200ms ease,
+                border-color 200ms ease, opacity 200ms ease,
+                transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 200ms ease;
+  }
+
+  /* Smoother hover-lift utility (use as className="lift") */
+  .lift {
+    will-change: transform;
+    transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 250ms ease;
+  }
+  .lift:hover { transform: translateY(-2px); }
+
+  /* GPU hint class for heavy animated nodes */
+  .gpu {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
   }
 
   /* Improved focus states for accessibility */
