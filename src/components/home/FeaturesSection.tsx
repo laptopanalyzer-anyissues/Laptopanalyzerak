@@ -116,9 +116,10 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
         style={{ rotateX, rotateY }}
         whileHover={{ y: -6 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="h-full"
       >
         <Link to={feature.path} className="block h-full" aria-label={`${feature.title}: ${feature.description}`}>
-          <div className="test-card h-full group relative overflow-hidden">
+          <div className="test-card h-full group relative overflow-hidden flex flex-col">
             {/* Animated gradient border on hover */}
             <div
               className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"
@@ -132,7 +133,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 
             {/* Icon with float animation */}
             <motion.div
-              className={`relative inline-flex p-3.5 rounded-xl bg-gradient-to-br ${feature.color} mb-5 shadow-lg`}
+              className={`relative self-start inline-flex p-3.5 rounded-xl bg-gradient-to-br ${feature.color} mb-5 shadow-lg`}
               style={{ boxShadow: `0 8px 20px -4px ${feature.shadow}` }}
               whileHover={{ scale: 1.15, rotate: 8 }}
               animate={{ y: [0, -4, 0] }}
@@ -148,7 +149,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
             <h3 className="relative text-lg font-semibold text-foreground mb-2 group-hover:text-foreground transition-colors">
               {feature.title}
             </h3>
-            <p className="relative text-sm text-muted-foreground mb-4">
+            <p className="relative text-sm text-muted-foreground mb-4 flex-1">
               {feature.description}
             </p>
 
