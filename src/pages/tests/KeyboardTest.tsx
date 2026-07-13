@@ -61,10 +61,7 @@ const KeyboardTest = () => {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     e.preventDefault();
     const key = e.key;
-    
-    // Debug logging for F-keys
-    console.log('Key pressed:', { key, code: e.code, keyCode: e.keyCode });
-    
+
     setLastKey(key);
     setLastKeyCode(e.code);
     

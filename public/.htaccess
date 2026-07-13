@@ -1,6 +1,24 @@
 # Apache SPA Fallback for React Router
 # Ensures all virtual routes serve index.html with 200 OK status
 
+# ── Block access to sensitive files (defense in depth) ──
+# Deny any dotfile (.env, .git, .htaccess, .htpasswd, etc.)
+<FilesMatch "(^\.|/\.)">
+  Require all denied
+</FilesMatch>
+
+# Deny source/config files that should never be served if present.
+# (Runtime assets are .js/.css/.json — those are intentionally NOT listed here.)
+<FilesMatch "\.(env|ini|log|sh|bak|sql|toml|lock|mjs|ts|tsx|map)$">
+  Require all denied
+</FilesMatch>
+
+# Disable directory listing
+Options -Indexes
+
+# Suppress server version/signature in headers and error pages
+ServerSignature Off
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

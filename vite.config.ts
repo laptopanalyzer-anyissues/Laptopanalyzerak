@@ -19,11 +19,17 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    // Never emit source maps in production — prevents leaking original source
+    sourcemap: false,
     // Additional production optimizations
     minify: 'terser',
     terserOptions: {
       compress: {
         drop_debugger: true,
+        // Strip debug-level logging from the production bundle (keeps warn/error
+        // for the ErrorBoundary and security reporting). Prevents information
+        // disclosure via the browser console in production.
+        drop_console: ['log', 'info', 'debug', 'trace'],
         passes: 2,
       },
       mangle: {

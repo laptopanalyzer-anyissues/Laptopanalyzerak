@@ -315,7 +315,6 @@ const DisplayTestEmbed = ({ onComplete }: Props) => {
   }, []);
 
   const exitFullscreenAndComplete = useCallback(() => {
-    console.log("[DisplayTestEmbed] exitFullscreenAndComplete called");
     // Mark as exiting FIRST to prevent the fullscreen prompt from showing
     setIsExiting(true);
     

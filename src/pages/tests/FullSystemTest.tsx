@@ -243,26 +243,21 @@ const FullSystemTest = () => {
 
   // Called when an embedded test completes (with optional passed result)
   const handleTestComplete = useCallback((passed?: boolean) => {
-    console.log("[FullSystemTest] handleTestComplete called for test:", tests[currentTestIndex]?.id, "passed:", passed);
     const testId = tests[currentTestIndex]?.id;
-    
+
     // Stop running the current test FIRST
     setIsRunningTest(false);
-    
+
     if (testId === "display") {
       // Delay showing popup to ensure the DisplayTestEmbed fully unmounts
-      console.log("[FullSystemTest] Scheduling display popup after delay");
       setTimeout(() => {
-        console.log("[FullSystemTest] Now showing display popup");
         setShowDisplayPopup(true);
       }, 200);
     } else if (passed !== undefined) {
       // If passed result is provided (e.g., from audio test), use it
-      console.log("[FullSystemTest] Using provided passed result:", passed);
       moveToNextTest(passed);
     } else {
       // Auto-pass all other tests
-      console.log("[FullSystemTest] Auto-passing test, moving to next");
       moveToNextTest(true);
     }
   }, [tests, currentTestIndex, moveToNextTest]);
