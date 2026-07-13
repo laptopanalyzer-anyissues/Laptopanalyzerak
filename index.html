@@ -6,6 +6,31 @@
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
+
+      // Consent Mode v2 — deny ad/analytics storage by default until the user
+      // accepts cookies. This is what makes the cookie banner's choice actually
+      // take effect (Analytics/AdSense respect these signals). Restore a prior
+      // "Accept" so returning visitors are not asked again.
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+      try {
+        if (localStorage.getItem('cookie-consent-accepted') === 'true') {
+          gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted',
+            analytics_storage: 'granted'
+          });
+        }
+      } catch (e) {}
+
       gtag('js', new Date());
       gtag('config', 'G-GCSM48EDHV');
     </script>

@@ -6,13 +6,28 @@ import { Link } from "react-router-dom";
 
 const COOKIE_CONSENT_KEY = "cookie-consent-accepted";
 
+// Push the user's choice to Google Consent Mode so Analytics/AdSense actually
+// honour it. The `default` state (denied) is set in index.html before the tags
+// load; this updates it once the user decides.
+const updateConsent = (granted: boolean) => {
+  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
+  if (typeof gtag !== "function") return;
+  const value = granted ? "granted" : "denied";
+  gtag("consent", "update", {
+    ad_storage: value,
+    ad_user_data: value,
+    ad_personalization: value,
+    analytics_storage: value,
+  });
+};
+
 export const CookieConsent = () => {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    // Check if user has already accepted cookies
-    const hasAccepted = localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (!hasAccepted) {
+    // Check if user has already made a choice
+    const choice = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (!choice) {
       // Small delay to avoid flash on page load
       const timer = setTimeout(() => setShowBanner(true), 1000);
       return () => clearTimeout(timer);
@@ -21,11 +36,13 @@ export const CookieConsent = () => {
 
   const acceptCookies = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, "true");
+    updateConsent(true);
     setShowBanner(false);
   };
 
   const declineCookies = () => {
     localStorage.setItem(COOKIE_CONSENT_KEY, "declined");
+    updateConsent(false);
     setShowBanner(false);
   };
 

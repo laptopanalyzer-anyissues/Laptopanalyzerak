@@ -38,9 +38,11 @@ import {
   SkipForward,
   MinusCircle,
   RefreshCw,
+  Download,
 } from "lucide-react";
 import { useTestSounds } from "@/hooks/useTestSounds";
 import { useConfetti } from "@/hooks/useConfetti";
+import { downloadReportPdf, collectDeviceInfo, type ReportTest } from "@/lib/pdfReport";
 
 // Lazy load test components
 const DisplayTestEmbed = lazy(() => import("@/components/fulltest/DisplayTestEmbed"));
@@ -87,6 +89,18 @@ const testIconMap: Record<string, React.ElementType> = {
   ports: Usb,
 };
 
+// Short, factual description of what each test checks — shown in the PDF report.
+const testDescriptions: Record<string, string> = {
+  display: "Checked the screen for dead/stuck pixels and colour uniformity.",
+  keyboard: "Verified that each key registers a keypress.",
+  touchpad: "Checked pointer movement, clicks and scrolling.",
+  camera: "Previewed the webcam feed to confirm image output.",
+  microphone: "Measured live microphone input levels.",
+  audio: "Played stereo tones to verify the left and right speakers.",
+  network: "Measured download, upload, ping and jitter.",
+  ports: "Checked USB ports and connected-device detection.",
+};
+
 interface StoredTestItem {
   id: string;
   name: string;
@@ -109,6 +123,7 @@ const FullSystemTest = () => {
   const [isRunningTest, setIsRunningTest] = useState(false);
   const [showDisplayPopup, setShowDisplayPopup] = useState(false);
   const [showSkipWarning, setShowSkipWarning] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   
   const { playSuccessSound, playCompleteSound, playSkipSound } = useTestSounds();
   const { fireConfetti } = useConfetti();
@@ -277,6 +292,39 @@ const FullSystemTest = () => {
     setIsRunningTest(false);
     setShowDisplayPopup(false);
   };
+
+  // Export the completed test run as a small, self-contained PDF report.
+  // Device info is collected client-side only; nothing is uploaded.
+  const handleExportReport = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const device = await collectDeviceInfo();
+      const reportTests: ReportTest[] = tests.map((t) => ({
+        name: t.name,
+        status:
+          t.passed === true
+            ? "passed"
+            : t.passed === false
+            ? "issue"
+            : t.status === "skipped"
+            ? "skipped"
+            : "pending",
+        detail: testDescriptions[t.id] ?? "",
+      }));
+      downloadReportPdf({
+        score: overallScore,
+        scoreLabel: getScoreLabel(overallScore).label,
+        passedCount,
+        issueCount,
+        skippedCount,
+        device,
+        tests: reportTests,
+        generatedAt: new Date().toLocaleString(),
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [tests, overallScore, passedCount, issueCount, skippedCount]);
 
   // Show skip confirmation dialog
   const handleSkipClick = useCallback(() => {
@@ -738,6 +786,10 @@ const FullSystemTest = () => {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button size="lg" onClick={handleExportReport} disabled={isExporting}>
+                      <Download className="h-4 w-4 mr-2" />
+                      {isExporting ? "Preparing report..." : "Export Report (PDF)"}
+                    </Button>
                     <Button variant="outline" size="lg" onClick={resetTests}>
                       <RotateCcw className="h-4 w-4 mr-2" />
                       Run Again
