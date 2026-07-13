@@ -53,9 +53,10 @@ export function HowItWorksSection() {
               transition={{ duration: 0.5, delay: index * 0.12 }}
               className="relative text-center group"
             >
-              {/* Connector line */}
+              {/* Connector line — runs through the icon centers, spanning the
+                  gap to the next step's icon center (card width + gap-8) */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-px bg-border" />
+                <div className="hidden md:block absolute top-16 left-1/2 w-[calc(100%_+_2rem)] h-px bg-border" />
               )}
 
               <div className="flex flex-col items-center mb-6">
