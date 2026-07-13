@@ -53,10 +53,26 @@ export function HowItWorksSection() {
               transition={{ duration: 0.5, delay: index * 0.12 }}
               className="relative text-center group"
             >
-              {/* Connector line — runs through the icon centers, spanning the
-                  gap to the next step's icon center (card width + gap-8) */}
+              {/* Connector line — sits behind the icons (z-0) and draws in from
+                  left to right as the section scrolls into view, spanning from
+                  this icon's centre to the next (card width + gap-8).
+                  The outer wrapper is the in-view trigger (it keeps a non-zero
+                  area so IntersectionObserver fires); the inner line runs the
+                  scaleX draw, which would otherwise collapse the trigger's area. */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-16 left-1/2 w-[calc(100%_+_2rem)] h-px bg-border" />
+                <motion.div
+                  aria-hidden="true"
+                  className="hidden md:block absolute top-16 left-1/2 z-0 w-[calc(100%_+_2rem)] h-px overflow-hidden"
+                  initial="hidden"
+                  whileInView="shown"
+                  viewport={{ once: true }}
+                >
+                  <motion.div
+                    className="h-full w-full bg-border origin-left"
+                    variants={{ hidden: { scaleX: 0 }, shown: { scaleX: 1 } }}
+                    transition={{ duration: 0.6, delay: 0.35 + index * 0.25, ease: "easeInOut" }}
+                  />
+                </motion.div>
               )}
 
               <div className="flex flex-col items-center mb-6">
@@ -66,7 +82,7 @@ export function HowItWorksSection() {
                 <motion.div
                   whileHover={{ scale: 1.06, y: -3 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-card border border-border/60 shadow-md group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all duration-300"
+                  className="relative z-10 inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-card border border-border/60 shadow-md group-hover:border-primary/40 group-hover:shadow-lg group-hover:shadow-primary/5 transition-all duration-300"
                 >
                   <s.icon className="h-7 w-7 text-primary" aria-hidden="true" />
                 </motion.div>
