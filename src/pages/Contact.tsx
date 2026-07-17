@@ -38,7 +38,7 @@ const infoItems = [
     href: "mailto:support@laptopanalyzer.com",
   },
   { icon: Clock, label: "Response time", value: "Within 24–48 hours" },
-  { icon: Globe, label: "Coverage", value: "Worldwide, every timezone" },
+  { icon: Globe, label: "Coverage", value: "Worldwide support" },
 ];
 
 const Contact = () => {
@@ -218,10 +218,11 @@ const Contact = () => {
                 <h1 className="mt-4 text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-foreground">
                   Contact us
                 </h1>
-                <p className="mt-4 max-w-md text-muted-foreground">
-                  A bug, a feature idea, a question about your results, or a privacy
-                  request — send it over and a real person gets back to you within a
-                  day or two.
+                <p className="mt-4 max-w-md leading-relaxed text-muted-foreground">
+                  Whether you&apos;ve found a bug, have a question about your results,
+                  want to suggest a feature, or need to make a privacy request — our
+                  support team reviews every message and typically responds within
+                  24–48 hours.
                 </p>
 
                 {/* Topic chips */}
@@ -396,76 +397,91 @@ const Contact = () => {
 
               {/* ══════════ Animated visual side ══════════ */}
               <div className="relative hidden min-h-[560px] flex-col overflow-hidden border-l border-border/60 bg-gradient-to-br from-primary/[0.06] via-transparent to-accent/[0.05] lg:flex">
-                {/* Radar ping rings + orbiting topics + central hub */}
+                {/* Message hub with the four support topics orbiting it */}
                 <div className="relative flex flex-1 items-center justify-center">
-                  <div className="relative h-[340px] w-[340px]">
-                    {/* Pinging rings */}
+                  <div className="relative h-[340px] w-[340px]" aria-hidden="true">
+                    {/* Sweeping conic light */}
+                    <motion.div
+                      className="absolute inset-6 rounded-full"
+                      style={{
+                        background:
+                          "conic-gradient(from 0deg, transparent 0deg, hsl(var(--primary) / 0.16) 55deg, transparent 130deg)",
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+                    />
+
+                    {/* Expanding radar pings */}
                     {[0, 1, 2].map((i) => (
                       <motion.span
                         key={i}
-                        className="absolute inset-0 rounded-full border border-primary/25"
-                        initial={{ scale: 0.35, opacity: 0.5 }}
+                        className="absolute inset-0 rounded-full border border-primary/20"
+                        initial={{ scale: 0.42, opacity: 0.45 }}
                         animate={{ scale: 1, opacity: 0 }}
-                        transition={{
-                          duration: 3.6,
-                          repeat: Infinity,
-                          ease: "easeOut",
-                          delay: i * 1.2,
-                        }}
-                        aria-hidden="true"
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeOut", delay: i * 1.33 }}
                       />
                     ))}
 
-                    {/* Static guide ring */}
-                    <div className="absolute inset-8 rounded-full border border-dashed border-border/50" aria-hidden="true" />
+                    {/* Static orbit tracks */}
+                    <div className="absolute inset-6 rounded-full border border-border/40" />
+                    <div className="absolute inset-[4.75rem] rounded-full border border-border/25" />
 
-                    {/* Slowly rotating accent ring */}
+                    {/* Orbiting layer — the whole ring revolves; icons counter-rotate to stay upright */}
                     <motion.div
-                      className="absolute inset-8 rounded-full border-t-2 border-primary/40"
+                      className="absolute inset-0"
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-                      aria-hidden="true"
-                    />
+                      transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+                    >
+                      {/* Spokes from the hub out to each topic */}
+                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 340 340" fill="none">
+                        {[[170, 38], [302, 170], [170, 302], [38, 170]].map(([x, y], i) => (
+                          <line
+                            key={i}
+                            x1="170"
+                            y1="170"
+                            x2={x}
+                            y2={y}
+                            stroke="hsl(var(--primary) / 0.22)"
+                            strokeWidth="1"
+                            strokeDasharray="2 6"
+                          />
+                        ))}
+                      </svg>
 
-                    {/* Orbiting topic icons (upright, gently bobbing) */}
-                    {categories.map((cat, i) => {
-                      const angle = i * 90;
-                      const radius = 132;
-                      return (
-                        <div
-                          key={cat.title}
-                          className="absolute left-1/2 top-1/2"
-                          style={{
-                            transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(${-angle}deg)`,
-                          }}
-                          aria-hidden="true"
-                        >
-                          <motion.div
-                            animate={{ y: [0, -7, 0] }}
-                            transition={{
-                              duration: 3 + i * 0.35,
-                              repeat: Infinity,
-                              ease: "easeInOut",
+                      {categories.map((cat, i) => {
+                        const angle = i * 90;
+                        const radius = 132;
+                        return (
+                          <div
+                            key={cat.title}
+                            className="absolute left-1/2 top-1/2"
+                            style={{
+                              transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(${-angle}deg)`,
                             }}
-                            className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-card/80 backdrop-blur-sm shadow-lg"
                           >
-                            <cat.icon className="h-6 w-6 text-primary" />
-                          </motion.div>
-                        </div>
-                      );
-                    })}
+                            <motion.div
+                              animate={{ rotate: -360 }}
+                              transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+                              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-card/90 shadow-lg shadow-black/20"
+                            >
+                              <cat.icon className="h-6 w-6 text-primary" />
+                            </motion.div>
+                          </div>
+                        );
+                      })}
+                    </motion.div>
 
                     {/* Central hub */}
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                       <motion.div
                         animate={{
                           boxShadow: [
-                            "0 0 0 0px hsl(var(--primary) / 0.25)",
-                            "0 0 0 18px hsl(var(--primary) / 0)",
+                            "0 0 0 0px hsl(var(--primary) / 0.3)",
+                            "0 0 0 22px hsl(var(--primary) / 0)",
                           ],
                         }}
-                        transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
-                        className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-accent shadow-xl"
+                        transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+                        className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-primary to-accent shadow-xl shadow-primary/20"
                       >
                         <MessageSquare className="h-10 w-10 text-primary-foreground" />
                       </motion.div>
@@ -473,71 +489,65 @@ const Contact = () => {
                   </div>
                 </div>
 
-                {/* Contact details (echoes the reference's corner address) */}
-                <div className="relative border-t border-border/60 bg-background/30 p-8">
-                  <dl className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    {infoItems.map((item) => (
-                      <div key={item.label} className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card/70">
-                          <item.icon className="h-4 w-4 text-primary" aria-hidden="true" />
-                        </div>
-                        <div className="min-w-0">
-                          <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                            {item.label}
-                          </dt>
-                          <dd className="mt-0.5 text-sm font-medium text-foreground">
-                            {item.href ? (
-                              <a
-                                href={item.href}
-                                className="break-all transition-colors hover:text-primary"
-                              >
-                                {item.value}
-                              </a>
-                            ) : (
-                              item.value
-                            )}
-                          </dd>
-                        </div>
-                      </div>
-                    ))}
-                  </dl>
+                {/* Contact details (compact corner row) */}
+                <div className="relative border-t border-border/60 bg-background/30 px-8 py-6">
+                  <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                    {infoItems.map((item) =>
+                      item.href ? (
+                        <a
+                          key={item.label}
+                          href={item.href}
+                          className="inline-flex items-center gap-2.5 font-medium text-foreground transition-colors hover:text-primary"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                          {item.value}
+                        </a>
+                      ) : (
+                        <span
+                          key={item.label}
+                          className="inline-flex items-center gap-2.5 text-muted-foreground"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                          {item.value}
+                        </span>
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* Contact details for mobile (visual panel is desktop-only) */}
-          <motion.dl
+          <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
-            className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:hidden"
+            className="mt-6 rounded-2xl border border-border/70 bg-card/50 p-5 lg:hidden"
           >
-            {infoItems.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/50 p-4"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <item.icon className="h-4 w-4 text-primary" aria-hidden="true" />
-                </div>
-                <div className="min-w-0">
-                  <dt className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    {item.label}
-                  </dt>
-                  <dd className="text-sm font-medium text-foreground">
-                    {item.href ? (
-                      <a href={item.href} className="break-all hover:text-primary">
-                        {item.value}
-                      </a>
-                    ) : (
-                      item.value
-                    )}
-                  </dd>
-                </div>
-              </div>
-            ))}
-          </motion.dl>
+            <div className="flex flex-col gap-3 text-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6">
+              {infoItems.map((item) =>
+                item.href ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="inline-flex items-center gap-2.5 font-medium text-foreground transition-colors hover:text-primary"
+                  >
+                    <item.icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    {item.value}
+                  </a>
+                ) : (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-2.5 text-muted-foreground"
+                  >
+                    <item.icon className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                    {item.value}
+                  </span>
+                )
+              )}
+            </div>
+          </motion.div>
         </div>
       </main>
 
