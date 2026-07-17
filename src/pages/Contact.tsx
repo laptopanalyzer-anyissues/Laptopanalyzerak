@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Send,
   HelpCircle,
@@ -12,9 +12,7 @@ import {
   Mail,
   Clock,
   Globe,
-  ArrowRight,
   MessageSquare,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,40 +24,21 @@ import { isValidEmail, isValidLength, hasXSSPatterns } from "@/lib/security";
 import { supabase } from "@/integrations/supabase/client";
 
 const categories = [
-  {
-    icon: HelpCircle,
-    title: "General Support",
-    desc: "Help with tests or results",
-    gradient: "from-primary to-accent",
-    glowColor: "var(--primary)",
-  },
-  {
-    icon: Bug,
-    title: "Bug Report",
-    desc: "Something isn't working right",
-    gradient: "from-destructive to-warning",
-    glowColor: "var(--destructive)",
-  },
-  {
-    icon: Lightbulb,
-    title: "Feature Request",
-    desc: "Suggest a new tool or idea",
-    gradient: "from-warning to-[hsl(50,92%,55%)]",
-    glowColor: "var(--warning)",
-  },
-  {
-    icon: Shield,
-    title: "Privacy Inquiry",
-    desc: "Data, cookies, or permissions",
-    gradient: "from-success to-accent",
-    glowColor: "var(--success)",
-  },
+  { icon: HelpCircle, title: "General Support", desc: "Help with tests or results" },
+  { icon: Bug, title: "Bug Report", desc: "Something isn't working right" },
+  { icon: Lightbulb, title: "Feature Request", desc: "Suggest a new tool or idea" },
+  { icon: Shield, title: "Privacy Inquiry", desc: "Data, cookies, or permissions" },
 ];
 
 const infoItems = [
-  { icon: Mail, label: "Email", value: "support@laptopanalyzer.com" },
-  { icon: Clock, label: "Response", value: "Within 24–48 hours" },
-  { icon: Globe, label: "Coverage", value: "Worldwide support" },
+  {
+    icon: Mail,
+    label: "Email us",
+    value: "support@laptopanalyzer.com",
+    href: "mailto:support@laptopanalyzer.com",
+  },
+  { icon: Clock, label: "Response time", value: "Within 24–48 hours" },
+  { icon: Globe, label: "Coverage", value: "Worldwide, every timezone" },
 ];
 
 const Contact = () => {
@@ -170,6 +149,9 @@ const Contact = () => {
     }
   };
 
+  const fieldClasses =
+    "h-12 bg-background/60 border-border/70 transition-colors focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/15";
+
   return (
     <div className="min-h-screen bg-background">
       <SEOHead
@@ -184,354 +166,378 @@ const Contact = () => {
       />
       <Header />
 
-      <main className="pt-24 pb-20">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <main className="relative overflow-hidden pt-28 pb-24 md:pt-32">
+        {/* Ambient background glows */}
+        <div
+          className="pointer-events-none absolute -top-24 left-1/2 h-[420px] w-[720px] -translate-x-1/2 rounded-full opacity-[0.12] blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 h-[360px] w-[520px] opacity-[0.10] blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(var(--accent)), transparent 70%)" }}
+          aria-hidden="true"
+        />
 
-          {/* ═══ Hero ═══ */}
-          <motion.section
+        <div className="container relative mx-auto px-4 max-w-6xl">
+          <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center mb-14"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative flex overflow-hidden rounded-[2rem] border border-border/70 bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/30"
           >
-            <motion.div
-              initial={{ scale: 0, rotate: -20 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 14 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6 relative"
-              style={{ boxShadow: "0 10px 36px -8px hsl(var(--primary) / 0.4)" }}
-            >
-              <MessageSquare className="h-7 w-7 text-primary-foreground" />
-              <motion.div
-                className="absolute inset-0 rounded-2xl"
-                animate={{
-                  boxShadow: [
-                    "0 0 0 0px hsl(var(--primary) / 0.3)",
-                    "0 0 0 12px hsl(var(--primary) / 0)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-              />
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.4 }}
-              className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-3"
-            >
-              Get in Touch
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.22, duration: 0.4 }}
-              className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto"
-            >
-              Support, bug reports, feature requests, and privacy questions.
-            </motion.p>
-          </motion.section>
-
-          {/* ═══ Category Cards ═══ */}
-          <motion.section
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
-            }}
-            className="mb-14"
-          >
-            <motion.p
-              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-              className="text-xs font-medium text-muted-foreground text-center mb-4 uppercase tracking-wider"
-            >
-              What can we help with?
-            </motion.p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {categories.map((cat, i) => {
-                const active = selected === i;
-                const glowHsl = `hsl(${cat.glowColor} / 0.25)`;
-                const glowHslStrong = `hsl(${cat.glowColor} / 0.35)`;
-
-                return (
-                  <motion.button
-                    key={i}
-                    variants={{
-                      hidden: { opacity: 0, y: 20, scale: 0.92 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        scale: 1,
-                        transition: { type: "spring", stiffness: 260, damping: 20 },
-                      },
-                    }}
-                    whileHover={{ y: -5, scale: 1.04 }}
-                    whileTap={{ scale: 0.96 }}
-                    onClick={() => {
-                      setSelected(i);
-                      setFormData((p) => ({ ...p, subject: cat.title }));
-                    }}
-                    className={`relative p-5 rounded-xl border text-left transition-all duration-300 overflow-hidden group cursor-pointer ${
-                      active
-                        ? "border-primary/50 bg-primary/[0.07]"
-                        : "border-border bg-card hover:border-primary/30"
-                    }`}
-                    style={{
-                      boxShadow: active ? `0 0 28px -4px ${glowHslStrong}, inset 0 1px 0 0 hsl(${cat.glowColor} / 0.1)` : "none",
-                    }}
-                  >
-                    {/* Hover radial glow */}
-                    <div
-                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
-                      style={{
-                        background: `radial-gradient(ellipse at 50% 100%, ${glowHsl}, transparent 65%)`,
-                      }}
-                    />
-
-                    {/* Active shimmer line */}
-                    <AnimatePresence>
-                      {active && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="absolute top-0 left-0 right-0 h-[2px] rounded-t-xl pointer-events-none"
-                          style={{
-                            background: `linear-gradient(90deg, transparent 0%, hsl(${cat.glowColor} / 0.6) 50%, transparent 100%)`,
-                          }}
-                        />
-                      )}
-                    </AnimatePresence>
-
-                    <div className="relative z-10">
-                      <motion.div
-                        className={`inline-flex p-2.5 rounded-xl bg-gradient-to-br ${cat.gradient} mb-3`}
-                        animate={active ? { scale: [1, 1.12, 1], rotate: [0, -3, 3, 0] } : {}}
-                        transition={{ duration: 0.5 }}
-                        style={{ boxShadow: `0 6px 18px -4px ${glowHsl}` }}
-                      >
-                        <cat.icon className="h-4 w-4 text-primary-foreground" />
-                      </motion.div>
-
-                      <p className="font-semibold text-foreground text-sm leading-tight">
-                        {cat.title}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-1 leading-snug">
-                        {cat.desc}
-                      </p>
-                    </div>
-
-                    <AnimatePresence>
-                      {active && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          exit={{ scale: 0, opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                          className="absolute top-3 right-3"
-                        >
-                          <CheckCircle2 className="h-4 w-4 text-primary" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                );
-              })}
+            {/* Vertical brand rail (echoes the reference's left column) */}
+            <div className="hidden lg:flex w-14 shrink-0 flex-col items-center justify-between border-r border-border/60 py-8">
+              <span className="h-10 w-px bg-gradient-to-b from-transparent to-primary/50" />
+              <span
+                className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground"
+                style={{ writingMode: "vertical-rl" }}
+              >
+                Laptop Analyzer · Support
+              </span>
+              <a
+                href="mailto:support@laptopanalyzer.com"
+                aria-label="Email support"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
             </div>
-          </motion.section>
 
-          {/* ═══ Form Card ═══ */}
-          <motion.section
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            <div className="rounded-2xl bg-card border border-border p-6 md:p-8 relative overflow-hidden">
-              {/* Corner glow */}
-              <div
-                className="absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-[0.04] pointer-events-none"
-                style={{ background: "radial-gradient(circle, hsl(var(--primary)), transparent 70%)" }}
-              />
-              <div
-                className="absolute -bottom-20 -left-20 w-40 h-40 rounded-full opacity-[0.03] pointer-events-none"
-                style={{ background: "radial-gradient(circle, hsl(var(--accent)), transparent 70%)" }}
-              />
+            {/* Main grid: form + animated visual */}
+            <div className="grid flex-1 lg:grid-cols-2">
+              {/* ══════════ Form side ══════════ */}
+              <div className="p-7 sm:p-10 lg:p-12">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
+                    Drop a message
+                  </span>
+                  <span className="h-px w-10 bg-primary/50" />
+                </div>
 
-              {/* Form header */}
-              <div className="flex items-center gap-2.5 mb-6 pb-5 border-b border-border/60">
-                <div className="p-1.5 rounded-lg bg-primary/10">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                </div>
-                <h2 className="text-sm font-semibold text-foreground">Send us a message</h2>
-                <div className="ml-auto flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span>Avg. reply: 24–48 hrs</span>
-                </div>
-              </div>
+                <h1 className="mt-4 text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-foreground">
+                  Contact us
+                </h1>
+                <p className="mt-4 max-w-md text-muted-foreground">
+                  A bug, a feature idea, a question about your results, or a privacy
+                  request — send it over and a real person gets back to you within a
+                  day or two.
+                </p>
 
-              <form onSubmit={handleSubmit} className="relative space-y-5">
-                {/* Honeypot field — hidden from users, catches bots */}
-                <div className="absolute opacity-0 h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
-                  <label htmlFor="website">Website</label>
-                  <input
-                    type="text"
-                    id="website"
-                    name="website"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    autoComplete="off"
-                    tabIndex={-1}
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <motion.div className="space-y-1.5" whileFocus={{ scale: 1 }}>
-                    <Label htmlFor="name" className="text-xs font-medium">Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Jane Doe"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      maxLength={100}
-                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.name ? "border-destructive" : ""}`}
-                    />
-                    {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
-                  </motion.div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-xs font-medium">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      maxLength={254}
-                      className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.email ? "border-destructive" : ""}`}
-                    />
-                    {formErrors.email && <p className="text-xs text-destructive">{formErrors.email}</p>}
+                {/* Topic chips */}
+                <div className="mt-8">
+                  <p className="mb-3 text-sm font-medium text-foreground">
+                    What&apos;s this about?
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((cat, i) => {
+                      const active = selected === i;
+                      return (
+                        <button
+                          key={cat.title}
+                          type="button"
+                          aria-pressed={active}
+                          onClick={() => {
+                            setSelected(i);
+                            setFormData((p) => ({ ...p, subject: cat.title }));
+                            if (formErrors.subject) {
+                              setFormErrors((p) => ({ ...p, subject: "" }));
+                            }
+                          }}
+                          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                            active
+                              ? "border-primary/50 bg-primary/10 text-foreground"
+                              : "border-border/70 bg-background/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                          }`}
+                        >
+                          {active ? (
+                            <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />
+                          ) : (
+                            <cat.icon className="h-4 w-4" aria-hidden="true" />
+                          )}
+                          {cat.title}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="subject" className="text-xs font-medium">Subject</Label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="Brief summary of your request"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    maxLength={200}
-                    className={`h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.subject ? "border-destructive" : ""}`}
-                  />
-                  {formErrors.subject && <p className="text-xs text-destructive">{formErrors.subject}</p>}
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="message" className="text-xs font-medium">Message</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Tell us how we can help…"
-                    rows={5}
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    maxLength={5000}
-                    className={`transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus:border-primary/40 ${formErrors.message ? "border-destructive" : ""}`}
-                  />
-                  {formErrors.message && <p className="text-xs text-destructive">{formErrors.message}</p>}
-                </div>
-
-                <motion.div whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }}>
-                  <Button
-                    type="submit"
-                    variant="hero"
-                    className="w-full h-12 text-sm font-semibold group"
-                    disabled={isSubmitting}
+                <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+                  {/* Honeypot field — hidden from users, catches bots */}
+                  <div
+                    className="absolute h-0 w-0 overflow-hidden opacity-0"
+                    aria-hidden="true"
+                    tabIndex={-1}
                   >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                        Sending…
-                      </span>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4 mr-2 transition-transform group-hover:translate-x-0.5" />
-                        Send Message
-                      </>
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      id="website"
+                      name="website"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      autoComplete="off"
+                      tabIndex={-1}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="name" className="sr-only">
+                        Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        placeholder="Full name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                        maxLength={100}
+                        className={`${fieldClasses} ${formErrors.name ? "border-destructive" : ""}`}
+                      />
+                      {formErrors.name && (
+                        <p className="text-xs text-destructive">{formErrors.name}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="sr-only">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Email address"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        maxLength={254}
+                        className={`${fieldClasses} ${formErrors.email ? "border-destructive" : ""}`}
+                      />
+                      {formErrors.email && (
+                        <p className="text-xs text-destructive">{formErrors.email}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="subject" className="sr-only">
+                      Subject
+                    </Label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      placeholder="Subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                      maxLength={200}
+                      className={`${fieldClasses} ${formErrors.subject ? "border-destructive" : ""}`}
+                    />
+                    {formErrors.subject && (
+                      <p className="text-xs text-destructive">{formErrors.subject}</p>
                     )}
-                  </Button>
-                </motion.div>
-              </form>
+                  </div>
 
-              <p className="text-[11px] text-muted-foreground/50 text-center mt-4">
-                We respond within 24–48 hours · Avoid sending sensitive financial information.
-              </p>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="message" className="sr-only">
+                      Message
+                    </Label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      placeholder="Your message…"
+                      rows={5}
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      maxLength={5000}
+                      className={`resize-none bg-background/60 border-border/70 transition-colors focus-visible:border-primary/60 focus-visible:ring-2 focus-visible:ring-primary/15 ${
+                        formErrors.message ? "border-destructive" : ""
+                      }`}
+                    />
+                    <div className="flex items-center justify-between">
+                      {formErrors.message ? (
+                        <p className="text-xs text-destructive">{formErrors.message}</p>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/60">
+                          Please don&apos;t share passwords or financial details.
+                        </span>
+                      )}
+                      <span className="text-xs text-muted-foreground/60">
+                        {formData.message.length}/5000
+                      </span>
+                    </div>
+                  </div>
+
+                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                    <Button
+                      type="submit"
+                      variant="hero"
+                      className="group h-12 w-full text-sm font-semibold tracking-wide"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                          Sending…
+                        </span>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                          Submit
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                </form>
+              </div>
+
+              {/* ══════════ Animated visual side ══════════ */}
+              <div className="relative hidden min-h-[560px] flex-col overflow-hidden border-l border-border/60 bg-gradient-to-br from-primary/[0.06] via-transparent to-accent/[0.05] lg:flex">
+                {/* Radar ping rings + orbiting topics + central hub */}
+                <div className="relative flex flex-1 items-center justify-center">
+                  <div className="relative h-[340px] w-[340px]">
+                    {/* Pinging rings */}
+                    {[0, 1, 2].map((i) => (
+                      <motion.span
+                        key={i}
+                        className="absolute inset-0 rounded-full border border-primary/25"
+                        initial={{ scale: 0.35, opacity: 0.5 }}
+                        animate={{ scale: 1, opacity: 0 }}
+                        transition={{
+                          duration: 3.6,
+                          repeat: Infinity,
+                          ease: "easeOut",
+                          delay: i * 1.2,
+                        }}
+                        aria-hidden="true"
+                      />
+                    ))}
+
+                    {/* Static guide ring */}
+                    <div className="absolute inset-8 rounded-full border border-dashed border-border/50" aria-hidden="true" />
+
+                    {/* Slowly rotating accent ring */}
+                    <motion.div
+                      className="absolute inset-8 rounded-full border-t-2 border-primary/40"
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                      aria-hidden="true"
+                    />
+
+                    {/* Orbiting topic icons (upright, gently bobbing) */}
+                    {categories.map((cat, i) => {
+                      const angle = i * 90;
+                      const radius = 132;
+                      return (
+                        <div
+                          key={cat.title}
+                          className="absolute left-1/2 top-1/2"
+                          style={{
+                            transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(${-angle}deg)`,
+                          }}
+                          aria-hidden="true"
+                        >
+                          <motion.div
+                            animate={{ y: [0, -7, 0] }}
+                            transition={{
+                              duration: 3 + i * 0.35,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            }}
+                            className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-card/80 backdrop-blur-sm shadow-lg"
+                          >
+                            <cat.icon className="h-6 w-6 text-primary" />
+                          </motion.div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Central hub */}
+                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <motion.div
+                        animate={{
+                          boxShadow: [
+                            "0 0 0 0px hsl(var(--primary) / 0.25)",
+                            "0 0 0 18px hsl(var(--primary) / 0)",
+                          ],
+                        }}
+                        transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
+                        className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-accent shadow-xl"
+                      >
+                        <MessageSquare className="h-10 w-10 text-primary-foreground" />
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contact details (echoes the reference's corner address) */}
+                <div className="relative border-t border-border/60 bg-background/30 p-8">
+                  <dl className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+                    {infoItems.map((item) => (
+                      <div key={item.label} className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-card/70">
+                          <item.icon className="h-4 w-4 text-primary" aria-hidden="true" />
+                        </div>
+                        <div className="min-w-0">
+                          <dt className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                            {item.label}
+                          </dt>
+                          <dd className="mt-0.5 text-sm font-medium text-foreground">
+                            {item.href ? (
+                              <a
+                                href={item.href}
+                                className="break-all transition-colors hover:text-primary"
+                              >
+                                {item.value}
+                              </a>
+                            ) : (
+                              item.value
+                            )}
+                          </dd>
+                        </div>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </div>
             </div>
-          </motion.section>
+          </motion.div>
 
-          {/* ═══ Support Info Row ═══ */}
-          <motion.section
-            initial="hidden"
-            animate="visible"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.06, delayChildren: 0.4 } },
-            }}
-            className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3"
+          {/* Contact details for mobile (visual panel is desktop-only) */}
+          <motion.dl
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3 lg:hidden"
           >
-            {infoItems.map((item, i) => (
-              <motion.div
-                key={i}
-                variants={{
-                  hidden: { opacity: 0, y: 10 },
-                  visible: { opacity: 1, y: 0 },
-                }}
-                whileHover={{ y: -3, borderColor: "hsl(var(--primary) / 0.2)" }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border"
+            {infoItems.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center gap-3 rounded-xl border border-border/70 bg-card/50 p-4"
               >
-                <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
-                  <item.icon className="h-4 w-4 text-primary" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <item.icon className="h-4 w-4 text-primary" aria-hidden="true" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">
+                  <dt className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     {item.label}
-                  </p>
-                  <p className="text-sm font-medium text-foreground break-all leading-tight mt-0.5">
-                    {item.value}
-                  </p>
+                  </dt>
+                  <dd className="text-sm font-medium text-foreground">
+                    {item.href ? (
+                      <a href={item.href} className="break-all hover:text-primary">
+                        {item.value}
+                      </a>
+                    ) : (
+                      item.value
+                    )}
+                  </dd>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </motion.section>
-
-          {/* ═══ FAQ ═══ */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="mt-6 rounded-xl bg-gradient-to-r from-primary/[0.05] to-accent/[0.03] border border-primary/10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-          >
-            <div>
-              <p className="text-sm font-semibold text-foreground">Need a quicker answer?</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Most common questions are already covered in our FAQ.
-              </p>
-            </div>
-            <a
-              href="/#faq"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors whitespace-nowrap group"
-            >
-              Visit FAQ
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-            </a>
-          </motion.section>
+          </motion.dl>
         </div>
       </main>
 
