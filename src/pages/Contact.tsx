@@ -407,8 +407,8 @@ const Contact = () => {
                         <motion.span
                           key={i}
                           className="absolute inset-2 rounded-full border border-primary/20"
-                          initial={{ scale: 0.42, opacity: 0.5 }}
-                          animate={{ scale: 1, opacity: 0 }}
+                          initial={{ scale: 0.42, opacity: 0 }}
+                          animate={{ scale: [0.42, 1], opacity: [0, 0.5, 0] }}
                           transition={{ duration: 4.2, repeat: Infinity, ease: "easeOut", delay: i * 1.4 }}
                         />
                       ))}
@@ -505,10 +505,10 @@ const Contact = () => {
                           GPU-composited (no per-frame box-shadow repaint) */}
                       {!reduce && (
                         <motion.span
-                          className="absolute inset-0 rounded-[1.75rem] bg-primary/25"
-                          initial={{ scale: 1, opacity: 0.45 }}
-                          animate={{ scale: 1.85, opacity: 0 }}
-                          transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+                          className="absolute inset-0 rounded-[1.75rem] bg-primary/30"
+                          initial={{ scale: 1, opacity: 0 }}
+                          animate={{ scale: [1, 1.85], opacity: [0, 0.4, 0] }}
+                          transition={{ duration: 2.8, repeat: Infinity, ease: "easeOut" }}
                           aria-hidden="true"
                         />
                       )}
