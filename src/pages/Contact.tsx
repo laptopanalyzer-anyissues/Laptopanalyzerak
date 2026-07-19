@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   Send,
   HelpCircle,
@@ -43,6 +43,7 @@ const infoItems = [
 
 const Contact = () => {
   const { toast } = useToast();
+  const reduce = useReducedMotion();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [honeypot, setHoneypot] = useState("");
@@ -396,20 +397,21 @@ const Contact = () => {
                         background:
                           "conic-gradient(from 0deg, transparent 0deg, hsl(var(--primary) / 0.18) 50deg, transparent 120deg)",
                       }}
-                      animate={{ rotate: 360 }}
+                      animate={reduce ? undefined : { rotate: 360 }}
                       transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
                     />
 
                     {/* Expanding radar pings */}
-                    {[0, 1, 2].map((i) => (
-                      <motion.span
-                        key={i}
-                        className="absolute inset-2 rounded-full border border-primary/20"
-                        initial={{ scale: 0.42, opacity: 0.5 }}
-                        animate={{ scale: 1, opacity: 0 }}
-                        transition={{ duration: 4.2, repeat: Infinity, ease: "easeOut", delay: i * 1.4 }}
-                      />
-                    ))}
+                    {!reduce &&
+                      [0, 1, 2].map((i) => (
+                        <motion.span
+                          key={i}
+                          className="absolute inset-2 rounded-full border border-primary/20"
+                          initial={{ scale: 0.42, opacity: 0.5 }}
+                          animate={{ scale: 1, opacity: 0 }}
+                          transition={{ duration: 4.2, repeat: Infinity, ease: "easeOut", delay: i * 1.4 }}
+                        />
+                      ))}
 
                     {/* Static orbit tracks */}
                     <div className="absolute inset-6 rounded-full border border-border/40" />
@@ -418,7 +420,7 @@ const Contact = () => {
                     {/* Orbiting layer — revolves as one; icons counter-rotate to stay upright */}
                     <motion.div
                       className="absolute inset-0"
-                      animate={{ rotate: 360 }}
+                      animate={reduce ? undefined : { rotate: 360 }}
                       transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
                     >
                       {/* Spokes — brighter at the hub, fading toward the rim */}
@@ -444,33 +446,34 @@ const Contact = () => {
                       </svg>
 
                       {/* Signal dots flowing inward to the hub */}
-                      {[0, 1, 2, 3].map((i) => {
-                        const angle = i * 90;
-                        return (
-                          <div
-                            key={`signal-${i}`}
-                            className="absolute left-1/2 top-1/2"
-                            style={{ transform: `rotate(${angle}deg)` }}
-                          >
-                            <motion.span
-                              className="absolute h-1.5 w-1.5 rounded-full bg-primary"
-                              style={{
-                                left: -3,
-                                top: -3,
-                                boxShadow: "0 0 8px hsl(var(--primary) / 0.9)",
-                              }}
-                              initial={{ y: -140, opacity: 0 }}
-                              animate={{ y: [-140, -52], opacity: [0, 1, 0] }}
-                              transition={{
-                                duration: 2.6,
-                                repeat: Infinity,
-                                ease: "easeIn",
-                                delay: i * 0.65,
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
+                      {!reduce &&
+                        [0, 1, 2, 3].map((i) => {
+                          const angle = i * 90;
+                          return (
+                            <div
+                              key={`signal-${i}`}
+                              className="absolute left-1/2 top-1/2"
+                              style={{ transform: `rotate(${angle}deg)` }}
+                            >
+                              <motion.span
+                                className="absolute h-1.5 w-1.5 rounded-full bg-primary"
+                                style={{
+                                  left: -3,
+                                  top: -3,
+                                  boxShadow: "0 0 8px hsl(var(--primary) / 0.9)",
+                                }}
+                                initial={{ y: -140, opacity: 0 }}
+                                animate={{ y: [-140, -52], opacity: [0, 1, 0] }}
+                                transition={{
+                                  duration: 2.6,
+                                  repeat: Infinity,
+                                  ease: "easeIn",
+                                  delay: i * 0.65,
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
 
                       {/* Topic icons */}
                       {categories.map((cat, i) => {
@@ -485,7 +488,7 @@ const Contact = () => {
                             }}
                           >
                             <motion.div
-                              animate={{ rotate: -360 }}
+                              animate={reduce ? undefined : { rotate: -360 }}
                               transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
                               className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-card/90 shadow-lg shadow-primary/10"
                             >
@@ -498,18 +501,20 @@ const Contact = () => {
 
                     {/* Central hub */}
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                      <motion.div
-                        animate={{
-                          boxShadow: [
-                            "0 0 0 0px hsl(var(--primary) / 0.35)",
-                            "0 0 0 24px hsl(var(--primary) / 0)",
-                          ],
-                        }}
-                        transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
-                        className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30"
-                      >
+                      {/* Pulsing glow — animated via transform/opacity so it stays
+                          GPU-composited (no per-frame box-shadow repaint) */}
+                      {!reduce && (
+                        <motion.span
+                          className="absolute inset-0 rounded-[1.75rem] bg-primary/25"
+                          initial={{ scale: 1, opacity: 0.45 }}
+                          animate={{ scale: 1.85, opacity: 0 }}
+                          transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30">
                         <MessageSquare className="h-10 w-10 text-primary-foreground" />
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 </div>
