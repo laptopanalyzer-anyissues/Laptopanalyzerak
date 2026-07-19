@@ -186,25 +186,7 @@ const Contact = () => {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="relative flex overflow-hidden rounded-[2rem] border border-border/70 bg-card/50 backdrop-blur-xl shadow-2xl shadow-black/30"
           >
-            {/* Vertical brand rail (echoes the reference's left column) */}
-            <div className="hidden lg:flex w-14 shrink-0 flex-col items-center justify-between border-r border-border/60 py-8">
-              <span className="h-10 w-px bg-gradient-to-b from-transparent to-primary/50" />
-              <span
-                className="text-[11px] font-semibold uppercase tracking-[0.35em] text-muted-foreground"
-                style={{ writingMode: "vertical-rl" }}
-              >
-                Laptop Analyzer · Support
-              </span>
-              <a
-                href="mailto:support@laptopanalyzer.com"
-                aria-label="Email support"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border/70 text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
-            </div>
-
-            {/* Main grid: form + animated visual */}
+            {/* Form + animated visual */}
             <div className="grid flex-1 lg:grid-cols-2">
               {/* ══════════ Form side ══════════ */}
               <div className="p-7 sm:p-10 lg:p-12">
@@ -219,10 +201,8 @@ const Contact = () => {
                   Contact us
                 </h1>
                 <p className="mt-4 max-w-md leading-relaxed text-muted-foreground">
-                  Whether you&apos;ve found a bug, have a question about your results,
-                  want to suggest a feature, or need to make a privacy request — our
-                  support team reviews every message and typically responds within
-                  24–48 hours.
+                  Questions, bug reports, or feature ideas — our support team reads
+                  every message and replies within 24–48 hours.
                 </p>
 
                 {/* Topic chips */}
@@ -399,13 +379,22 @@ const Contact = () => {
               <div className="relative hidden min-h-[560px] flex-col overflow-hidden border-l border-border/60 bg-gradient-to-br from-primary/[0.06] via-transparent to-accent/[0.05] lg:flex">
                 {/* Message hub with the four support topics orbiting it */}
                 <div className="relative flex flex-1 items-center justify-center">
-                  <div className="relative h-[340px] w-[340px]" aria-hidden="true">
+                  <div className="relative h-[360px] w-[360px]" aria-hidden="true">
+                    {/* Soft light source behind the hub */}
+                    <div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background:
+                          "radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.18), transparent 58%)",
+                      }}
+                    />
+
                     {/* Sweeping conic light */}
                     <motion.div
                       className="absolute inset-6 rounded-full"
                       style={{
                         background:
-                          "conic-gradient(from 0deg, transparent 0deg, hsl(var(--primary) / 0.16) 55deg, transparent 130deg)",
+                          "conic-gradient(from 0deg, transparent 0deg, hsl(var(--primary) / 0.18) 50deg, transparent 120deg)",
                       }}
                       animate={{ rotate: 360 }}
                       transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
@@ -415,42 +404,78 @@ const Contact = () => {
                     {[0, 1, 2].map((i) => (
                       <motion.span
                         key={i}
-                        className="absolute inset-0 rounded-full border border-primary/20"
-                        initial={{ scale: 0.42, opacity: 0.45 }}
+                        className="absolute inset-2 rounded-full border border-primary/20"
+                        initial={{ scale: 0.42, opacity: 0.5 }}
                         animate={{ scale: 1, opacity: 0 }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeOut", delay: i * 1.33 }}
+                        transition={{ duration: 4.2, repeat: Infinity, ease: "easeOut", delay: i * 1.4 }}
                       />
                     ))}
 
                     {/* Static orbit tracks */}
                     <div className="absolute inset-6 rounded-full border border-border/40" />
-                    <div className="absolute inset-[4.75rem] rounded-full border border-border/25" />
+                    <div className="absolute inset-[5rem] rounded-full border border-border/25" />
 
-                    {/* Orbiting layer — the whole ring revolves; icons counter-rotate to stay upright */}
+                    {/* Orbiting layer — revolves as one; icons counter-rotate to stay upright */}
                     <motion.div
                       className="absolute inset-0"
                       animate={{ rotate: 360 }}
-                      transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+                      transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
                     >
-                      {/* Spokes from the hub out to each topic */}
-                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 340 340" fill="none">
-                        {[[170, 38], [302, 170], [170, 302], [38, 170]].map(([x, y], i) => (
+                      {/* Spokes — brighter at the hub, fading toward the rim */}
+                      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 360 360" fill="none">
+                        <defs>
+                          <radialGradient id="spokeFade" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.55" />
+                            <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.05" />
+                          </radialGradient>
+                        </defs>
+                        {[[180, 40], [320, 180], [180, 320], [40, 180]].map(([x, y], i) => (
                           <line
                             key={i}
-                            x1="170"
-                            y1="170"
+                            x1="180"
+                            y1="180"
                             x2={x}
                             y2={y}
-                            stroke="hsl(var(--primary) / 0.22)"
-                            strokeWidth="1"
+                            stroke="url(#spokeFade)"
+                            strokeWidth="1.25"
                             strokeDasharray="2 6"
                           />
                         ))}
                       </svg>
 
+                      {/* Signal dots flowing inward to the hub */}
+                      {[0, 1, 2, 3].map((i) => {
+                        const angle = i * 90;
+                        return (
+                          <div
+                            key={`signal-${i}`}
+                            className="absolute left-1/2 top-1/2"
+                            style={{ transform: `rotate(${angle}deg)` }}
+                          >
+                            <motion.span
+                              className="absolute h-1.5 w-1.5 rounded-full bg-primary"
+                              style={{
+                                left: -3,
+                                top: -3,
+                                boxShadow: "0 0 8px hsl(var(--primary) / 0.9)",
+                              }}
+                              initial={{ y: -140, opacity: 0 }}
+                              animate={{ y: [-140, -52], opacity: [0, 1, 0] }}
+                              transition={{
+                                duration: 2.6,
+                                repeat: Infinity,
+                                ease: "easeIn",
+                                delay: i * 0.65,
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+
+                      {/* Topic icons */}
                       {categories.map((cat, i) => {
                         const angle = i * 90;
-                        const radius = 132;
+                        const radius = 140;
                         return (
                           <div
                             key={cat.title}
@@ -461,8 +486,8 @@ const Contact = () => {
                           >
                             <motion.div
                               animate={{ rotate: -360 }}
-                              transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
-                              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-border/70 bg-card/90 shadow-lg shadow-black/20"
+                              transition={{ duration: 34, repeat: Infinity, ease: "linear" }}
+                              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-card/90 shadow-lg shadow-primary/10"
                             >
                               <cat.icon className="h-6 w-6 text-primary" />
                             </motion.div>
@@ -476,12 +501,12 @@ const Contact = () => {
                       <motion.div
                         animate={{
                           boxShadow: [
-                            "0 0 0 0px hsl(var(--primary) / 0.3)",
-                            "0 0 0 22px hsl(var(--primary) / 0)",
+                            "0 0 0 0px hsl(var(--primary) / 0.35)",
+                            "0 0 0 24px hsl(var(--primary) / 0)",
                           ],
                         }}
                         transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
-                        className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-primary to-accent shadow-xl shadow-primary/20"
+                        className="flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-gradient-to-br from-primary to-accent shadow-2xl shadow-primary/30"
                       >
                         <MessageSquare className="h-10 w-10 text-primary-foreground" />
                       </motion.div>
