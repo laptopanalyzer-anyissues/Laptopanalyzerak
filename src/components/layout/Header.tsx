@@ -4,6 +4,7 @@ import { Laptop, Menu, X, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
+import { GlitchText } from "@/components/GlitchText";
 
 const navLinks = [
   { name: "Home", path: "/" },
@@ -42,9 +43,10 @@ export const Header = forwardRef<HTMLElement>((_, ref) => {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent shadow-md">
               <Laptop className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold text-foreground group-hover:text-primary transition-colors duration-200">
-              LaptopAnalyzer
-            </span>
+            <GlitchText
+              text="LaptopAnalyzer"
+              className="text-lg font-bold text-foreground"
+            />
           </Link>
 
           {/* Desktop Navigation */}
